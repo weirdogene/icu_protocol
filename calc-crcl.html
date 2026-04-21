@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Creatinine Clearance · SMC ICU Protocol</title>
+    <script src="settings-init.js?v=1776350000"></script>
+<link href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=1776350000">
+<link rel="stylesheet" href="calculator.css?v=1776350000">
+<style>.container { --cat-color: var(--smc-blue); }</style>
+</head>
+<body>
+<div class="container">
+  <header class="header header--page">
+    <div class="header__top">
+      <button class="icon-btn icon-btn--back" onclick="window.location.href='calculator.html'" aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <div class="header__title">
+        <span class="header__eyebrow">Calculator</span>
+        <div class="header__h1">Creatinine Clearance</div>
+      </div>
+      <button class="icon-btn icon-btn--bookmark" aria-label="Save" aria-pressed="false">
+        <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="main main--page">
+    <div class="calc-intro">
+      <div class="calc-intro__title">Cockcroft-Gault Equation</div>
+      <div class="calc-intro__desc">Estimated creatinine clearance for renal dosing. Not validated in acute kidney injury, pregnancy, or extremes of body composition.</div>
+    </div>
+
+    <section class="calc-sect">
+      <div class="calc-sect__hd">
+        <span class="calc-sect__num">01</span>
+        <span class="calc-sect__title">Inputs</span>
+        <div class="calc-sect__rule"></div>
+      </div>
+
+      <div class="calc-toggle" role="radiogroup" aria-label="Sex">
+        <button class="calc-toggle__btn" data-sex="M" aria-pressed="true">Male</button>
+        <button class="calc-toggle__btn" data-sex="F" aria-pressed="false">Female</button>
+      </div>
+
+      <label class="calc-field">
+        <span class="calc-field__label">Age<span class="calc-field__unit">years</span></span>
+        <input class="calc-field__input" type="number" inputmode="numeric" id="age" placeholder="—" min="0" max="120">
+      </label>
+
+      <label class="calc-field">
+        <span class="calc-field__label">Weight<span class="calc-field__unit">kg</span></span>
+        <input class="calc-field__input" type="number" inputmode="decimal" id="weight" placeholder="—" min="0" step="0.1">
+        <span class="calc-field__hint">Use actual body weight; consider ideal body weight in obesity.</span>
+      </label>
+
+      <label class="calc-field">
+        <span class="calc-field__label">Serum Creatinine<span class="calc-field__unit">mg/dL</span></span>
+        <input class="calc-field__input" type="number" inputmode="decimal" id="cr" placeholder="—" min="0" step="0.01">
+      </label>
+    </section>
+
+    <section class="calc-sect">
+      <div class="calc-sect__hd">
+        <span class="calc-sect__num">02</span>
+        <span class="calc-sect__title">Formula</span>
+        <div class="calc-sect__rule"></div>
+      </div>
+      <div class="calc-formula">
+CrCl = ((140 − age) × weight) / (72 × sCr)
+       × 0.85 (if female)
+      </div>
+    </section>
+
+    <section class="calc-sect">
+      <div class="calc-sect__hd">
+        <span class="calc-sect__num">03</span>
+        <span class="calc-sect__title">Interpretation (KDIGO stage)</span>
+        <div class="calc-sect__rule"></div>
+      </div>
+      <div class="calc-interp">
+        <div class="calc-interp__row"><span class="calc-interp__range">≥ 90</span><span class="calc-interp__desc">Normal / G1</span></div>
+        <div class="calc-interp__row"><span class="calc-interp__range">60–89</span><span class="calc-interp__desc">Mildly decreased / G2</span></div>
+        <div class="calc-interp__row"><span class="calc-interp__range">30–59</span><span class="calc-interp__desc">Moderate / G3</span></div>
+        <div class="calc-interp__row"><span class="calc-interp__range">15–29</span><span class="calc-interp__desc">Severe / G4</span></div>
+        <div class="calc-interp__row"><span class="calc-interp__range">&lt; 15</span><span class="calc-interp__desc">Kidney failure / G5</span></div>
+      </div>
+    </section>
+
+    <button class="calc-reset" onclick="resetAll()">
+      <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+      Reset
+    </button>
+
+    <div class="calc-refs">
+      <p>Cockcroft DW, Gault MH. Prediction of creatinine clearance from serum creatinine. Nephron. 1976;16(1):31-41.</p>
+    </div>
+
+    <div class="calc-result is-empty" id="result">
+      <div class="calc-result__row">
+        <span class="calc-result__label">Estimated CrCl</span>
+        <span class="calc-result__value" id="total">—<small>mL/min</small></span>
+      </div>
+      <div class="calc-result__interp" id="interp"></div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast">Reset</div>
+
+    <nav class="bottom-nav">
+    <div class="nav-item" onclick="window.location.href='index.html'"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg><span class="nav-item__label">Home</span></div>
+    <div class="nav-item" onclick="window.location.href='protocols.html'"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8m8 4H8"/></svg><span class="nav-item__label">Protocols</span></div>
+    <div class="nav-item active" onclick="window.location.href='calculator.html'"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h.01M8 14h2M12 14h2M16 14h.01M8 18h8"/></svg><span class="nav-item__label">Calculator</span></div>
+    <div class="nav-item" onclick="window.location.href='saved.html'"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg><span class="nav-item__label">Saved</span></div>
+    <div class="nav-item" onclick="window.location.href='info.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg><span class="nav-item__label">Information</span></div>
+  </nav>
+</div>
+
+<script>
+const state = { sex: 'M' };
+document.querySelectorAll('.calc-toggle__btn').forEach(b => b.addEventListener('click', () => {
+  state.sex = b.dataset.sex;
+  document.querySelectorAll('.calc-toggle__btn').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+  render();
+}));
+['age','weight','cr'].forEach(id => document.getElementById(id).addEventListener('input', render));
+
+function render() {
+  const age = parseFloat(document.getElementById('age').value);
+  const wt = parseFloat(document.getElementById('weight').value);
+  const cr = parseFloat(document.getElementById('cr').value);
+  const result = document.getElementById('result');
+  const total = document.getElementById('total');
+  const interp = document.getElementById('interp');
+  if (age > 0 && wt > 0 && cr > 0) {
+    let crcl = ((140 - age) * wt) / (72 * cr);
+    if (state.sex === 'F') crcl *= 0.85;
+    crcl = Math.max(0, crcl);
+    total.innerHTML = `${crcl.toFixed(1)}<small>mL/min</small>`;
+    result.classList.remove('is-empty');
+    let msg;
+    if (crcl >= 90) msg = 'Normal kidney function (G1).';
+    else if (crcl >= 60) msg = 'Mildly decreased (G2).';
+    else if (crcl >= 30) msg = 'Moderately decreased (G3) — review renal dosing.';
+    else if (crcl >= 15) msg = 'Severely decreased (G4) — adjust doses; avoid nephrotoxins.';
+    else msg = 'Kidney failure (G5) — RRT may be indicated.';
+    interp.textContent = msg;
+  } else {
+    total.innerHTML = '—<small>mL/min</small>';
+    result.classList.add('is-empty');
+    interp.textContent = '';
+  }
+}
+function resetAll() {
+  ['age','weight','cr'].forEach(id => document.getElementById(id).value = '');
+  state.sex = 'M';
+  document.querySelectorAll('.calc-toggle__btn').forEach(b => b.setAttribute('aria-pressed', b.dataset.sex === 'M' ? 'true' : 'false'));
+  render();
+  const t = document.getElementById('toast');
+  t.textContent = 'Reset'; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1400);
+}
+</script>
+
+<script>
+(function(){
+  const btn=document.querySelector('.icon-btn--bookmark');
+  if(!btn) return;
+  const key='smc-bookmark:'+(location.pathname.split('/').pop()||'index');
+  let saved=false;
+  try{ saved=localStorage.getItem(key)==='1'; }catch(e){}
+  if(saved){ btn.classList.add('is-saved'); btn.setAttribute('aria-pressed','true'); }
+  btn.addEventListener('click',function(ev){
+    ev.stopPropagation();
+    saved=!saved;
+    btn.classList.toggle('is-saved',saved);
+    btn.setAttribute('aria-pressed',saved?'true':'false');
+    btn.classList.remove('is-animating'); void btn.offsetWidth; btn.classList.add('is-animating');
+    setTimeout(()=>btn.classList.remove('is-animating'),650);
+    try{ saved?localStorage.setItem(key,'1'):localStorage.removeItem(key); }catch(e){}
+    if(typeof showToast==='function') showToast(saved?'Saved':'Removed from saved');
+  });
+})();
+</script>
+<script src="recent.js?v=1776350000"></script>
+</body>
+</html>

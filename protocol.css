@@ -1,0 +1,1192 @@
+/* ============================================================
+   Protocol content stylesheet — shared by vap.html,
+   airway-toc.html, airway-s*.html
+   ============================================================ */
+
+/* ---- Meta strip ---- */
+.p-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 12px;
+    font-variant-numeric: tabular-nums;
+}
+.p-meta .dot {
+    width: 3px; height: 3px;
+    border-radius: 50%;
+    background: var(--border-strong);
+}
+
+/* ---- Single-page document title (for vap) ---- */
+.p-title {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    color: var(--text-primary);
+    line-height: 1.25;
+    margin-bottom: 24px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+/* ---- Section block ---- */
+.p-sect {
+    margin-bottom: 28px;
+    animation: fadeUp 0.45s var(--ease-out) both;
+}
+.p-sect--page { margin-bottom: 20px; }
+
+.p-sect__hd {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--cat-color);
+    position: relative;
+}
+.p-sect__num {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: var(--cat-color);
+    background: color-mix(in srgb, var(--cat-color) 10%, #fff);
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+}
+.p-sect__title {
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+    color: var(--text-primary);
+    line-height: 1.3;
+    flex: 1;
+}
+
+.p-sect__body {
+    padding: 2px 0;
+}
+
+/* Shared marker span — number/bullet baked in by renderer */
+.p-num {
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-variant-numeric: tabular-nums;
+    display: inline-block;
+}
+
+/* ---- L1 group: boxed card containing heading + children ---- */
+.p-group {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--r-md);
+    padding: 16px 18px 14px;
+    margin: 14px 0;
+    box-shadow: 0 1px 2px rgba(20, 40, 160, 0.03);
+    position: relative;
+}
+/* ---- L1: subsection heading + "1." prefix ---- */
+.p-sub {
+    font-size: 15.5px;
+    font-weight: 800;
+    letter-spacing: -0.2px;
+    color: var(--cat-color);
+    margin: 0 0 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid color-mix(in srgb, var(--cat-color) 18%, var(--border-subtle));
+    line-height: 1.35;
+    position: relative;
+}
+.p-group > .p-sub:first-child { margin-top: 0; }
+.p-sub .p-num {
+    position: static;
+    color: var(--cat-color);
+    font-weight: 800;
+    margin-right: 8px;
+    opacity: 0.75;
+}
+
+/* ---- List items by ilvl ---- */
+.p-item {
+    position: relative;
+    line-height: 1.6;
+    color: var(--text-primary);
+}
+
+/* L2: (1) (2) (3) — primary content point */
+.p-l2 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 10px 0 4px;
+    padding-left: 26px;
+}
+.p-l2 .p-num {
+    width: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* L3: ① ② ③ — circled numbers */
+.p-l3 {
+    font-size: 13.5px;
+    font-weight: 500;
+    margin: 4px 0 4px 18px;
+    padding-left: 18px;
+    color: var(--text-primary);
+}
+.p-l3 .p-num {
+    width: 16px;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+/* L4: • bullet */
+.p-l4 {
+    font-size: 13px;
+    margin: 3px 0 3px 40px;
+    padding-left: 16px;
+    color: var(--text-secondary);
+    line-height: 1.55;
+}
+.p-l4 .p-num {
+    left: 4px;
+    top: -1px;
+    color: var(--text-tertiary);
+    font-weight: 700;
+    font-size: 14px;
+}
+
+/* L5: – en-dash */
+.p-l5 {
+    font-size: 12.5px;
+    margin: 2px 0 2px 58px;
+    padding-left: 14px;
+    color: var(--text-tertiary);
+    line-height: 1.5;
+}
+.p-l5 .p-num {
+    color: var(--text-tertiary);
+    font-weight: 700;
+}
+
+/* Normal paragraph (no list level) — plain inline prose */
+.p-note {
+    font-size: 13.5px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 8px 0 10px;
+}
+/* p-note indent modifiers — align to and match the preceding list level */
+.p-note.p-note--l2 { margin-left: 26px; font-size: 14px; color: var(--text-primary); line-height: 1.6; }
+.p-note.p-note--l3 { margin-left: 36px; font-size: 13.5px; color: var(--text-primary); line-height: 1.55; }
+.p-note.p-note--l4 { margin-left: 56px; font-size: 13px; color: var(--text-secondary); line-height: 1.55; }
+.p-note.p-note--l5 { margin-left: 72px; font-size: 12.5px; color: var(--text-tertiary); line-height: 1.5; }
+/* Italic callout — visual cue for "참고:/Note:" style callouts */
+.p-note.p-note--italic { font-style: italic; }
+
+/* Inline reference link — used within list items to point to a detail page */
+.p-inline-ref {
+    color: var(--cat-color);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+    font-weight: 500;
+}
+.p-inline-ref:hover,
+.p-inline-ref:active {
+    text-decoration-thickness: 2px;
+}
+
+/* Reference link card — navigates to a detail/comparison sub-page */
+.p-ref-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 14px 0 6px;
+    padding: 12px 14px;
+    background: var(--bg-card);
+    border: 1px solid color-mix(in srgb, var(--cat-color) 24%, var(--border-subtle));
+    border-radius: 10px;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 1px 2px rgba(20, 40, 160, 0.04);
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    cursor: pointer;
+}
+.p-ref-card:hover,
+.p-ref-card:active {
+    background: color-mix(in srgb, var(--cat-color) 5%, var(--bg-card));
+    border-color: color-mix(in srgb, var(--cat-color) 40%, var(--border-subtle));
+}
+.p-ref-card:active { transform: scale(0.99); }
+.p-ref-card__icon {
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    background: color-mix(in srgb, var(--cat-color) 10%, transparent);
+    border-radius: 9px;
+    color: var(--cat-color);
+}
+.p-ref-card__icon svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.p-ref-card__body { flex: 1; min-width: 0; }
+.p-ref-card__label {
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--cat-color);
+}
+.p-ref-card__title {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-top: 2px;
+    line-height: 1.4;
+}
+.p-ref-card__chevron { flex-shrink: 0; color: var(--text-tertiary); }
+.p-ref-card__chevron svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2; fill: none; }
+html[data-theme="dark"] .p-ref-card {
+    background: #161b22;
+    border-color: #2a3140;
+}
+html[data-theme="dark"] .p-ref-card:hover,
+html[data-theme="dark"] .p-ref-card:active {
+    background: #1c2333;
+    border-color: color-mix(in srgb, var(--cat-color) 40%, #2a3140);
+}
+
+/* ---- End marker ---- */
+.p-end {
+    text-align: center;
+    margin: 40px 0 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+}
+
+/* ---- Data table (p-table) ---- */
+.p-table-wrap {
+    margin: 14px 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(20, 40, 160, 0.03);
+    -webkit-overflow-scrolling: touch;
+    overflow-x: auto;
+}
+.p-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--text-primary);
+    table-layout: fixed;
+}
+.p-table th,
+.p-table td {
+    padding: 9px 10px;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--border-subtle);
+    word-break: keep-all;
+    overflow-wrap: break-word;
+}
+.p-table thead th,
+.p-table tr:first-child th {
+    background: #BEDAFF;
+    color: #0b2a52;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+    border-bottom: 1px solid #a6c8f0;
+}
+.p-table tr:last-child td,
+.p-table tr:last-child th {
+    border-bottom: none;
+}
+/* Group header row (colspan) — category label spanning all columns */
+.p-table td[colspan],
+.p-table th[colspan] {
+    background: #E5F0FF;
+    color: var(--text-primary);
+    font-size: 12.5px;
+    font-weight: 700;
+    padding: 10px 12px;
+    border-top: 1px solid #cfe0f5;
+    border-bottom: 1px solid #cfe0f5;
+}
+/* Tighten spacing on small font mode */
+html[data-font="sm"] .p-table { font-size: 11.5px; }
+html[data-font="lg"] .p-table { font-size: 13.5px; }
+
+/* Table group — bundles caption + table + footnote in one card */
+.p-group--table {
+    padding: 14px 16px;
+}
+.p-table-caption {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 10px 0;
+    line-height: 1.4;
+    letter-spacing: -0.1px;
+}
+/* Table inside any p-group — drop nested card styling, use thin border only */
+.p-group .p-table-wrap {
+    margin: 12px 0 2px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    background: transparent;
+    box-shadow: none;
+}
+/* Inside a dedicated table group (caption + table + footnote), no top margin */
+.p-group--table > .p-table-wrap {
+    margin: 0;
+}
+.p-table-footnote {
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    margin: 10px 0 0 0;
+    line-height: 1.5;
+    font-style: italic;
+}
+/* BMI-style table: keep first and third column (range values) on a single line */
+.p-table--bmi td:nth-child(1),
+.p-table--bmi td:nth-child(3) {
+    white-space: nowrap;
+}
+
+/* ---- Drug card (mobile-friendly drug reference) ---- */
+.drug-card {
+    margin: 14px 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    overflow: hidden;
+}
+.drug-card__name {
+    padding: 12px 14px 10px;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.2px;
+    color: var(--cat-color);
+    border-bottom: 1px solid var(--border-subtle);
+    background: color-mix(in srgb, var(--cat-color) 5%, var(--bg-card));
+}
+.drug-card__stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border-subtle);
+    border-bottom: 1px solid var(--border-subtle);
+}
+.drug-card__stat {
+    padding: 8px 10px;
+    background: var(--bg-card);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+.drug-card__stat-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+}
+.drug-card__stat-value {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.35;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+}
+.drug-card__sections {
+    padding: 10px 14px 12px;
+}
+.drug-card__section + .drug-card__section {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border-subtle);
+}
+.drug-card__section-label {
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 4px;
+}
+.drug-card__section--adverse .drug-card__section-label {
+    color: #c1432a;
+}
+.drug-card__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.drug-card__list li {
+    position: relative;
+    padding-left: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-primary);
+    margin: 3px 0;
+}
+.drug-card__list li::before {
+    content: "•";
+    position: absolute;
+    left: 2px;
+    color: var(--text-tertiary);
+    font-weight: 700;
+}
+.drug-card__section--adverse .drug-card__list li::before {
+    color: #d66a50;
+}
+.drug-card__note {
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--text-secondary);
+}
+.drug-card__note + .drug-card__note {
+    margin-top: 6px;
+}
+html[data-theme="dark"] .drug-card {
+    background: #161b22;
+    border-color: #2a3140;
+}
+html[data-theme="dark"] .drug-card__name {
+    background: color-mix(in srgb, var(--cat-color) 10%, #161b22);
+    border-color: #2a3140;
+}
+html[data-theme="dark"] .drug-card__stats {
+    background: #2a3140;
+    border-color: #2a3140;
+}
+html[data-theme="dark"] .drug-card__stat {
+    background: #161b22;
+}
+html[data-theme="dark"] .drug-card__section--adverse .drug-card__section-label {
+    color: #ff9a82;
+}
+html[data-theme="dark"] .drug-card__section--adverse .drug-card__list li::before {
+    color: #ff9a82;
+}
+
+/* Conditional arrow — used in dose modification notes (e.g., "CrCl < 50 → 20mg")
+   SUIT Variable renders → with a very short horizontal stem (looks like >).
+   Force a symbol-capable font so the arrow shape is unambiguous. */
+.p-arrow {
+    display: inline-block;
+    margin: 0 3px;
+    font-family: 'Segoe UI Symbol', 'Apple Symbols', 'Apple SD Gothic Neo',
+                 'Noto Sans Symbols 2', 'Noto Sans Symbols', 'Arial Unicode MS',
+                 Arial, sans-serif;
+    font-size: 1.05em;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    vertical-align: baseline;
+}
+
+/* ---- Figure (algorithm/flowchart image) ---- */
+.p-figure {
+    position: relative;
+    margin: 14px 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 10px;
+    cursor: zoom-in;
+    transition: border-color 0.2s, background 0.2s;
+}
+.p-figure:hover {
+    border-color: color-mix(in srgb, var(--cat-color) 35%, var(--border-subtle));
+    background: color-mix(in srgb, var(--cat-color) 3%, var(--bg-card));
+}
+.p-figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 6px;
+    pointer-events: none;
+}
+.p-figure::after {
+    content: "";
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 28px;
+    height: 28px;
+    background: rgba(20, 40, 120, 0.78);
+    border-radius: 50%;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='7'/><path d='M21 21l-4.35-4.35'/><path d='M11 8v6M8 11h6'/></svg>");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 16px 16px;
+    pointer-events: none;
+    opacity: 0.9;
+}
+html[data-theme="dark"] .p-figure {
+    background: #161b22;
+    border-color: #2a3140;
+}
+html[data-theme="dark"] .p-figure:hover {
+    background: #1c2333;
+    border-color: color-mix(in srgb, var(--cat-color) 40%, #2a3140);
+}
+html[data-theme="dark"] .p-figure img {
+    filter: brightness(0.96) contrast(1.02);
+}
+
+/* Lightbox overlay for enlarged figure view */
+.p-lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 15, 25, 0.94);
+    z-index: 9999;
+    display: none;
+    animation: pLightboxIn 0.18s ease-out;
+    overflow: hidden;
+    touch-action: none;
+}
+.p-lightbox.is-open { display: block; }
+.p-lightbox__stage {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    cursor: zoom-in;
+    touch-action: none;
+}
+.p-lightbox__stage.is-zoomed { cursor: grab; }
+.p-lightbox__stage.is-panning { cursor: grabbing; }
+.p-lightbox__img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: 0 0;
+    background: #fff;
+    border-radius: 4px;
+    user-select: none;
+    -webkit-user-drag: none;
+    pointer-events: none;
+    will-change: transform;
+}
+.p-lightbox__close {
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    border: none;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    z-index: 10000;
+}
+.p-lightbox__close svg {
+    width: 20px;
+    height: 20px;
+    stroke: #222;
+    stroke-width: 2.4;
+    fill: none;
+    stroke-linecap: round;
+}
+.p-lightbox__hint {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(8px);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    border-radius: 16px;
+    pointer-events: none;
+    z-index: 10000;
+    transition: opacity 0.3s;
+}
+.p-lightbox__hint.is-fading { opacity: 0; }
+@keyframes pLightboxIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ============================================================
+   TOC page — editorial reference (textbook-style)
+   No container box. Hairline dividers. Typography-driven.
+   ============================================================ */
+
+/* Group label: "PROTOCOL" / "APPENDIX" */
+.toc-group {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin: 4px 0 4px;
+    padding: 0 2px;
+}
+.toc-group { margin-top: 4px; }
+.toc-group + .toc-group,
+.toc-list + .toc-group { margin-top: 24px; }
+
+.toc-group__label {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--cat-color);
+    font-variant-numeric: tabular-nums;
+}
+.toc-group__rule {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right,
+        color-mix(in srgb, var(--cat-color) 35%, transparent) 0%,
+        var(--border-subtle) 20%,
+        var(--border-subtle) 100%);
+}
+.toc-group__count { display: none; }
+
+/* List — no outer box, just vertical stack */
+.toc-list {
+    display: flex;
+    flex-direction: column;
+    padding: 0 2px;
+}
+
+/* Row */
+.toc-item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    align-items: baseline;
+    gap: 14px;
+    padding: 10px 8px 10px 4px;
+    text-decoration: none;
+    color: inherit;
+    transition: padding 0.25s var(--ease-out), color 0.25s;
+    animation: slideFade 0.4s var(--ease-out) both;
+    cursor: pointer;
+}
+
+/* Left reading-cursor bar — appears on hover/active */
+.toc-item::before {
+    content: '';
+    position: absolute;
+    left: -12px;
+    top: 50%;
+    transform: translateY(-50%) scaleY(0.3);
+    width: 2px;
+    height: 60%;
+    background: var(--cat-color);
+    opacity: 0;
+    transition: opacity 0.25s var(--ease-out), transform 0.3s var(--ease-spring);
+}
+.toc-item:hover {
+    padding-left: 10px;
+}
+.toc-item:hover::before {
+    opacity: 1;
+    transform: translateY(-50%) scaleY(1);
+}
+.toc-item:active {
+    background: color-mix(in srgb, var(--cat-color) 4%, transparent);
+}
+
+/* Staggered entry */
+.toc-item:nth-child(1)  { animation-delay: 0.03s; }
+.toc-item:nth-child(2)  { animation-delay: 0.06s; }
+.toc-item:nth-child(3)  { animation-delay: 0.09s; }
+.toc-item:nth-child(4)  { animation-delay: 0.12s; }
+.toc-item:nth-child(5)  { animation-delay: 0.15s; }
+.toc-item:nth-child(6)  { animation-delay: 0.18s; }
+.toc-item:nth-child(7)  { animation-delay: 0.21s; }
+.toc-item:nth-child(8)  { animation-delay: 0.24s; }
+.toc-item:nth-child(9)  { animation-delay: 0.27s; }
+
+/* Number — small tabular figure, no pill, no color fill */
+.toc-item__num {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    color: var(--text-tertiary);
+    font-variant-numeric: tabular-nums;
+    text-align: left;
+    padding-top: 3px;
+    transition: color 0.25s;
+}
+.toc-item:hover .toc-item__num {
+    color: var(--cat-color);
+}
+
+/* Title — refined weight for readable list density */
+.toc-item__title {
+    font-size: 15.5px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    color: var(--text-primary);
+    line-height: 1.4;
+    word-break: keep-all;
+}
+
+/* Body wrapper kept for HTML compat (no padding/margin overhead) */
+.toc-item__body { min-width: 0; }
+
+/* Hide legacy decorative pieces if any remain in markup */
+.toc-item__chev,
+.toc-item__sub,
+.toc-intro { display: none; }
+
+/* ============================================================
+   Section page — progress bar + prev/next pager
+   ============================================================ */
+.sec-progress {
+    height: 3px;
+    background: var(--border-subtle);
+    border-radius: 2px;
+    margin-bottom: 18px;
+    overflow: hidden;
+}
+.sec-progress__bar {
+    height: 100%;
+    background: var(--cat-color);
+    border-radius: 2px;
+    transition: width 0.6s var(--ease-out);
+}
+
+.p-pager {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 28px;
+}
+.pn-btn {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--r-md);
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.25s var(--ease-out);
+    min-height: 60px;
+    justify-content: flex-start;
+}
+.pn-btn:hover {
+    border-color: color-mix(in srgb, var(--cat-color) 35%, var(--border-subtle));
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(20, 40, 160, 0.06);
+}
+.pn-btn::before {
+    content: '';
+    display: block;
+    width: 14px;
+    height: 14px;
+    background: currentColor;
+    color: var(--cat-color);
+    -webkit-mask: var(--pn-arrow) center/contain no-repeat;
+            mask: var(--pn-arrow) center/contain no-repeat;
+}
+.pn-btn--prev {
+    align-items: flex-start;
+    text-align: left;
+    --pn-arrow: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M15 18l-6-6 6-6'/></svg>");
+}
+.pn-btn--next {
+    align-items: flex-end;
+    text-align: right;
+    --pn-arrow: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M9 18l6-6-6-6'/></svg>");
+}
+
+.pn-lbl {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+}
+.pn-ttl {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.3;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.pn-btn--disabled {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    background: var(--bg-subtle);
+    border: 1px dashed var(--border-subtle);
+    border-radius: var(--r-md);
+    min-height: 60px;
+}
+.pn-btn--disabled .pn-lbl { color: var(--text-tertiary); }
+
+.p-toc-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 14px 0 8px;
+    padding: 12px;
+    background: transparent;
+    color: var(--cat-color);
+    font-size: 12.5px;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: var(--r-md);
+    transition: background 0.2s;
+}
+.p-toc-btn:hover {
+    background: color-mix(in srgb, var(--cat-color) 8%, transparent);
+}
+.p-toc-btn svg {
+    width: 14px; height: 14px;
+    stroke: currentColor;
+    stroke-width: 2.5;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* ============================================================
+   Section dropdown (header hamburger toggle)
+   ============================================================ */
+.sec-dd {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    pointer-events: none;
+}
+.sec-dd__scrim {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 38, 94, 0.28);
+    opacity: 0;
+    transition: opacity 0.25s var(--ease-out);
+}
+.sec-dd__panel {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100%);
+    width: 100%;
+    max-width: var(--app-max);
+    max-height: min(80vh, 640px);
+    background: var(--bg-card);
+    border-radius: 0 0 var(--r-hero) var(--r-hero);
+    box-shadow: 0 24px 48px rgba(20, 40, 160, 0.18);
+    padding: 14px 18px 20px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.35s var(--ease-spring);
+    overflow: hidden;
+}
+.sec-dd.is-open { pointer-events: auto; }
+.sec-dd.is-open .sec-dd__scrim { opacity: 1; }
+.sec-dd.is-open .sec-dd__panel { transform: translateX(-50%) translateY(0); }
+
+.sec-dd__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 2px 10px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+.sec-dd__eyebrow {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+}
+.sec-dd__close {
+    width: 32px; height: 32px;
+    border: none;
+    background: var(--bg-subtle);
+    border-radius: 10px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+.sec-dd__close:hover { background: var(--border-subtle); color: var(--text-primary); }
+.sec-dd__close svg { width: 16px; height: 16px; }
+
+.sec-dd__list {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 2px 0;
+    -webkit-overflow-scrolling: touch;
+}
+.sec-dd__item {
+    display: grid;
+    grid-template-columns: 30px 1fr;
+    gap: 12px;
+    align-items: baseline;
+    padding: 11px 6px;
+    text-decoration: none;
+    color: inherit;
+    border-radius: 8px;
+    transition: background 0.18s;
+}
+.sec-dd__item:hover { background: var(--bg-subtle); }
+.sec-dd__num {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    color: var(--text-tertiary);
+    font-variant-numeric: tabular-nums;
+}
+.sec-dd__title {
+    font-size: 14.5px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: var(--text-primary);
+    line-height: 1.35;
+    word-break: keep-all;
+}
+
+/* Density modifiers — used when section count is large */
+.sec-dd__list--medium .sec-dd__item { padding: 8px 6px; }
+.sec-dd__list--medium .sec-dd__title { font-size: 13.5px; }
+.sec-dd__list--medium .sec-dd__num { font-size: 10.5px; }
+
+.sec-dd__list--dense .sec-dd__item { padding: 6px 6px; }
+.sec-dd__list--dense .sec-dd__title { font-size: 12.5px; line-height: 1.3; }
+.sec-dd__list--dense .sec-dd__num { font-size: 10px; }
+.sec-dd__item.is-current {
+    background: color-mix(in srgb, var(--cat-color) 10%, transparent);
+}
+.sec-dd__item.is-current .sec-dd__num,
+.sec-dd__item.is-current .sec-dd__title {
+    color: var(--cat-color);
+}
+
+/* ---------------------------------------------------------------
+   FONT SIZE SCALING (sm / lg)
+   --------------------------------------------------------------- */
+
+/* ---- Small ---- */
+html[data-font="sm"] .p-title       { font-size: 20px; }
+html[data-font="sm"] .p-sect__title { font-size: 15px; }
+html[data-font="sm"] .p-sub         { font-size: 14px; }
+html[data-font="sm"] .p-l2          { font-size: 12.5px; }
+html[data-font="sm"] .p-l3          { font-size: 12px; }
+html[data-font="sm"] .p-l4          { font-size: 11.5px; }
+html[data-font="sm"] .p-l5          { font-size: 11px; }
+html[data-font="sm"] .p-note        { font-size: 12px; }
+html[data-font="sm"] .sec-dd__title { font-size: 13px; }
+html[data-font="sm"] .toc-item      { font-size: 12px; }
+
+/* ---- Large ---- */
+html[data-font="lg"] .p-title       { font-size: 25px; }
+html[data-font="lg"] .p-sect__title { font-size: 19.5px; }
+html[data-font="lg"] .p-sub         { font-size: 17.5px; }
+html[data-font="lg"] .p-l2          { font-size: 16px; }
+html[data-font="lg"] .p-l3          { font-size: 15.5px; }
+html[data-font="lg"] .p-l4          { font-size: 15px; }
+html[data-font="lg"] .p-l5          { font-size: 14.5px; }
+html[data-font="lg"] .p-note        { font-size: 15.5px; }
+html[data-font="lg"] .sec-dd__title { font-size: 16.5px; }
+html[data-font="lg"] .toc-item      { font-size: 15px; }
+
+/* ---------------------------------------------------------------
+   DARK THEME — comprehensive overrides
+   --------------------------------------------------------------- */
+
+/* ---- p-group card: the main content container ---- */
+html[data-theme="dark"] .p-group {
+    background: #161b22;
+    border-color: #2d3748;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* ---- Headings & section chrome ---- */
+html[data-theme="dark"] .p-title {
+    color: #e6edf3;
+}
+html[data-theme="dark"] .p-sect__hd {
+    border-bottom-color: color-mix(in srgb, var(--cat-color) 35%, #2a3140);
+}
+html[data-theme="dark"] .p-sect__num {
+    background: color-mix(in srgb, var(--cat-color) 15%, #161b22);
+}
+html[data-theme="dark"] .p-sect__title {
+    color: #e6edf3;
+}
+html[data-theme="dark"] .p-sub {
+    color: var(--cat-color);
+    border-bottom-color: color-mix(in srgb, var(--cat-color) 25%, #2a3140);
+}
+html[data-theme="dark"] .p-sub .p-num {
+    color: var(--cat-color);
+}
+
+/* ---- List items — explicit text colors for dark ---- */
+html[data-theme="dark"] .p-item {
+    color: #e6edf3;
+}
+html[data-theme="dark"] .p-l2 {
+    color: #e6edf3;
+}
+html[data-theme="dark"] .p-l2 .p-num {
+    color: #e6edf3;
+}
+html[data-theme="dark"] .p-l3 {
+    color: #d0d7e0;
+}
+html[data-theme="dark"] .p-l3 .p-num {
+    color: #a8b5c4;
+}
+html[data-theme="dark"] .p-l4 {
+    color: #c0c8d4;
+}
+html[data-theme="dark"] .p-l4 .p-num {
+    color: #7d8a9a;
+}
+html[data-theme="dark"] .p-l5 {
+    color: #a8b5c4;
+}
+html[data-theme="dark"] .p-l5 .p-num {
+    color: #7d8a9a;
+}
+html[data-theme="dark"] .p-note {
+    color: #a8b5c4;
+}
+html[data-theme="dark"] .p-end {
+    color: #7d8a9a;
+}
+html[data-theme="dark"] .p-meta {
+    color: #7d8a9a;
+}
+
+/* ---- Remark/callout boxes (if used) ---- */
+html[data-theme="dark"] .p-remark {
+    background: color-mix(in srgb, var(--cat-color) 6%, #161b22);
+    border-color: color-mix(in srgb, var(--cat-color) 20%, #2a3140);
+    color: #c0c8d4;
+}
+
+/* ---- TOC pages ---- */
+html[data-theme="dark"] .toc-item {
+    border-bottom-color: #2a3140;
+}
+html[data-theme="dark"] .toc-item:hover {
+    background: #1c2333;
+}
+html[data-theme="dark"] .toc-item.is-active {
+    background: color-mix(in srgb, var(--cat-color) 10%, #161b22);
+}
+html[data-theme="dark"] .toc-group__label {
+    color: var(--cat-color);
+}
+html[data-theme="dark"] .toc-group__rule {
+    background: linear-gradient(to right,
+        color-mix(in srgb, var(--cat-color) 35%, transparent) 0%,
+        #2a3140 20%,
+        #2a3140 100%);
+}
+
+/* ---- Section dropdown (airway multi-page) ---- */
+html[data-theme="dark"] .sec-dd__panel {
+    background: #161b22;
+    border-color: #2a3140;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+}
+html[data-theme="dark"] .sec-dd__scrim {
+    background: rgba(0, 0, 0, 0.55);
+}
+html[data-theme="dark"] .sec-dd__item {
+    border-bottom-color: #2a3140;
+}
+html[data-theme="dark"] .sec-dd__title {
+    color: #e6edf3;
+}
+html[data-theme="dark"] .sec-dd__num {
+    color: #7d8a9a;
+}
+html[data-theme="dark"] .sec-dd__item.is-current {
+    background: color-mix(in srgb, var(--cat-color) 12%, #161b22);
+}
+html[data-theme="dark"] .sec-dd__item.is-current .sec-dd__num,
+html[data-theme="dark"] .sec-dd__item.is-current .sec-dd__title {
+    color: var(--cat-color);
+}
+
+/* ---- Progress bar ---- */
+html[data-theme="dark"] .sec-progress {
+    background: #1c2333;
+}
+
+/* ---- Data table (dark) ---- */
+html[data-theme="dark"] .p-table-wrap {
+    background: #161b22;
+    border-color: #2a3140;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+html[data-theme="dark"] .p-table {
+    color: #c0c8d4;
+}
+html[data-theme="dark"] .p-table th,
+html[data-theme="dark"] .p-table td {
+    border-bottom-color: #2a3140;
+}
+html[data-theme="dark"] .p-table thead th,
+html[data-theme="dark"] .p-table tr:first-child th {
+    background: #1e3559;
+    color: #cfe0f5;
+    border-bottom-color: #2a4a7a;
+}
+html[data-theme="dark"] .p-table td[colspan],
+html[data-theme="dark"] .p-table th[colspan] {
+    background: #16263d;
+    color: #e6edf3;
+    border-top-color: #2a3f5c;
+    border-bottom-color: #2a3f5c;
+}
+html[data-theme="dark"] .p-table-caption {
+    color: #e6edf3;
+}
+html[data-theme="dark"] .p-group--table .p-table-wrap {
+    border-color: #2a3140;
+}
+html[data-theme="dark"] .p-table-footnote {
+    color: #a8b5c4;
+}

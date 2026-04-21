@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monitoring During ECMO · Pulmonology</title>
+    <script src="settings-init.js?v=1776350000"></script>
+<link href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=1776350000">
+<link rel="stylesheet" href="protocol.css?v=1776350000">
+<style>.container { --cat-color: var(--cat-pulmonology); }</style>
+</head>
+<body>
+<div class="container">
+  <header class="header header--page">
+    <div class="header__top">
+      <button class="icon-btn" id="secToggle" aria-label="Sections">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div class="header__title">
+        <span class="header__eyebrow"><span data-lang="ko">VV-ECMO · 섹션 8 / 10</span><span data-lang="en">VV-ECMO · Section 8 / 10</span></span>
+        <div class="header__h1"><span data-lang="ko">ECMO 중 모니터링</span><span data-lang="en">Monitoring During ECMO</span></div>
+      </div>
+      <button class="icon-btn icon-btn--bookmark" aria-label="Save" aria-pressed="false">
+        <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="main main--page">
+    <div class="sec-progress"><div class="sec-progress__bar" style="width:80.0%"></div></div>
+
+    <div class="p-sect__body"><div data-lang="ko"><div class="p-group">
+<p class="p-note">ECMO 중 모니터링은 절대값뿐 아니라 시간에 따른 변화 양상(trend)에 초점을 두어야 함. 이는 서킷 관련 또는 환자 관련 합병증의 발생을 시사할 수 있기 때문임. ECMO 기능 이상, 장기 손상 또는 치료 관련 부작용의 초기 징후를 조기에 발견하기 위해 지속적인 재평가 필수적임.</p>
+</div><!--/p-group-->
+<div class="p-group"><h3 class="p-sub"><span class="p-num">1.</span>기본 검사</h3>
+<div class="p-item p-l2"><span class="p-num">(1)</span>ECMO 시작 직후</div>
+<div class="p-item p-l3"><span class="p-num">①</span>서킷</div>
+<div class="p-item p-l4"><span class="p-num">•</span>산화기 전·후 동맥혈 가스 분석</div>
+<div class="p-item p-l3"><span class="p-num">②</span>환자</div>
+<div class="p-item p-l4"><span class="p-num">•</span>동맥혈 가스 및 젖산</div>
+<div class="p-item p-l4"><span class="p-num">•</span>ACT/aPTT</div>
+<div class="p-item p-l4"><span class="p-num">•</span>흉부 및 복부 단순 촬영: 캐뉼라 위치 확인</div>
+<div class="p-item p-l2"><span class="p-num">(2)</span>일일 모니터링</div>
+<div class="p-item p-l3"><span class="p-num">①</span>서킷: 산화기 전·후 동맥혈 가스 분석</div>
+<div class="p-item p-l3"><span class="p-num">②</span>환자</div>
+<div class="p-item p-l4"><span class="p-num">•</span>CBC, ACT/aPTT (II-2. 항응고 참조), PT(INR), fibrinogen</div>
+<div class="p-item p-l4"><span class="p-num">•</span>Fasting blood sugar, total bilirubin, AST, ALT, BUN, Cr, Na, K, Cl, Ca, P, Mg, LDH</div>
+<div class="p-item p-l4"><span class="p-num">•</span>동맥혈 가스 및 젖산</div>
+<div class="p-item p-l4"><span class="p-num">•</span>흉부 단순 촬영</div>
+<div class="p-item p-l2"><span class="p-num">(3)</span>주기적 모니터링</div>
+<div class="p-item p-l3"><span class="p-num">•</span>월요일 및 목요일: CRP, total protein, albumin</div>
+<div class="p-item p-l3"><span class="p-num">•</span>화요일 및 금요일: plasma free hemoglobin, antithrombin III</div>
+<div class="p-item p-l3"><span class="p-num">•</span>수요일: Anti-factor Xa</div>
+<div class="p-item p-l3"><span class="p-num">•</span>주 1–2회: 호흡기 배양 검사 (객담 또는 기관지 흡인액)</div>
+<div class="p-item p-l3"><span class="p-num">•</span>1–2주 간격: NT-proBNP</div>
+<div class="p-item p-l2"><span class="p-num">(4)</span>임상적 필요 시 검사</div>
+<div class="p-item p-l3"><span class="p-num">•</span>CK-MB, troponin I, 심장초음파</div>
+<div class="p-item p-l3"><span class="p-num">•</span>임상적 의심에 따라 추가 배양 검사 또는 영상 검사</div>
+</div><!--/p-group-->
+<div class="p-group"><h3 class="p-sub"><span class="p-num">2.</span>일일 점검 목록: 서킷</h3>
+<div class="p-table-wrap"><table class="p-table">
+<tr><th>영역</th><th>항목</th><th>기록</th></tr>
+<tr><td rowspan="2">회로 설정</td><td>콘솔</td><td>RPM:<br>펌프 혈류량:</td></tr>
+<tr><td>가스 유량</td><td>산화기 가스 유량:<br>FiO₂:</td></tr>
+<tr><td rowspan="2">항응고</td><td>항응고제</td><td></td></tr>
+<tr><td>항응고 적절성</td><td></td></tr>
+<tr><td rowspan="3">캐뉼라</td><td>캐뉼라 삽입부 문제</td><td></td></tr>
+<tr><td>위치 변동</td><td>X-ray:<br>피부 표식:</td></tr>
+<tr><td>배액 캐뉼라 떨림</td><td></td></tr>
+<tr><td>산화기</td><td>가스 교환 효율</td><td>배액·관류 캐뉼라 혈액 색깔:<br>산화기 PaO₂/FiO₂:</td></tr>
+<tr><td rowspan="2">용혈</td><td>임상 징후</td><td>소변 색깔:</td></tr>
+<tr><td>검사 소견</td><td>혈장 유리 혈색소, 빌리루빈, LDH:</td></tr>
+<tr><td>열교환기</td><td>가열기 사용</td><td></td></tr>
+</table></div>
+</div><!--/p-group-->
+<div class="p-group"><h3 class="p-sub"><span class="p-num">3.</span>일일 점검 목록: 환자</h3>
+<div class="p-table-wrap"><table class="p-table">
+<tr><th>영역</th><th>항목</th><th>기록</th></tr>
+<tr><td rowspan="3">중추신경계</td><td>초조-진정</td><td>RASS:     (목표:     )<br>진정제:</td></tr>
+<tr><td>섬망</td><td></td></tr>
+<tr><td>신경학적 이상</td><td></td></tr>
+<tr><td rowspan="5">심혈관계</td><td>수분 균형</td><td>목표:</td></tr>
+<tr><td>승압제/강심제 필요 여부</td><td></td></tr>
+<tr><td>심부전 유무</td><td></td></tr>
+<tr><td>부정맥 유무</td><td></td></tr>
+<tr><td>혈관 접근로</td><td>동맥 카테터:<br>중심 정맥관:</td></tr>
+<tr><td rowspan="4">호흡기계</td><td>인공기도</td><td></td></tr>
+<tr><td>기계환기</td><td>설정:</td></tr>
+<tr><td>흉부 X-ray</td><td></td></tr>
+<tr><td>동맥혈 가스 분석</td><td></td></tr>
+<tr><td>간</td><td>황달</td><td></td></tr>
+<tr><td rowspan="3">소화기계</td><td>스트레스 궤양 예방</td><td></td></tr>
+<tr><td>영양</td><td>목표:<br>경로:</td></tr>
+<tr><td>배변 여부</td><td></td></tr>
+<tr><td rowspan="2">신장</td><td>소변량</td><td></td></tr>
+<tr><td>신 대체 요법</td><td></td></tr>
+<tr><td rowspan="2">내분비</td><td>혈당 조절</td><td>목표:</td></tr>
+<tr><td>전신 스테로이드 사용</td><td></td></tr>
+<tr><td rowspan="3">혈액학</td><td>수혈 필요 여부</td><td></td></tr>
+<tr><td>출혈</td><td></td></tr>
+<tr><td>혈전색전증</td><td></td></tr>
+<tr><td rowspan="3">감염</td><td>감염 부위</td><td></td></tr>
+<tr><td>확인된 균종</td><td></td></tr>
+<tr><td>항생제</td><td></td></tr>
+</table></div>
+</div><!--/p-group-->
+</div><div data-lang="en"><div class="p-group">
+<p class="p-note">Monitoring during ECMO should focus not only on absolute values, but also on trends that may indicate evolving circuit-related or patient-related complications. Continuous reassessment is essential to detect early signs of ECMO dysfunction, organ injury, or treatment-related adverse events.</p>
+</div><!--/p-group-->
+<div class="p-group"><h3 class="p-sub"><span class="p-num">1.</span>Routine investigations</h3>
+<div class="p-item p-l2"><span class="p-num">(1)</span>Immediately after ECMO initiation</div>
+<div class="p-item p-l3"><span class="p-num">①</span>Circuit</div>
+<div class="p-item p-l4"><span class="p-num">•</span>Pre- and post-oxygenator arterial blood gas analysis</div>
+<div class="p-item p-l3"><span class="p-num">②</span>Patient</div>
+<div class="p-item p-l4"><span class="p-num">•</span>Arterial blood gas and lactate</div>
+<div class="p-item p-l4"><span class="p-num">•</span>ACT/aPTT</div>
+<div class="p-item p-l4"><span class="p-num">•</span>Chest X-ray and KUB: check cannula position</div>
+<div class="p-item p-l2"><span class="p-num">(2)</span>Daily monitoring</div>
+<div class="p-item p-l3"><span class="p-num">①</span>Circuit: Pre- and post-oxygenator arterial blood gas analysis</div>
+<div class="p-item p-l3"><span class="p-num">②</span>Patient:</div>
+<div class="p-item p-l4"><span class="p-num">•</span>CBC, ACT/aPTT (refer to section II-2. Anticoagulation), PT(INR), fibrinogen</div>
+<div class="p-item p-l4"><span class="p-num">•</span>Fasting blood sugar, total bilirubin, AST, ALT, BUN, Cr, Na, K, Cl, Ca, P, Mg, LDH</div>
+<div class="p-item p-l4"><span class="p-num">•</span>Arterial blood gas, lactate</div>
+<div class="p-item p-l4"><span class="p-num">•</span>Chest X-ray</div>
+<div class="p-item p-l2"><span class="p-num">(3)</span>Periodic monitoring</div>
+<div class="p-item p-l3"><span class="p-num">•</span>Monday and Thursday: CRP, total protein, albumin</div>
+<div class="p-item p-l3"><span class="p-num">•</span>Tuesday and Friday: plasma free hemoglobin, antithrombin III</div>
+<div class="p-item p-l3"><span class="p-num">•</span>Wednesday: Anti-factor Xa</div>
+<div class="p-item p-l3"><span class="p-num">•</span>Once or twice a week: Respiratory cultures (sputum or TTA)</div>
+<div class="p-item p-l3"><span class="p-num">•</span>Every 1–2 weeks: NT-proBNP</div>
+<div class="p-item p-l2"><span class="p-num">(4)</span>As clinically indicated (PRN)</div>
+<div class="p-item p-l3"><span class="p-num">•</span>CK-MB, troponin I, echocardiogram</div>
+<div class="p-item p-l3"><span class="p-num">•</span>Additional cultures or imaging studies based on clinical suspicion</div>
+</div><!--/p-group-->
+<div class="p-group"><h3 class="p-sub"><span class="p-num">2.</span>Daily checklist: circuit</h3>
+<div class="p-table-wrap"><table class="p-table">
+<tr><th>Domain</th><th>Item</th><th>Record</th></tr>
+<tr><td rowspan="2">Circuit setting</td><td>Console</td><td>RPM:<br>Pump blood flow:</td></tr>
+<tr><td>Gas flow</td><td>Sweep gas flow:<br>FiO₂:</td></tr>
+<tr><td rowspan="2">Anticoagulation</td><td>Anticoagulant</td><td></td></tr>
+<tr><td>Adequacy of anticoagulation</td><td></td></tr>
+<tr><td rowspan="3">Cannula</td><td>Cannula site problem</td><td></td></tr>
+<tr><td>Change of position</td><td>In X-ray:<br>Skin marking:</td></tr>
+<tr><td>Drainage insufficiency</td><td></td></tr>
+<tr><td>Oxygenator</td><td>Gas exchange efficiency</td><td>Color of blood in access and return cannulae:<br>Oxygenator PaO₂/FiO₂ ratio:</td></tr>
+<tr><td rowspan="2">Hemolysis</td><td>Clinical sign</td><td>Urine color:</td></tr>
+<tr><td>Laboratory findings</td><td>Plasma free Hb, bilirubin, LDH:</td></tr>
+<tr><td>Heat exchanger</td><td>Use of heater</td><td></td></tr>
+</table></div>
+</div><!--/p-group-->
+<div class="p-group"><h3 class="p-sub"><span class="p-num">3.</span>Daily checklist: patient</h3>
+<div class="p-table-wrap"><table class="p-table">
+<tr><th>Domain</th><th>Item</th><th>Record</th></tr>
+<tr><td rowspan="3">CNS</td><td>Agitation-sedation</td><td>RASS:     (target:     )<br>Sedatives:</td></tr>
+<tr><td>Delirium</td><td></td></tr>
+<tr><td>Neurologic abnormalities</td><td></td></tr>
+<tr><td rowspan="5">Cardiovascular</td><td>Fluid balance</td><td>Target:</td></tr>
+<tr><td>Need of inotrope/vasopressor</td><td></td></tr>
+<tr><td>Presence of cardiac failure</td><td></td></tr>
+<tr><td>Presence of arrhythmia</td><td></td></tr>
+<tr><td>Vascular access</td><td>Arterial catheter:<br>Central venous catheter:</td></tr>
+<tr><td rowspan="4">Respiratory</td><td>Artificial airway</td><td></td></tr>
+<tr><td>Mechanical ventilation</td><td>Setting:</td></tr>
+<tr><td>CXR</td><td></td></tr>
+<tr><td>ABG</td><td></td></tr>
+<tr><td>Liver</td><td>Jaundice</td><td></td></tr>
+<tr><td rowspan="3">GI</td><td>Ulcer prophylaxis</td><td></td></tr>
+<tr><td>Nutrition</td><td>Target:<br>Route:</td></tr>
+<tr><td>Bowel movement</td><td></td></tr>
+<tr><td rowspan="2">Renal</td><td>Urine output</td><td></td></tr>
+<tr><td>RRT</td><td></td></tr>
+<tr><td rowspan="2">Endocrine</td><td>Glycemic control</td><td>Target:</td></tr>
+<tr><td>Use of systemic steroid</td><td></td></tr>
+<tr><td rowspan="3">Hematology</td><td>Need of transfusion</td><td></td></tr>
+<tr><td>Bleeding</td><td></td></tr>
+<tr><td>Thromboembolism</td><td></td></tr>
+<tr><td rowspan="3">Infection</td><td>Infection site</td><td></td></tr>
+<tr><td>Documented microorganism</td><td></td></tr>
+<tr><td>Antibiotics</td><td></td></tr>
+</table></div>
+</div><!--/p-group-->
+</div></div>
+
+    <div class="p-pager">
+      <a class="pn-btn pn-btn--prev" href="ecmo-s7.html"><span class="pn-lbl"><span data-lang="ko">이전</span><span data-lang="en">Previous</span></span><span class="pn-ttl"><span data-lang="ko">07. VV ECMO 중 저산소혈증</span><span data-lang="en">07. Hypoxemia During VV ECMO</span></span></a>
+      <a class="pn-btn pn-btn--next" href="ecmo-s9.html"><span class="pn-lbl"><span data-lang="ko">다음</span><span data-lang="en">Next</span></span><span class="pn-ttl"><span data-lang="ko">09. ECMO 이탈</span><span data-lang="en">09. Weaning from ECMO</span></span></a>
+    </div>
+
+    
+    <a class="p-toc-btn" href="ecmo-toc.html">
+      <svg viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      <span data-lang="ko">목차로 돌아가기</span><span data-lang="en">Back to Contents</span>
+    </a>
+  </main>
+
+  <div class="toast" id="toast">Saved</div>
+
+    <nav class="bottom-nav">
+    <div class="nav-item" onclick="window.location.href='index.html'"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg><span class="nav-item__label">Home</span></div>
+    <div class="nav-item active" onclick="window.location.href='protocols.html'"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8m8 4H8"/></svg><span class="nav-item__label">Protocols</span></div>
+    <div class="nav-item" onclick="window.location.href='calculator.html'"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h.01M8 14h2M12 14h2M16 14h.01M8 18h8"/></svg><span class="nav-item__label">Calculator</span></div>
+    <div class="nav-item" onclick="window.location.href='saved.html'"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg><span class="nav-item__label">Saved</span></div>
+    <div class="nav-item" onclick="window.location.href='info.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg><span class="nav-item__label">Information</span></div>
+  </nav>
+<div class="sec-dd" id="secDD" aria-hidden="true">
+  <div class="sec-dd__scrim" data-dd-close></div>
+  <div class="sec-dd__panel" role="dialog" aria-label="Section list">
+    <div class="sec-dd__head">
+      <span class="sec-dd__eyebrow">VV-ECMO Protocol</span>
+      <button class="sec-dd__close" data-dd-close aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <nav class="sec-dd__list sec-dd__list--medium">
+      <a class="sec-dd__item" href="ecmo-s1.html">
+        <span class="sec-dd__num">01</span>
+        <span class="sec-dd__title"><span data-lang="ko">환자 선택</span><span data-lang="en">Patient Selection</span></span>
+      </a>
+      <a class="sec-dd__item" href="ecmo-s2.html">
+        <span class="sec-dd__num">02</span>
+        <span class="sec-dd__title"><span data-lang="ko">서킷 관리 1 — 콘솔 설정</span><span data-lang="en">Circuit Management 1 — Console Setting</span></span>
+      </a>
+      <a class="sec-dd__item" href="ecmo-s3.html">
+        <span class="sec-dd__num">03</span>
+        <span class="sec-dd__title"><span data-lang="ko">서킷 관리 2 — 항응고</span><span data-lang="en">Circuit Management 2 — Anticoagulation</span></span>
+      </a>
+      <a class="sec-dd__item" href="ecmo-s4.html">
+        <span class="sec-dd__num">04</span>
+        <span class="sec-dd__title"><span data-lang="ko">서킷 관리 3 — 응급 합병증</span><span data-lang="en">Circuit Management 3 — Emergency Complications</span></span>
+      </a>
+      <a class="sec-dd__item" href="ecmo-s5.html">
+        <span class="sec-dd__num">05</span>
+        <span class="sec-dd__title"><span data-lang="ko">서킷 관리 4 — 흔한 문제</span><span data-lang="en">Circuit Management 4 — Common Problems</span></span>
+      </a>
+      <a class="sec-dd__item" href="ecmo-s6.html">
+        <span class="sec-dd__num">06</span>
+        <span class="sec-dd__title"><span data-lang="ko">ECMO 중 의학적 관리</span><span data-lang="en">Medical Management During ECMO</span></span>
+      </a>
+      <a class="sec-dd__item" href="ecmo-s7.html">
+        <span class="sec-dd__num">07</span>
+        <span class="sec-dd__title"><span data-lang="ko">VV ECMO 중 저산소혈증</span><span data-lang="en">Hypoxemia During VV ECMO</span></span>
+      </a>
+      <a class="sec-dd__item is-current" href="ecmo-s8.html">
+        <span class="sec-dd__num">08</span>
+        <span class="sec-dd__title"><span data-lang="ko">ECMO 중 모니터링</span><span data-lang="en">Monitoring During ECMO</span></span>
+      </a>
+      <a class="sec-dd__item" href="ecmo-s9.html">
+        <span class="sec-dd__num">09</span>
+        <span class="sec-dd__title"><span data-lang="ko">ECMO 이탈</span><span data-lang="en">Weaning from ECMO</span></span>
+      </a>
+      <a class="sec-dd__item" href="ecmo-s10.html">
+        <span class="sec-dd__num">10</span>
+        <span class="sec-dd__title"><span data-lang="ko">참고문헌</span><span data-lang="en">Reference</span></span>
+      </a>
+    </nav>
+  </div>
+</div>
+
+
+<script>
+const toast=document.getElementById('toast');let t;
+function showToast(m){toast.textContent=m;toast.classList.add('show');clearTimeout(t);t=setTimeout(()=>toast.classList.remove('show'),1600);}
+document.querySelectorAll('[data-toast]').forEach(e=>e.addEventListener('click',ev=>{ev.stopPropagation();showToast(e.dataset.toast);}));
+document.querySelectorAll('.nav-item').forEach(i=>i.addEventListener('click',function(){if(this.classList.contains('active'))return;if(this.getAttribute('onclick'))return;showToast(this.querySelector('.nav-item__label').textContent+' — Coming soon');}));
+
+const dd=document.getElementById('secDD');
+const tog=document.getElementById('secToggle');
+if(dd&&tog){
+  function openDD(){dd.classList.add('is-open');dd.setAttribute('aria-hidden','false');}
+  function closeDD(){dd.classList.remove('is-open');dd.setAttribute('aria-hidden','true');}
+  tog.addEventListener('click',e=>{e.stopPropagation();dd.classList.contains('is-open')?closeDD():openDD();});
+  dd.querySelectorAll('[data-dd-close]').forEach(el=>el.addEventListener('click',closeDD));
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDD();});
+}
+
+(function(){
+  const btn=document.querySelector('.icon-btn--bookmark');
+  if(!btn) return;
+  const key='smc-bookmark:'+(location.pathname.split('/').pop()||'index');
+  let saved=false;
+  try{ saved=localStorage.getItem(key)==='1'; }catch(e){}
+  if(saved){ btn.classList.add('is-saved'); btn.setAttribute('aria-pressed','true'); }
+  btn.addEventListener('click',function(ev){
+    ev.stopPropagation(); saved=!saved;
+    btn.classList.toggle('is-saved',saved); btn.setAttribute('aria-pressed',saved?'true':'false');
+    btn.classList.remove('is-animating'); void btn.offsetWidth; btn.classList.add('is-animating');
+    setTimeout(()=>btn.classList.remove('is-animating'),650);
+    try{ saved?localStorage.setItem(key,'1'):localStorage.removeItem(key); }catch(e){}
+    if(typeof showToast==='function') showToast(saved?'Saved':'Removed from saved');
+  });
+})();
+</script>
+<script src="recent.js?v=1776350000"></script>
+</body>
+</html>

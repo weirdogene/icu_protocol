@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Saved · SMC ICU Protocol</title>
+    <script src="settings-init.js?v=1776350000"></script>
+<link href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=1776350000">
+<link rel="stylesheet" href="protocol.css?v=1776350000">
+<style>
+.container { --cat-color: var(--smc-blue); }
+
+/* ---- Saved list ---- */
+.saved-group {
+    margin-bottom: 24px;
+    animation: fadeUp 0.4s var(--ease-out) both;
+}
+.saved-group__head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin: 4px 0 10px;
+    padding: 0 2px;
+}
+.saved-group__cat {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--group-color, var(--smc-blue));
+}
+.saved-group__proto {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.2px;
+}
+.saved-group__rule {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right,
+        color-mix(in srgb, var(--group-color, var(--smc-blue)) 30%, transparent) 0%,
+        var(--border-subtle) 22%,
+        var(--border-subtle) 100%);
+}
+
+.saved-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.saved-item {
+    display: flex;
+    flex-direction: column;
+    padding: 13px 14px 13px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--r-md);
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s var(--ease-out), border-color 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    --item-color: var(--smc-blue);
+}
+.saved-item__row {
+    display: grid;
+    grid-template-columns: 32px 1fr auto auto;
+    align-items: center;
+    gap: 10px;
+}
+/* Thin category stripe — per-item color identity */
+.saved-item::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 12px; bottom: 12px;
+    width: 2px;
+    background: var(--item-color);
+    opacity: 0.55;
+    border-radius: 0 2px 2px 0;
+    transition: opacity 0.2s, width 0.2s;
+}
+.saved-item:hover::before { opacity: 1; width: 3px; }
+.saved-item:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--item-color) 35%, var(--border-subtle));
+    box-shadow: 0 6px 16px rgba(20, 40, 160, 0.06);
+}
+.saved-item__num {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    color: var(--item-color);
+    font-variant-numeric: tabular-nums;
+}
+.saved-item__title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.35;
+    letter-spacing: -0.3px;
+    word-break: keep-all;
+    min-width: 0;
+}
+.saved-item__remove {
+    width: 32px; height: 32px;
+    border: none;
+    background: var(--bg-subtle);
+    border-radius: 10px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.18s, color 0.18s, transform 0.3s var(--ease-spring);
+}
+.saved-item__remove:hover {
+    background: color-mix(in srgb, var(--smc-red) 15%, var(--bg-subtle));
+    color: var(--smc-red);
+}
+.saved-item__remove svg {
+    width: 14px; height: 14px;
+    stroke: currentColor; stroke-width: 2.4;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.saved-item.is-removing {
+    animation: itemOut 0.35s var(--ease-out) forwards;
+    pointer-events: none;
+}
+@keyframes itemOut {
+    to { opacity: 0; transform: translateX(60px) scale(0.95); max-height: 0; padding-top: 0; padding-bottom: 0; margin-bottom: -8px; }
+}
+
+/* Note button (pencil) */
+.saved-item__note-btn {
+    width: 32px; height: 32px;
+    border: none;
+    background: var(--bg-subtle);
+    border-radius: 10px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.18s, color 0.18s;
+    position: relative;
+}
+.saved-item__note-btn:hover {
+    background: color-mix(in srgb, var(--item-color) 12%, var(--bg-subtle));
+    color: var(--item-color);
+}
+.saved-item__note-btn svg {
+    width: 14px; height: 14px;
+    stroke: currentColor; stroke-width: 2.2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+/* Blue dot when a note exists */
+.saved-item.has-note .saved-item__note-btn::after {
+    content: '';
+    position: absolute;
+    top: 4px; right: 4px;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--item-color);
+    border: 1.5px solid var(--bg-card);
+}
+
+/* Note preview — 1-2 lines under the title row */
+.saved-item__note-preview {
+    margin-top: 10px;
+    padding: 8px 12px 9px 12px;
+    background: color-mix(in srgb, var(--item-color) 5%, var(--bg-subtle));
+    border-radius: 8px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    font-style: italic;
+    letter-spacing: -0.1px;
+    position: relative;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    cursor: text;
+    border-left: 2px solid color-mix(in srgb, var(--item-color) 40%, transparent);
+}
+.saved-item__note-preview::before {
+    content: '“';
+    color: color-mix(in srgb, var(--item-color) 55%, transparent);
+    font-weight: 800;
+    font-style: normal;
+    margin-right: 4px;
+}
+
+/* Note editor (expanded) */
+.saved-item__editor {
+    margin-top: 10px;
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    animation: editorIn 0.25s var(--ease-out);
+}
+.saved-item.is-editing .saved-item__editor { display: flex; }
+.saved-item.is-editing .saved-item__note-preview { display: none; }
+@keyframes editorIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.saved-item__textarea {
+    width: 100%;
+    min-height: 72px;
+    max-height: 200px;
+    resize: vertical;
+    padding: 10px 12px;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+}
+.saved-item__textarea::placeholder { color: var(--text-tertiary); }
+.saved-item__textarea:focus {
+    border-color: var(--item-color);
+    background: #fff;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--item-color) 12%, transparent);
+}
+.saved-item__editor-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+.saved-item__count {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-tertiary);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.3px;
+}
+.saved-item__count.is-near { color: var(--smc-orange); }
+.saved-item__count.is-over { color: var(--smc-red); }
+.saved-item__actions {
+    display: flex;
+    gap: 6px;
+}
+.saved-item__btn {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-subtle);
+    background: transparent;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.18s;
+}
+.saved-item__btn:hover { background: var(--bg-subtle); color: var(--text-primary); }
+.saved-item__btn--primary {
+    background: var(--item-color);
+    border-color: var(--item-color);
+    color: #fff;
+}
+.saved-item__btn--primary:hover {
+    background: color-mix(in srgb, var(--item-color) 88%, #000);
+    color: #fff;
+}
+.saved-item__btn--danger {
+    color: var(--smc-red);
+    border-color: color-mix(in srgb, var(--smc-red) 25%, var(--border-subtle));
+}
+.saved-item__btn--danger:hover {
+    background: color-mix(in srgb, var(--smc-red) 10%, transparent);
+    color: var(--smc-red);
+    border-color: color-mix(in srgb, var(--smc-red) 45%, var(--border-subtle));
+}
+
+/* ---- Empty state ---- */
+.saved-empty {
+    text-align: center;
+    padding: 60px 24px 40px;
+    animation: fadeUp 0.5s var(--ease-out) both;
+}
+/* Empty state — stacked card illustration (reading list metaphor) */
+.saved-empty__icon {
+    width: 96px; height: 72px;
+    margin: 0 auto 22px;
+    position: relative;
+}
+.saved-empty__icon span {
+    position: absolute;
+    left: 50%;
+    width: 72px;
+    height: 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    transform-origin: center;
+}
+.saved-empty__icon span:nth-child(1) {
+    top: 6px;
+    transform: translateX(-50%) rotate(-6deg);
+    background: var(--bg-subtle);
+    opacity: 0.7;
+}
+.saved-empty__icon span:nth-child(2) {
+    top: 22px;
+    transform: translateX(-50%) rotate(2deg);
+}
+.saved-empty__icon span:nth-child(3) {
+    top: 40px;
+    transform: translateX(-50%) rotate(-3deg);
+    border-color: color-mix(in srgb, var(--smc-blue) 35%, var(--border-subtle));
+    box-shadow: 0 6px 16px rgba(10, 75, 255, 0.12);
+}
+.saved-empty__icon span:nth-child(3)::after {
+    content: '';
+    position: absolute;
+    left: 10px; top: 50%;
+    width: 36px; height: 2px;
+    background: var(--smc-blue);
+    border-radius: 2px;
+    transform: translateY(-50%);
+    opacity: 0.75;
+}
+.saved-empty__title {
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+.saved-empty__sub {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.55;
+    max-width: 260px;
+    margin: 0 auto 22px;
+}
+.saved-empty__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, var(--smc-blue) 0%, var(--samsung-blue) 100%);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    box-shadow: 0 8px 20px rgba(10, 75, 255, 0.24);
+    transition: transform 0.2s var(--ease-spring);
+}
+.saved-empty__cta:hover { transform: translateY(-2px); }
+.saved-empty__cta svg {
+    width: 14px; height: 14px;
+    stroke: currentColor; stroke-width: 2.5; fill: none;
+    stroke-linecap: round; stroke-linejoin: round;
+}
+
+/* ---- Count pill in header ---- */
+.saved-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 8px;
+    background: rgba(255, 255, 255, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.32);
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+    backdrop-filter: blur(10px);
+}
+
+/* Dark theme — saved page */
+html[data-theme="dark"] .saved-item__remove:hover {
+    background: color-mix(in srgb, var(--smc-red) 18%, #1c2333);
+}
+html[data-theme="dark"] .saved-item:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="header header--page">
+    <div class="header__top">
+      <button class="icon-btn icon-btn--back" onclick="window.location.href='index.html'" aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <div class="header__title">
+        <span class="header__eyebrow">Library</span>
+        <div class="header__h1">Saved</div>
+      </div>
+      <span class="saved-count" id="savedCount">0</span>
+    </div>
+  </header>
+
+  <main class="main main--page" id="savedRoot">
+    <!-- filled by JS -->
+  </main>
+
+  <div class="toast" id="toast">Removed</div>
+
+    <nav class="bottom-nav">
+    <div class="nav-item" onclick="window.location.href='index.html'"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg><span class="nav-item__label">Home</span></div>
+    <div class="nav-item" onclick="window.location.href='protocols.html'"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8m8 4H8"/></svg><span class="nav-item__label">Protocols</span></div>
+    <div class="nav-item" onclick="window.location.href='calculator.html'"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h.01M8 14h2M12 14h2M16 14h.01M8 18h8"/></svg><span class="nav-item__label">Calculator</span></div>
+    <div class="nav-item active"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg><span class="nav-item__label">Saved</span></div>
+    <div class="nav-item" onclick="window.location.href='info.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg><span class="nav-item__label">Information</span></div>
+  </nav>
+</div>
+
+<script>
+/* ---- Catalog: filename <span class="p-arrow">→</span> { category, protocol, section } ---- */
+const CAT_COLOR = {
+  'Neurology':   'var(--cat-neurology)',
+  'Cardiology':  'var(--cat-cardiology)',
+  'Pulmonology': 'var(--cat-pulmonology)',
+  'GI':          'var(--cat-gi)',
+  'Nephrology':  'var(--cat-nephrology)',
+  'Infection':   'var(--cat-infection)',
+  'Procedure':   'var(--cat-procedure)',
+  'Calculator':  'var(--smc-orange, #e67700)'
+};
+const CATALOG = {
+  'airway-toc.html':  { cat:'Neurology', proto:'Airway Management',    num:null, title:'Contents' },
+  'airway-s1.html':   { cat:'Neurology', proto:'Airway Management',    num:'01', title:'Decision to Intubate' },
+  'airway-s2.html':   { cat:'Neurology', proto:'Airway Management',    num:'02', title:'Pre-Intubation Assessment' },
+  'airway-s3.html':   { cat:'Neurology', proto:'Airway Management',    num:'03', title:'Preparation' },
+  'airway-s4.html':   { cat:'Neurology', proto:'Airway Management',    num:'04', title:'Standard Rapid Sequence Intubation (RSI)' },
+  'airway-s5.html':   { cat:'Neurology', proto:'Airway Management',    num:'05', title:'Anatomically Difficult Airway' },
+  'airway-s6.html':   { cat:'Neurology', proto:'Airway Management',    num:'06', title:'Physiologically Difficult Airway' },
+  'airway-s7.html':   { cat:'Neurology', proto:'Airway Management',    num:'07', title:'Crash Airway' },
+  'airway-s8.html':   { cat:'Neurology', proto:'Airway Management',    num:'08', title:'Failed Airway Management' },
+  'airway-s9.html':   { cat:'Neurology', proto:'Airway Management',    num:'09', title:'Post-Intubation Management' },
+  'airway-s10.html':  { cat:'Neurology', proto:'Airway Management',    num:'10', title:'References' },
+  'airway-s11.html':  { cat:'Neurology', proto:'Airway Management',    num:'11', title:'Abbreviations' },
+  'vap-toc.html':     { cat:'Neurology', proto:'VAP Prevention',       num:null, title:'Contents' },
+  'vap-s1.html':      { cat:'Neurology', proto:'VAP Prevention',       num:'01', title:'Definition' },
+  'vap-s2.html':      { cat:'Neurology', proto:'VAP Prevention',       num:'02', title:'Indication' },
+  'vap-s3.html':      { cat:'Neurology', proto:'VAP Prevention',       num:'03', title:'Recommendations' },
+  'vap-s4.html':      { cat:'Neurology', proto:'VAP Prevention',       num:'04', title:'References' },
+  /* ---- Calculators ---- */
+  'calc-steroid.html':       { cat:'Calculator', proto:'Pharmacology',           num:null, title:'Steroid Conversion' },
+  'calc-fena.html':          { cat:'Calculator', proto:'Renal & Electrolytes',   num:null, title:'FENa Calculator' },
+  'calc-ttkg.html':          { cat:'Calculator', proto:'Renal & Electrolytes',   num:null, title:'TTKG Calculator' },
+  'calc-na-correction.html': { cat:'Calculator', proto:'Renal & Electrolytes',   num:null, title:'Na Correction (Glucose)' },
+  'calc-fwd.html':           { cat:'Calculator', proto:'Renal & Electrolytes',   num:null, title:'Free Water Deficit' },
+  'calc-na-deficit.html':    { cat:'Calculator', proto:'Renal & Electrolytes',   num:null, title:'Sodium Deficit' },
+  'calc-aa-gradient.html':   { cat:'Calculator', proto:'Pulmonary',              num:null, title:'A-a Gradient' },
+  'calc-anion-gap.html':     { cat:'Calculator', proto:'Acid-Base',              num:null, title:'Anion Gap' },
+  'calc-apache2.html':       { cat:'Calculator', proto:'ICU Scoring',            num:null, title:'APACHE II' },
+  'calc-corrected-ca.html':  { cat:'Calculator', proto:'Renal & Electrolytes',   num:null, title:'Corrected Calcium' },
+  'calc-crcl.html':          { cat:'Calculator', proto:'Renal & Electrolytes',   num:null, title:'Creatinine Clearance' },
+  'calc-fick-co.html':       { cat:'Calculator', proto:'Hemodynamics',           num:null, title:'Fick Cardiac Output' },
+  'calc-gcs.html':           { cat:'Calculator', proto:'ICU Scoring',            num:null, title:'Glasgow Coma Scale' },
+  'calc-sofa.html':          { cat:'Calculator', proto:'ICU Scoring',            num:null, title:'SOFA Score' },
+  'calc-vis.html':           { cat:'Calculator', proto:'Hemodynamics',           num:null, title:'Vasoactive-Inotropic Score' }
+};
+
+const KEY_PREFIX = 'smc-bookmark:';
+const NOTE_PREFIX = 'smc-note:';
+const NOTE_LIMIT = 500;
+function getNote(file){ try{ return localStorage.getItem(NOTE_PREFIX+file) || ''; }catch(e){ return ''; } }
+function setNote(file, text){ try{ text ? localStorage.setItem(NOTE_PREFIX+file, text) : localStorage.removeItem(NOTE_PREFIX+file); }catch(e){} }
+function escapeHtml(s){ return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+const toastEl = document.getElementById('toast');
+let toastTimer;
+function showToast(m){ toastEl.textContent=m; toastEl.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>toastEl.classList.remove('show'),1600); }
+
+function collect() {
+  const out = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (!k || !k.startsWith(KEY_PREFIX)) continue;
+    if (localStorage.getItem(k) !== '1') continue;
+    const file = k.slice(KEY_PREFIX.length);
+    const meta = CATALOG[file];
+    if (meta) out.push({ file, ...meta });
+  }
+  // Stable sort: protocol, then numeric section
+  out.sort((a,b) => {
+    if (a.proto !== b.proto) return a.proto.localeCompare(b.proto);
+    if (a.num === null) return -1;
+    if (b.num === null) return 1;
+    return parseInt(a.num) - parseInt(b.num);
+  });
+  return out;
+}
+
+function groupByProtocol(items){
+  const map = new Map();
+  for (const it of items) {
+    const key = it.cat + '|' + it.proto;
+    if (!map.has(key)) map.set(key, { cat: it.cat, proto: it.proto, items: [] });
+    map.get(key).items.push(it);
+  }
+  return [...map.values()];
+}
+
+function render() {
+  const root = document.getElementById('savedRoot');
+  const countEl = document.getElementById('savedCount');
+  const items = collect();
+  countEl.textContent = items.length;
+
+  if (items.length === 0) {
+    root.innerHTML = `
+      <div class="saved-empty">
+        <div class="saved-empty__icon"><span></span><span></span><span></span></div>
+        <div class="saved-empty__title">Your reading list is empty</div>
+        <div class="saved-empty__sub">프로토콜이나 계산기 페이지 우측 상단의 북마크를 눌러 담아두면 이곳에 쌓입니다.</div>
+        <a class="saved-empty__cta" href="index.html">
+          Browse protocols
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>`;
+    return;
+  }
+
+  const groups = groupByProtocol(items);
+  root.innerHTML = groups.map(g => {
+    const color = CAT_COLOR[g.cat] || 'var(--smc-blue)';
+    return `
+    <section class="saved-group" style="--group-color:${color};">
+      <div class="saved-group__head">
+        <span class="saved-group__cat">${g.cat}</span>
+        <span class="saved-group__proto">${g.proto}</span>
+        <span class="saved-group__rule"></span>
+      </div>
+      <div class="saved-list">
+        ${g.items.map(it => {
+          const note = getNote(it.file);
+          const hasNote = note.trim().length > 0;
+          return `
+          <div class="saved-item${hasNote ? ' has-note' : ''}" data-file="${it.file}" role="link" tabindex="0" style="--item-color:${color};">
+            <div class="saved-item__row">
+              <div class="saved-item__num">${it.num ?? '—'}</div>
+              <div class="saved-item__title">${it.title}</div>
+              <button class="saved-item__note-btn" data-note-toggle aria-label="${hasNote ? 'Edit note' : 'Add note'}" title="${hasNote ? 'Edit note' : 'Add note'}">
+                <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+              </button>
+              <button class="saved-item__remove" data-remove aria-label="Remove from saved" title="Remove">
+                <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+              </button>
+            </div>
+            ${hasNote ? `<div class="saved-item__note-preview" data-note-preview>${escapeHtml(note)}</div>` : ''}
+            <div class="saved-item__editor">
+              <textarea class="saved-item__textarea" data-note-input maxlength="${NOTE_LIMIT}" placeholder="이 프로토콜에 대한 메모를 남기세요">${escapeHtml(note)}</textarea>
+              <div class="saved-item__editor-foot">
+                <span class="saved-item__count" data-count>${note.length} / ${NOTE_LIMIT}</span>
+                <div class="saved-item__actions">
+                  ${hasNote ? '<button class="saved-item__btn saved-item__btn--danger" data-note-delete>Delete</button>' : ''}
+                  <button class="saved-item__btn" data-note-cancel>Cancel</button>
+                  <button class="saved-item__btn saved-item__btn--primary" data-note-save>Save</button>
+                </div>
+              </div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </section>`;
+  }).join('');
+
+  // Card navigation + note interactions
+  root.querySelectorAll('.saved-item').forEach(card => {
+    const file = card.dataset.file;
+    const editor = card.querySelector('.saved-item__editor');
+    const textarea = card.querySelector('[data-note-input]');
+    const countEl = card.querySelector('[data-count]');
+
+    function openEditor() {
+      card.classList.add('is-editing');
+      setTimeout(() => { textarea.focus(); textarea.setSelectionRange(textarea.value.length, textarea.value.length); }, 10);
+      updateCount();
+    }
+    function closeEditor(restore = false) {
+      if (restore) textarea.value = getNote(file);
+      card.classList.remove('is-editing');
+    }
+    function updateCount() {
+      const n = textarea.value.length;
+      countEl.textContent = `${n} / ${NOTE_LIMIT}`;
+      countEl.classList.toggle('is-near', n > NOTE_LIMIT * 0.85 && n <= NOTE_LIMIT);
+      countEl.classList.toggle('is-over', n > NOTE_LIMIT);
+    }
+    function saveNote() {
+      const text = textarea.value.trim().slice(0, NOTE_LIMIT);
+      setNote(file, text);
+      showToast(text ? 'Note saved' : 'Note cleared');
+      render();
+    }
+
+    // Click on card <span class="p-arrow">→</span> navigate, unless inside interactive zones
+    card.addEventListener('click', e => {
+      if (e.target.closest('[data-remove], [data-note-toggle], [data-note-preview], .saved-item__editor')) return;
+      window.location.href = file;
+    });
+    card.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !card.classList.contains('is-editing') && e.target === card) {
+        window.location.href = file;
+      }
+      if (e.key === 'Escape' && card.classList.contains('is-editing')) {
+        closeEditor(true);
+      }
+    });
+
+    // Note toggle
+    const toggleBtn = card.querySelector('[data-note-toggle]');
+    toggleBtn && toggleBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      card.classList.contains('is-editing') ? closeEditor(true) : openEditor();
+    });
+    // Tap preview <span class="p-arrow">→</span> edit
+    const preview = card.querySelector('[data-note-preview]');
+    preview && preview.addEventListener('click', e => { e.stopPropagation(); openEditor(); });
+    // Textarea interactions
+    textarea && textarea.addEventListener('input', updateCount);
+    textarea && textarea.addEventListener('click', e => e.stopPropagation());
+    textarea && textarea.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); saveNote(); }
+    });
+    // Save / Cancel
+    card.querySelector('[data-note-save]')?.addEventListener('click', e => {
+      e.stopPropagation();
+      saveNote();
+    });
+    card.querySelector('[data-note-cancel]')?.addEventListener('click', e => {
+      e.stopPropagation();
+      closeEditor(true);
+    });
+    // Delete note (only present when a note exists)
+    card.querySelector('[data-note-delete]')?.addEventListener('click', e => {
+      e.stopPropagation();
+      setNote(file, '');
+      showToast('Note deleted');
+      render();
+    });
+    // Remove
+    card.querySelector('[data-remove]')?.addEventListener('click', e => {
+      e.stopPropagation();
+      localStorage.removeItem(KEY_PREFIX + file);
+      setNote(file, ''); // also drop the note when unsaving
+      card.classList.add('is-removing');
+      showToast('Removed from saved');
+      setTimeout(render, 360);
+    });
+  });
+}
+
+render();
+window.addEventListener('storage', render);
+
+document.querySelectorAll('.nav-item').forEach(i=>i.addEventListener('click',function(){
+  if(this.classList.contains('active'))return;
+  if(this.getAttribute('onclick'))return;
+  showToast(this.querySelector('.nav-item__label').textContent+' — Coming soon');
+}));
+</script>
+</body>
+</html>

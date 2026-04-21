@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APACHE II · SMC ICU Protocol</title>
+    <script src="settings-init.js?v=1776350000"></script>
+<link href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=1776350000">
+<link rel="stylesheet" href="calculator.css?v=1776350000">
+<style>
+.container { --cat-color: var(--smc-blue); }
+.ap-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px dashed var(--border-subtle); }
+.ap-row:last-child { border-bottom: none; }
+.ap-row__lbl { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.ap-row__lbl small { display: block; font-size: 10.5px; font-weight: 600; color: var(--text-tertiary); margin-top: 2px; letter-spacing: 0.3px; }
+.ap-input { width: 100px; padding: 8px 10px; border: 1px solid var(--border-subtle); border-radius: 8px; font-family: inherit; font-size: 14px; font-weight: 700; text-align: center; color: var(--text-primary); background: var(--bg-card); }
+.ap-input:focus { outline: none; border-color: var(--smc-blue); }
+.ap-pts { min-width: 28px; text-align: center; font-size: 13px; font-weight: 900; color: var(--smc-blue); font-variant-numeric: tabular-nums; }
+.ap-toggle { display: inline-flex; gap: 4px; border: 1px solid var(--border-subtle); border-radius: 8px; padding: 2px; background: var(--bg-subtle); }
+.ap-toggle__btn { border: none; background: transparent; padding: 6px 10px; border-radius: 6px; font-family: inherit; font-size: 11px; font-weight: 700; color: var(--text-secondary); cursor: pointer; }
+.ap-toggle__btn[aria-pressed="true"] { background: var(--bg-card); color: var(--smc-blue); box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+.ap-row--toggle { grid-template-columns: 1fr auto auto; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="header header--page">
+    <div class="header__top">
+      <button class="icon-btn icon-btn--back" onclick="window.location.href='calculator.html'" aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <div class="header__title">
+        <span class="header__eyebrow">Calculator</span>
+        <div class="header__h1">APACHE II</div>
+      </div>
+      <button class="icon-btn icon-btn--bookmark" aria-label="Save" aria-pressed="false">
+        <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="main main--page">
+    <div class="calc-intro">
+      <div class="calc-intro__title">Acute Physiology & Chronic Health Evaluation II</div>
+      <div class="calc-intro__desc">Mortality prediction using worst values in the first 24 hours of ICU admission. Range 0–71.</div>
+    </div>
+
+    <section class="calc-sect">
+      <div class="calc-sect__hd">
+        <span class="calc-sect__num">01</span>
+        <span class="calc-sect__title">Acute Physiology</span>
+        <div class="calc-sect__rule"></div>
+      </div>
+
+      <div class="ap-row"><div class="ap-row__lbl">Temperature<small>°C (rectal)</small></div><input class="ap-input" type="number" step="0.1" id="temp"><span class="ap-pts" id="p-temp">—</span></div>
+      <div class="ap-row"><div class="ap-row__lbl">Mean arterial pressure<small>mmHg</small></div><input class="ap-input" type="number" step="1" id="map"><span class="ap-pts" id="p-map">—</span></div>
+      <div class="ap-row"><div class="ap-row__lbl">Heart rate<small>bpm</small></div><input class="ap-input" type="number" step="1" id="hr"><span class="ap-pts" id="p-hr">—</span></div>
+      <div class="ap-row"><div class="ap-row__lbl">Respiratory rate<small>/min</small></div><input class="ap-input" type="number" step="1" id="rr"><span class="ap-pts" id="p-rr">—</span></div>
+
+      <div class="ap-row ap-row--toggle"><div class="ap-row__lbl">FiO₂ mode<small>selects oxygenation criterion</small></div>
+        <div class="ap-toggle" id="fio2mode"><button class="ap-toggle__btn" data-v="high" aria-pressed="false">≥ 0.5 (A-a)</button><button class="ap-toggle__btn" data-v="low" aria-pressed="true">&lt; 0.5 (PaO₂)</button></div>
+        <span class="ap-pts"></span>
+      </div>
+      <div class="ap-row" id="row-pao2"><div class="ap-row__lbl">PaO₂<small>mmHg (FiO₂ &lt; 0.5)</small></div><input class="ap-input" type="number" step="0.1" id="pao2"><span class="ap-pts" id="p-oxy">—</span></div>
+      <div class="ap-row" id="row-aa" style="display:none"><div class="ap-row__lbl">A-a gradient<small>mmHg (FiO₂ ≥ 0.5)</small></div><input class="ap-input" type="number" step="0.1" id="aa"><span class="ap-pts" id="p-oxy2">—</span></div>
+
+      <div class="ap-row"><div class="ap-row__lbl">Arterial pH<small></small></div><input class="ap-input" type="number" step="0.01" id="ph"><span class="ap-pts" id="p-ph">—</span></div>
+      <div class="ap-row"><div class="ap-row__lbl">Serum Na⁺<small>mmol/L</small></div><input class="ap-input" type="number" step="1" id="na"><span class="ap-pts" id="p-na">—</span></div>
+      <div class="ap-row"><div class="ap-row__lbl">Serum K⁺<small>mmol/L</small></div><input class="ap-input" type="number" step="0.1" id="k"><span class="ap-pts" id="p-k">—</span></div>
+
+      <div class="ap-row ap-row--toggle"><div class="ap-row__lbl">Acute renal failure<small>doubles Cr points</small></div>
+        <div class="ap-toggle" id="arf"><button class="ap-toggle__btn" data-v="yes" aria-pressed="false">Yes</button><button class="ap-toggle__btn" data-v="no" aria-pressed="true">No</button></div>
+        <span class="ap-pts"></span>
+      </div>
+      <div class="ap-row"><div class="ap-row__lbl">Creatinine<small>mg/dL</small></div><input class="ap-input" type="number" step="0.01" id="cr"><span class="ap-pts" id="p-cr">—</span></div>
+
+      <div class="ap-row"><div class="ap-row__lbl">Hematocrit<small>%</small></div><input class="ap-input" type="number" step="0.1" id="hct"><span class="ap-pts" id="p-hct">—</span></div>
+      <div class="ap-row"><div class="ap-row__lbl">WBC<small>×10³/μL</small></div><input class="ap-input" type="number" step="0.1" id="wbc"><span class="ap-pts" id="p-wbc">—</span></div>
+      <div class="ap-row"><div class="ap-row__lbl">GCS<small>3–15</small></div><input class="ap-input" type="number" step="1" min="3" max="15" id="gcs"><span class="ap-pts" id="p-gcs">—</span></div>
+    </section>
+
+    <section class="calc-sect">
+      <div class="calc-sect__hd">
+        <span class="calc-sect__num">02</span>
+        <span class="calc-sect__title">Age</span>
+        <div class="calc-sect__rule"></div>
+      </div>
+      <div class="ap-row"><div class="ap-row__lbl">Age<small>years (≤44:0, 45-54:2, 55-64:3, 65-74:5, ≥75:6)</small></div><input class="ap-input" type="number" step="1" min="0" max="120" id="age"><span class="ap-pts" id="p-age">—</span></div>
+    </section>
+
+    <section class="calc-sect">
+      <div class="calc-sect__hd">
+        <span class="calc-sect__num">03</span>
+        <span class="calc-sect__title">Chronic Health</span>
+        <div class="calc-sect__rule"></div>
+      </div>
+      <div class="ap-row ap-row--toggle"><div class="ap-row__lbl">Severe organ insufficiency<small>or immunocompromised</small></div>
+        <div class="ap-toggle" id="chronic"><button class="ap-toggle__btn" data-v="none" aria-pressed="true">None</button><button class="ap-toggle__btn" data-v="elec">Elective post-op</button><button class="ap-toggle__btn" data-v="emerg">Non-op / Emerg</button></div>
+        <span class="ap-pts" id="p-chr">0</span>
+      </div>
+      <p class="sofa-crit" style="font-size:10.5px;color:var(--text-tertiary);font-weight:600;margin-top:6px">+2 for elective postoperative, +5 for non-operative or emergency postoperative. If none: 0.</p>
+    </section>
+
+    <button class="calc-reset" onclick="resetAll()">
+      <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+      Reset
+    </button>
+
+    <div class="calc-refs">
+      <p>Knaus WA, Draper EA, Wagner DP, Zimmerman JE. APACHE II: a severity of disease classification system. Crit Care Med. 1985;13(10):818-29.</p>
+    </div>
+
+    <div class="calc-result is-empty" id="result">
+      <div class="calc-result__row">
+        <span class="calc-result__label">APACHE II</span>
+        <span class="calc-result__value" id="total">—<small>/ 71</small></span>
+      </div>
+      <div class="calc-subresult"><span class="calc-subresult__k">APS (physiology)</span><span class="calc-subresult__v" id="v-aps">—</span></div>
+      <div class="calc-subresult"><span class="calc-subresult__k">Age + Chronic</span><span class="calc-subresult__v" id="v-ac">—</span></div>
+      <div class="calc-result__interp" id="interp"></div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast">Reset</div>
+
+    <nav class="bottom-nav">
+    <div class="nav-item" onclick="window.location.href='index.html'"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg><span class="nav-item__label">Home</span></div>
+    <div class="nav-item" onclick="window.location.href='protocols.html'"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8m8 4H8"/></svg><span class="nav-item__label">Protocols</span></div>
+    <div class="nav-item active" onclick="window.location.href='calculator.html'"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h.01M8 14h2M12 14h2M16 14h.01M8 18h8"/></svg><span class="nav-item__label">Calculator</span></div>
+    <div class="nav-item" onclick="window.location.href='saved.html'"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg><span class="nav-item__label">Saved</span></div>
+    <div class="nav-item" onclick="window.location.href='info.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg><span class="nav-item__label">Information</span></div>
+  </nav>
+</div>
+
+<script>
+// ===== Scoring functions =====
+function pTemp(v){ if(isNaN(v)) return null; if(v>=41)return 4; if(v>=39)return 3; if(v>=38.5)return 1; if(v>=36)return 0; if(v>=34)return 1; if(v>=32)return 2; if(v>=30)return 3; return 4; }
+function pMap(v){ if(isNaN(v)) return null; if(v>=160)return 4; if(v>=130)return 3; if(v>=110)return 2; if(v>=70)return 0; if(v>=50)return 2; return 4; }
+function pHr(v){ if(isNaN(v)) return null; if(v>=180)return 4; if(v>=140)return 3; if(v>=110)return 2; if(v>=70)return 0; if(v>=55)return 2; if(v>=40)return 3; return 4; }
+function pRr(v){ if(isNaN(v)) return null; if(v>=50)return 4; if(v>=35)return 3; if(v>=25)return 1; if(v>=12)return 0; if(v>=10)return 1; if(v>=6)return 2; return 4; }
+function pPao2(v){ if(isNaN(v)) return null; if(v>70)return 0; if(v>=61)return 1; if(v>=55)return 3; return 4; }
+function pAa(v){ if(isNaN(v)) return null; if(v>=500)return 4; if(v>=350)return 3; if(v>=200)return 2; return 0; }
+function pPh(v){ if(isNaN(v)) return null; if(v>=7.7)return 4; if(v>=7.6)return 3; if(v>=7.5)return 1; if(v>=7.33)return 0; if(v>=7.25)return 2; if(v>=7.15)return 3; return 4; }
+function pNa(v){ if(isNaN(v)) return null; if(v>=180)return 4; if(v>=160)return 3; if(v>=155)return 2; if(v>=150)return 1; if(v>=130)return 0; if(v>=120)return 2; if(v>=111)return 3; return 4; }
+function pK(v){ if(isNaN(v)) return null; if(v>=7)return 4; if(v>=6)return 3; if(v>=5.5)return 1; if(v>=3.5)return 0; if(v>=3)return 1; if(v>=2.5)return 2; return 4; }
+function pCr(v, arf){ if(isNaN(v)) return null; let p; if(v>=3.5)p=4; else if(v>=2)p=3; else if(v>=1.5)p=2; else if(v>=0.6)p=0; else p=2; return arf ? p*2 : p; }
+function pHct(v){ if(isNaN(v)) return null; if(v>=60)return 4; if(v>=50)return 2; if(v>=46)return 1; if(v>=30)return 0; if(v>=20)return 2; return 4; }
+function pWbc(v){ if(isNaN(v)) return null; if(v>=40)return 4; if(v>=20)return 2; if(v>=15)return 1; if(v>=3)return 0; if(v>=1)return 2; return 4; }
+function pGcs(v){ if(isNaN(v)||v<3||v>15) return null; return 15 - v; }
+function pAge(v){ if(isNaN(v)) return null; if(v>=75)return 6; if(v>=65)return 5; if(v>=55)return 3; if(v>=45)return 2; return 0; }
+
+// ===== Toggle state =====
+const state = { fio2mode: 'low', arf: false, chronic: 'none' };
+function setupToggle(id, cb) {
+  const g = document.getElementById(id);
+  g.querySelectorAll('.ap-toggle__btn').forEach(b => b.addEventListener('click', () => {
+    g.querySelectorAll('.ap-toggle__btn').forEach(x => x.setAttribute('aria-pressed', x===b ? 'true' : 'false'));
+    cb(b.dataset.v); render();
+  }));
+}
+setupToggle('fio2mode', v => { state.fio2mode = v; document.getElementById('row-pao2').style.display = v==='low' ? 'grid' : 'none'; document.getElementById('row-aa').style.display = v==='high' ? 'grid' : 'none'; });
+setupToggle('arf', v => { state.arf = v === 'yes'; });
+setupToggle('chronic', v => { state.chronic = v; });
+
+['temp','map','hr','rr','pao2','aa','ph','na','k','cr','hct','wbc','gcs','age'].forEach(id => document.getElementById(id).addEventListener('input', render));
+
+function setP(el, v) { el.textContent = v === null ? '—' : v; el.style.color = v === null ? 'var(--text-tertiary)' : 'var(--smc-blue)'; }
+
+function render() {
+  const get = id => parseFloat(document.getElementById(id).value);
+  const parts = {};
+  parts.temp = pTemp(get('temp')); setP(document.getElementById('p-temp'), parts.temp);
+  parts.map = pMap(get('map')); setP(document.getElementById('p-map'), parts.map);
+  parts.hr = pHr(get('hr')); setP(document.getElementById('p-hr'), parts.hr);
+  parts.rr = pRr(get('rr')); setP(document.getElementById('p-rr'), parts.rr);
+  if (state.fio2mode === 'low') { parts.oxy = pPao2(get('pao2')); setP(document.getElementById('p-oxy'), parts.oxy); setP(document.getElementById('p-oxy2'), null); }
+  else { parts.oxy = pAa(get('aa')); setP(document.getElementById('p-oxy2'), parts.oxy); setP(document.getElementById('p-oxy'), null); }
+  parts.ph = pPh(get('ph')); setP(document.getElementById('p-ph'), parts.ph);
+  parts.na = pNa(get('na')); setP(document.getElementById('p-na'), parts.na);
+  parts.k = pK(get('k')); setP(document.getElementById('p-k'), parts.k);
+  parts.cr = pCr(get('cr'), state.arf); setP(document.getElementById('p-cr'), parts.cr);
+  parts.hct = pHct(get('hct')); setP(document.getElementById('p-hct'), parts.hct);
+  parts.wbc = pWbc(get('wbc')); setP(document.getElementById('p-wbc'), parts.wbc);
+  parts.gcs = pGcs(get('gcs')); setP(document.getElementById('p-gcs'), parts.gcs);
+  const agePts = pAge(get('age')); setP(document.getElementById('p-age'), agePts);
+  const chrPts = state.chronic === 'emerg' ? 5 : state.chronic === 'elec' ? 2 : 0;
+  document.getElementById('p-chr').textContent = chrPts;
+
+  const apsKeys = ['temp','map','hr','rr','oxy','ph','na','k','cr','hct','wbc','gcs'];
+  const apsVals = apsKeys.map(k => parts[k]);
+  const result = document.getElementById('result');
+  if (apsVals.every(v => v !== null) && agePts !== null) {
+    const aps = apsVals.reduce((a,b) => a+b, 0);
+    const total = aps + agePts + chrPts;
+    document.getElementById('total').innerHTML = `${total}<small>/ 71</small>`;
+    document.getElementById('v-aps').textContent = aps;
+    document.getElementById('v-ac').textContent = agePts + chrPts;
+    result.classList.remove('is-empty');
+    let msg;
+    if (total <= 4) msg = 'Approx. mortality 4%.';
+    else if (total <= 9) msg = 'Approx. mortality 8%.';
+    else if (total <= 14) msg = 'Approx. mortality 15%.';
+    else if (total <= 19) msg = 'Approx. mortality 25%.';
+    else if (total <= 24) msg = 'Approx. mortality 40%.';
+    else if (total <= 29) msg = 'Approx. mortality 55%.';
+    else if (total <= 34) msg = 'Approx. mortality 75%.';
+    else msg = 'Approx. mortality > 85%.';
+    document.getElementById('interp').textContent = msg;
+  } else {
+    document.getElementById('total').innerHTML = '—<small>/ 71</small>';
+    document.getElementById('v-aps').textContent = '—';
+    document.getElementById('v-ac').textContent = '—';
+    result.classList.add('is-empty');
+    document.getElementById('interp').textContent = '';
+  }
+}
+
+function resetAll() {
+  ['temp','map','hr','rr','pao2','aa','ph','na','k','cr','hct','wbc','gcs','age'].forEach(id => document.getElementById(id).value = '');
+  state.fio2mode = 'low'; state.arf = false; state.chronic = 'none';
+  document.querySelectorAll('#fio2mode .ap-toggle__btn').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === 'low' ? 'true' : 'false'));
+  document.querySelectorAll('#arf .ap-toggle__btn').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === 'no' ? 'true' : 'false'));
+  document.querySelectorAll('#chronic .ap-toggle__btn').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === 'none' ? 'true' : 'false'));
+  document.getElementById('row-pao2').style.display = 'grid';
+  document.getElementById('row-aa').style.display = 'none';
+  render();
+  const t = document.getElementById('toast');
+  t.textContent = 'Reset'; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1400);
+}
+render();
+</script>
+
+<script>
+(function(){
+  const btn=document.querySelector('.icon-btn--bookmark');
+  if(!btn) return;
+  const key='smc-bookmark:'+(location.pathname.split('/').pop()||'index');
+  let saved=false;
+  try{ saved=localStorage.getItem(key)==='1'; }catch(e){}
+  if(saved){ btn.classList.add('is-saved'); btn.setAttribute('aria-pressed','true'); }
+  btn.addEventListener('click',function(ev){
+    ev.stopPropagation();
+    saved=!saved;
+    btn.classList.toggle('is-saved',saved);
+    btn.setAttribute('aria-pressed',saved?'true':'false');
+    btn.classList.remove('is-animating'); void btn.offsetWidth; btn.classList.add('is-animating');
+    setTimeout(()=>btn.classList.remove('is-animating'),650);
+    try{ saved?localStorage.setItem(key,'1'):localStorage.removeItem(key); }catch(e){}
+    if(typeof showToast==='function') showToast(saved?'Saved':'Removed from saved');
+  });
+})();
+</script>
+<script src="recent.js?v=1776350000"></script>
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A-a Gradient · SMC ICU Protocol</title>
+    <script src="settings-init.js?v=1776350000"></script>
+<link href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=1776350000">
+<link rel="stylesheet" href="calculator.css?v=1776350000">
+<style>.container { --cat-color: var(--smc-blue); }</style>
+</head>
+<body>
+<div class="container">
+  <header class="header header--page">
+    <div class="header__top">
+      <button class="icon-btn icon-btn--back" onclick="window.location.href='calculator.html'" aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <div class="header__title">
+        <span class="header__eyebrow">Calculator</span>
+        <div class="header__h1">A-a Gradient</div>
+      </div>
+      <button class="icon-btn icon-btn--bookmark" aria-label="Save" aria-pressed="false">
+        <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="main main--page">
+    <div class="calc-intro">
+      <div class="calc-intro__title">Alveolar-arterial Oxygen Gradient</div>
+      <div class="calc-intro__desc">Differentiates hypoxemia mechanisms: normal gradient suggests hypoventilation or low FiO₂; widened gradient suggests V/Q mismatch, shunt, or diffusion impairment.</div>
+    </div>
+
+    <section class="calc-sect">
+      <div class="calc-sect__hd">
+        <span class="calc-sect__num">01</span>
+        <span class="calc-sect__title">Inputs</span>
+        <div class="calc-sect__rule"></div>
+      </div>
+      <label class="calc-field">
+        <span class="calc-field__label">FiO₂<span class="calc-field__unit">decimal (0.21–1.0)</span></span>
+        <input class="calc-field__input" type="number" inputmode="decimal" id="fio2" placeholder="0.21" step="0.01" min="0.21" max="1">
+        <span class="calc-field__hint">Room air 0.21; adjust to delivered fraction.</span>
+      </label>
+      <label class="calc-field">
+        <span class="calc-field__label">PaO₂<span class="calc-field__unit">mmHg</span></span>
+        <input class="calc-field__input" type="number" inputmode="decimal" id="pao2" placeholder="—" step="0.1" min="0">
+      </label>
+      <label class="calc-field">
+        <span class="calc-field__label">PaCO₂<span class="calc-field__unit">mmHg</span></span>
+        <input class="calc-field__input" type="number" inputmode="decimal" id="paco2" placeholder="—" step="0.1" min="0">
+      </label>
+      <label class="calc-field">
+        <span class="calc-field__label">Age<span class="calc-field__unit">years (optional)</span></span>
+        <input class="calc-field__input" type="number" inputmode="numeric" id="age" placeholder="—" min="0" max="120">
+        <span class="calc-field__hint">Used to compute age-adjusted expected value: age/4 + 4.</span>
+      </label>
+      <label class="calc-field">
+        <span class="calc-field__label">Atmospheric Pressure<span class="calc-field__unit">mmHg</span></span>
+        <input class="calc-field__input" type="number" inputmode="decimal" id="patm" placeholder="760" step="1" min="0">
+        <span class="calc-field__hint">Default 760 mmHg (sea level).</span>
+      </label>
+    </section>
+
+    <section class="calc-sect">
+      <div class="calc-sect__hd">
+        <span class="calc-sect__num">02</span>
+        <span class="calc-sect__title">Formula</span>
+        <div class="calc-sect__rule"></div>
+      </div>
+      <div class="calc-formula">
+PAO₂ = FiO₂ × (Patm − 47) − PaCO₂ / 0.8
+A-a gradient = PAO₂ − PaO₂
+Expected (age-adjusted) ≈ age/4 + 4
+      </div>
+    </section>
+
+    <section class="calc-sect">
+      <div class="calc-sect__hd">
+        <span class="calc-sect__num">03</span>
+        <span class="calc-sect__title">Interpretation</span>
+        <div class="calc-sect__rule"></div>
+      </div>
+      <div class="calc-interp">
+        <div class="calc-interp__row"><span class="calc-interp__range">Normal</span><span class="calc-interp__desc">Hypoventilation or low FiO₂</span></div>
+        <div class="calc-interp__row"><span class="calc-interp__range">Widened</span><span class="calc-interp__desc">V/Q mismatch, shunt, diffusion impairment</span></div>
+      </div>
+    </section>
+
+    <button class="calc-reset" onclick="resetAll()">
+      <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+      Reset
+    </button>
+
+    <div class="calc-refs">
+      <p>Story DA. Alveolar oxygen partial pressure, alveolar carbon dioxide partial pressure, and the alveolar gas equation. Anesthesiology. 2006;105(5):1066.</p>
+    </div>
+
+    <div class="calc-result is-empty" id="result">
+      <div class="calc-result__row">
+        <span class="calc-result__label">A-a Gradient</span>
+        <span class="calc-result__value" id="total">—<small>mmHg</small></span>
+      </div>
+      <div class="calc-subresult" id="paoRow" style="display:none">
+        <span class="calc-subresult__k">PAO₂</span>
+        <span class="calc-subresult__v" id="paoVal">—</span>
+      </div>
+      <div class="calc-subresult" id="expRow" style="display:none">
+        <span class="calc-subresult__k">Expected (age/4 + 4)</span>
+        <span class="calc-subresult__v" id="expVal">—</span>
+      </div>
+      <div class="calc-result__interp" id="interp"></div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast">Reset</div>
+
+    <nav class="bottom-nav">
+    <div class="nav-item" onclick="window.location.href='index.html'"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg><span class="nav-item__label">Home</span></div>
+    <div class="nav-item" onclick="window.location.href='protocols.html'"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8m8 4H8"/></svg><span class="nav-item__label">Protocols</span></div>
+    <div class="nav-item active" onclick="window.location.href='calculator.html'"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h.01M8 14h2M12 14h2M16 14h.01M8 18h8"/></svg><span class="nav-item__label">Calculator</span></div>
+    <div class="nav-item" onclick="window.location.href='saved.html'"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg><span class="nav-item__label">Saved</span></div>
+    <div class="nav-item" onclick="window.location.href='info.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg><span class="nav-item__label">Information</span></div>
+  </nav>
+</div>
+
+<script>
+['fio2','pao2','paco2','age','patm'].forEach(id => document.getElementById(id).addEventListener('input', render));
+function render() {
+  const fio2 = parseFloat(document.getElementById('fio2').value);
+  const pao2 = parseFloat(document.getElementById('pao2').value);
+  const paco2 = parseFloat(document.getElementById('paco2').value);
+  const age = parseFloat(document.getElementById('age').value);
+  let patm = parseFloat(document.getElementById('patm').value);
+  if (isNaN(patm) || patm <= 0) patm = 760;
+  const result = document.getElementById('result');
+  const total = document.getElementById('total');
+  const interp = document.getElementById('interp');
+  const paoRow = document.getElementById('paoRow');
+  const paoVal = document.getElementById('paoVal');
+  const expRow = document.getElementById('expRow');
+  const expVal = document.getElementById('expVal');
+  if (!isNaN(fio2) && fio2 > 0 && !isNaN(pao2) && !isNaN(paco2)) {
+    const pao = fio2 * (patm - 47) - paco2 / 0.8;
+    const grad = pao - pao2;
+    total.innerHTML = `${grad.toFixed(1)}<small>mmHg</small>`;
+    paoVal.textContent = `${pao.toFixed(1)} mmHg`;
+    paoRow.style.display = 'flex';
+    result.classList.remove('is-empty');
+    let expected = null;
+    if (!isNaN(age) && age >= 0) {
+      expected = age / 4 + 4;
+      expVal.textContent = `${expected.toFixed(1)} mmHg`;
+      expRow.style.display = 'flex';
+    } else {
+      expRow.style.display = 'none';
+    }
+    const threshold = expected ?? 15;
+    let msg;
+    if (grad <= threshold) msg = 'Normal gradient — consider hypoventilation or low inspired FiO₂.';
+    else msg = 'Widened gradient — V/Q mismatch, shunt, or diffusion impairment.';
+    interp.textContent = msg;
+  } else {
+    total.innerHTML = '—<small>mmHg</small>';
+    result.classList.add('is-empty');
+    paoRow.style.display = 'none';
+    expRow.style.display = 'none';
+    interp.textContent = '';
+  }
+}
+function resetAll() {
+  ['fio2','pao2','paco2','age','patm'].forEach(id => document.getElementById(id).value = '');
+  render();
+  const t = document.getElementById('toast');
+  t.textContent = 'Reset'; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1400);
+}
+</script>
+
+<script>
+(function(){
+  const btn=document.querySelector('.icon-btn--bookmark');
+  if(!btn) return;
+  const key='smc-bookmark:'+(location.pathname.split('/').pop()||'index');
+  let saved=false;
+  try{ saved=localStorage.getItem(key)==='1'; }catch(e){}
+  if(saved){ btn.classList.add('is-saved'); btn.setAttribute('aria-pressed','true'); }
+  btn.addEventListener('click',function(ev){
+    ev.stopPropagation();
+    saved=!saved;
+    btn.classList.toggle('is-saved',saved);
+    btn.setAttribute('aria-pressed',saved?'true':'false');
+    btn.classList.remove('is-animating'); void btn.offsetWidth; btn.classList.add('is-animating');
+    setTimeout(()=>btn.classList.remove('is-animating'),650);
+    try{ saved?localStorage.setItem(key,'1'):localStorage.removeItem(key); }catch(e){}
+    if(typeof showToast==='function') showToast(saved?'Saved':'Removed from saved');
+  });
+})();
+</script>
+<script src="recent.js?v=1776350000"></script>
+</body>
+</html>

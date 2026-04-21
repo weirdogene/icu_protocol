@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings · SMC ICU Protocol</title>
+    <script src="settings-init.js?v=1776350000"></script>
+    <link href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=1776350000">
+    <style>
+        .container { --cat-color: var(--smc-blue); }
+
+        /* Settings group */
+        .set-group {
+            margin-bottom: 22px;
+            animation: fadeUp 0.4s var(--ease-out) both;
+        }
+        .set-group:nth-child(1) { animation-delay: 0.04s; }
+        .set-group:nth-child(2) { animation-delay: 0.10s; }
+        .set-group:nth-child(3) { animation-delay: 0.16s; }
+        .set-group:nth-child(4) { animation-delay: 0.22s; }
+
+        .set-group__head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 2px 0 10px;
+            padding: 0 2px;
+        }
+        .set-group__name {
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--smc-blue);
+        }
+        .set-group__rule {
+            flex: 1;
+            height: 1px;
+            background: var(--border-subtle);
+        }
+
+        /* Row */
+        .set-row {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--r-lg);
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: border-color 0.2s;
+        }
+        .set-row + .set-row { margin-top: 8px; }
+
+        .set-row__top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .set-row__label {
+            font-size: 13.5px;
+            font-weight: 800;
+            letter-spacing: -0.2px;
+            color: var(--text-primary);
+        }
+        .set-row__desc {
+            margin-top: 2px;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            line-height: 1.45;
+        }
+        .set-row__val {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.4px;
+            color: var(--smc-blue);
+            text-transform: uppercase;
+            font-variant-numeric: tabular-nums;
+            flex-shrink: 0;
+        }
+
+        /* Segmented control */
+        .seg {
+            display: grid;
+            grid-auto-flow: column;
+            grid-auto-columns: 1fr;
+            gap: 0;
+            padding: 3px;
+            background: var(--bg-subtle);
+            border-radius: 10px;
+            position: relative;
+        }
+        .seg__opt {
+            position: relative;
+            z-index: 1;
+            padding: 9px 8px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            color: var(--text-secondary);
+            text-align: center;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: color 0.2s;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        .seg__opt svg { width: 13px; height: 13px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+        .seg__opt.is-active {
+            color: var(--text-primary);
+            background: var(--bg-card);
+            box-shadow: 0 1px 3px rgba(20, 40, 160, 0.08), 0 0 0 1px var(--border-subtle);
+        }
+        .seg__opt:hover:not(.is-active) { color: var(--text-primary); }
+
+        /* Language row: bigger pills */
+        .lang-seg .seg__opt {
+            padding: 11px 8px;
+            font-size: 12.5px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+        .lang-seg .seg__opt b {
+            font-size: 14px;
+            margin-right: 4px;
+            letter-spacing: 0;
+        }
+        .lang-seg .seg__opt.is-active b { color: var(--smc-blue); }
+
+        /* Font size live preview */
+        .preview {
+            margin-top: 4px;
+            padding: 14px 16px;
+            background: linear-gradient(135deg, color-mix(in srgb, var(--smc-blue) 4%, #fff), var(--bg-card));
+            border: 1px dashed var(--border-subtle);
+            border-radius: var(--r-md);
+        }
+        .preview__eyebrow {
+            font-size: 9.5px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--smc-blue);
+            margin-bottom: 6px;
+        }
+        .preview__title {
+            font-weight: 800;
+            letter-spacing: -0.3px;
+            color: var(--text-primary);
+            line-height: 1.3;
+            margin-bottom: 4px;
+        }
+        .preview__body {
+            font-weight: 500;
+            color: var(--text-secondary);
+            line-height: 1.55;
+        }
+        /* Font scale classes — drive preview only; applied live */
+        .font-sm .preview__title { font-size: 14px; }
+        .font-sm .preview__body  { font-size: 11.5px; }
+        .font-md .preview__title { font-size: 16px; }
+        .font-md .preview__body  { font-size: 13px; }
+        .font-lg .preview__title { font-size: 18.5px; }
+        .font-lg .preview__body  { font-size: 14.5px; }
+
+        /* Info link row */
+        .info-link {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--r-md);
+            text-decoration: none;
+            color: inherit;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .info-link:hover {
+            border-color: color-mix(in srgb, var(--smc-blue) 35%, var(--border-subtle));
+            transform: translateY(-1px);
+        }
+        .info-link__body { flex: 1; min-width: 0; }
+        .info-link__label {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -0.2px;
+        }
+        .info-link__hint {
+            margin-top: 3px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            letter-spacing: 0.2px;
+        }
+        .info-link__arrow {
+            width: 14px; height: 14px;
+            stroke: var(--text-tertiary);
+            stroke-width: 2.5;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+            transition: stroke 0.2s, transform 0.2s;
+        }
+        .info-link:hover .info-link__arrow {
+            stroke: var(--smc-blue);
+            transform: translateX(2px);
+        }
+
+        /* Save button — sticky at bottom of content */
+        .save-btn {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 12px;
+            background: var(--smc-blue);
+            border: none;
+            border-radius: var(--r-md);
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.2s, opacity 0.3s, transform 0.25s var(--ease-out);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            opacity: 0.35;
+            pointer-events: none;
+            transform: scale(0.98);
+        }
+        .save-btn svg {
+            width: 16px; height: 16px; stroke: currentColor; stroke-width: 2.5;
+            fill: none; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .save-btn.is-dirty {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
+        }
+        .save-btn.is-dirty:hover {
+            background: color-mix(in srgb, var(--smc-blue) 88%, #000);
+        }
+        .save-btn.is-dirty:active {
+            transform: scale(0.97);
+        }
+        .save-btn.is-saved {
+            background: #16a34a;
+            pointer-events: none;
+        }
+
+        /* Reset button */
+        .reset-btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--r-md);
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            color: var(--cat-cardiology);
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+        }
+        .reset-btn:hover {
+            background: color-mix(in srgb, var(--cat-cardiology) 5%, #fff);
+            border-color: color-mix(in srgb, var(--cat-cardiology) 30%, var(--border-subtle));
+        }
+        .reset-btn svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Dark theme — settings-specific */
+        html[data-theme="dark"] .preview {
+            background: linear-gradient(135deg, color-mix(in srgb, var(--smc-blue) 6%, #161b22), var(--bg-card));
+        }
+        html[data-theme="dark"] .seg__opt.is-active {
+            background: #1c2333;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+        html[data-theme="dark"] .reset-btn:hover {
+            background: color-mix(in srgb, var(--cat-cardiology) 8%, #161b22);
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header header--page">
+        <div class="header__top">
+            <button class="icon-btn icon-btn--back" onclick="window.location.href='index.html'" aria-label="Back">
+                <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            </button>
+            <div class="header__title">
+                <span class="header__eyebrow" data-i18n="headerEyebrow">환경설정</span>
+                <div class="header__h1" data-i18n="headerTitle">설정</div>
+            </div>
+            <span class="icon-btn" aria-hidden="true" style="visibility:hidden"></span>
+        </div>
+    </header>
+
+    <main class="main main--page">
+
+        <!-- Language -->
+        <section class="set-group">
+            <div class="set-group__head">
+                <span class="set-group__name" data-i18n="groupLang">언어</span>
+                <div class="set-group__rule"></div>
+            </div>
+            <div class="set-row">
+                <div class="set-row__top">
+                    <div>
+                        <div class="set-row__label" data-i18n="labelLang">표시 언어</div>
+                        <div class="set-row__desc" data-i18n="descLang">프로토콜 문서의 한글판 / 영문판을 전환합니다.</div>
+                    </div>
+                    <span class="set-row__val" id="valLang">KO</span>
+                </div>
+                <div class="seg lang-seg" data-setting="lang">
+                    <div class="seg__opt is-active" data-val="ko"><b>가</b>한국어</div>
+                    <div class="seg__opt" data-val="en"><b>A</b>English</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Appearance -->
+        <section class="set-group">
+            <div class="set-group__head">
+                <span class="set-group__name" data-i18n="groupAppearance">화면</span>
+                <div class="set-group__rule"></div>
+            </div>
+
+            <div class="set-row">
+                <div class="set-row__top">
+                    <div>
+                        <div class="set-row__label" data-i18n="labelTheme">테마</div>
+                        <div class="set-row__desc" data-i18n="descTheme">라이트 / 다크 테마를 선택합니다.</div>
+                    </div>
+                    <span class="set-row__val" id="valTheme">LIGHT</span>
+                </div>
+                <div class="seg" data-setting="theme">
+                    <div class="seg__opt is-active" data-val="light">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                        Light
+                    </div>
+                    <div class="seg__opt" data-val="dark">
+                        <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                        Dark
+                    </div>
+                </div>
+            </div>
+
+            <div class="set-row">
+                <div class="set-row__top">
+                    <div>
+                        <div class="set-row__label" data-i18n="labelFont">글자 크기</div>
+                        <div class="set-row__desc" data-i18n="descFont">본문과 프로토콜 내용의 크기를 조절합니다.</div>
+                    </div>
+                    <span class="set-row__val" id="valFont">MEDIUM</span>
+                </div>
+                <div class="seg" data-setting="font">
+                    <div class="seg__opt" data-val="sm">A<span style="font-size:14px;margin-left:2px">a</span></div>
+                    <div class="seg__opt is-active" data-val="md">A<span style="font-size:16px;margin-left:2px">a</span></div>
+                    <div class="seg__opt" data-val="lg">A<span style="font-size:18px;margin-left:2px">a</span></div>
+                </div>
+                <div class="preview font-md" id="fontPreview">
+                    <div class="preview__eyebrow" data-i18n="previewEyebrow">미리보기</div>
+                    <div class="preview__title" data-i18n="previewTitle">기관내삽관 준비</div>
+                    <div class="preview__body" data-i18n="previewBody">FiO₂ 1.0으로 3분간 사전 산소화를 시행합니다. 정맥로를 확보하고 구조 기구를 손이 닿는 곳에 준비합니다.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Save -->
+        <button class="save-btn" id="saveBtn">
+            <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+            <span data-i18n="btnSave">저장</span>
+        </button>
+
+        <!-- Data / Actions -->
+        <section class="set-group">
+            <div class="set-group__head">
+                <span class="set-group__name" data-i18n="groupData">데이터</span>
+                <div class="set-group__rule"></div>
+            </div>
+            <button class="reset-btn" id="resetBtn">
+                <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+                <span data-i18n="btnReset">모든 설정 초기화</span>
+            </button>
+        </section>
+
+    </main>
+
+    <div class="toast" id="toast">Saved</div>
+
+      <nav class="bottom-nav">
+    <div class="nav-item" onclick="window.location.href='index.html'"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg><span class="nav-item__label">Home</span></div>
+    <div class="nav-item" onclick="window.location.href='protocols.html'"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8m8 4H8"/></svg><span class="nav-item__label">Protocols</span></div>
+    <div class="nav-item" onclick="window.location.href='calculator.html'"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h.01M8 14h2M12 14h2M16 14h.01M8 18h8"/></svg><span class="nav-item__label">Calculator</span></div>
+    <div class="nav-item" onclick="window.location.href='saved.html'"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg><span class="nav-item__label">Saved</span></div>
+    <div class="nav-item" onclick="window.location.href='info.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg><span class="nav-item__label">Information</span></div>
+  </nav>
+</div>
+
+<script>
+    // -------- i18n Dictionary --------
+    const i18n = {
+        ko: {
+            headerEyebrow: '환경설정',
+            headerTitle: '설정',
+            groupLang: '언어',
+            labelLang: '표시 언어',
+            descLang: '프로토콜 문서의 한글판 / 영문판을 전환합니다.',
+            groupAppearance: '화면',
+            labelTheme: '테마',
+            descTheme: '라이트 / 다크 테마를 선택합니다.',
+            labelFont: '글자 크기',
+            descFont: '본문과 프로토콜 내용의 크기를 조절합니다.',
+            previewEyebrow: '미리보기',
+            previewTitle: '기관내삽관 준비',
+            previewBody: 'FiO\u2082 1.0으로 3분간 사전 산소화를 시행합니다. 정맥로를 확보하고 구조 기구를 손이 닿는 곳에 준비합니다.',
+            groupData: '데이터',
+            btnSave: '저장',
+            btnSaved: '저장됨',
+            btnReset: '모든 설정 초기화',
+            toastSaved: '설정이 저장되었습니다',
+            toastReset: '설정이 초기화되었습니다',
+            confirmReset: '모든 설정을 기본값으로 초기화하시겠습니까?',
+            btnResetDone: '초기화됨',
+        },
+        en: {
+            headerEyebrow: 'Preferences',
+            headerTitle: 'Settings',
+            groupLang: 'Language',
+            labelLang: 'Display Language',
+            descLang: 'Switch between Korean and English protocol documents.',
+            groupAppearance: 'Appearance',
+            labelTheme: 'Theme',
+            descTheme: 'Choose between Light and Dark theme.',
+            labelFont: 'Font Size',
+            descFont: 'Adjust the size of body text and protocol content.',
+            previewEyebrow: 'Preview',
+            previewTitle: 'Endotracheal Intubation Preparation',
+            previewBody: 'Pre-oxygenate with FiO\u2082 1.0 for 3 minutes. Confirm IV access and have rescue devices ready within arm\u2019s reach.',
+            groupData: 'Data',
+            btnSave: 'Save',
+            btnSaved: 'Saved',
+            btnReset: 'Reset All Settings',
+            toastSaved: 'Settings saved',
+            toastReset: 'Settings reset',
+            confirmReset: 'Reset all settings to defaults?',
+            btnResetDone: 'Reset',
+        }
+    };
+
+    function applyLang(lang) {
+        const dict = i18n[lang] || i18n.ko;
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.dataset.i18n;
+            if (dict[key] != null) el.textContent = dict[key];
+        });
+        document.documentElement.lang = lang === 'en' ? 'en' : 'ko';
+    }
+
+    // -------- Persistence --------
+    const KEY = 'smc-icu-settings';
+    const defaults = { lang: 'ko', theme: 'light', font: 'md' };
+    let state;
+    try {
+        state = Object.assign({}, defaults, JSON.parse(localStorage.getItem(KEY) || '{}'));
+        if (state.theme === 'system') state.theme = 'light'; // legacy fallback
+    } catch (e) { state = Object.assign({}, defaults); }
+
+    function save() {
+        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+        // Apply font size globally right away
+        if (state.font && state.font !== 'md') {
+            document.documentElement.setAttribute('data-font', state.font);
+        } else {
+            document.documentElement.removeAttribute('data-font');
+        }
+        // Apply theme globally right away
+        var theme = state.theme || 'light';
+        if (theme === 'system') theme = 'light'; // legacy fallback
+        if (theme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+            document.documentElement.removeAttribute('data-theme');
+        }
+    }
+
+    // -------- Toast --------
+    const toast = document.getElementById('toast');
+    let tTimer;
+    function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(tTimer);
+        tTimer = setTimeout(() => toast.classList.remove('show'), 1400);
+    }
+
+    // -------- Apply to UI --------
+    const labelMap = {
+        lang: { ko: 'KO', en: 'EN' },
+        theme: { light: 'LIGHT', dark: 'DARK' },
+        font: { sm: 'SMALL', md: 'MEDIUM', lg: 'LARGE' }
+    };
+    const valEls = {
+        lang: document.getElementById('valLang'),
+        theme: document.getElementById('valTheme'),
+        font: document.getElementById('valFont')
+    };
+    const preview = document.getElementById('fontPreview');
+    const saveSvg = '<svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>';
+    const checkSvg = '<svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>';
+
+    function reflect() {
+        document.querySelectorAll('.seg').forEach(seg => {
+            const key = seg.dataset.setting;
+            seg.querySelectorAll('.seg__opt').forEach(opt => {
+                opt.classList.toggle('is-active', opt.dataset.val === state[key]);
+            });
+            if (valEls[key]) valEls[key].textContent = labelMap[key][state[key]];
+        });
+        preview.classList.remove('font-sm', 'font-md', 'font-lg');
+        preview.classList.add('font-' + state.font);
+        // Apply language to all i18n elements
+        applyLang(state.lang);
+    }
+
+    // -------- Dirty tracking --------
+    let savedState = JSON.stringify(state);
+    const saveBtn = document.getElementById('saveBtn');
+
+    function checkDirty() {
+        const isDirty = JSON.stringify(state) !== savedState;
+        saveBtn.classList.toggle('is-dirty', isDirty);
+        saveBtn.classList.remove('is-saved');
+        if (isDirty) {
+            const dict = i18n[state.lang] || i18n.ko;
+            saveBtn.innerHTML = saveSvg + ' <span data-i18n="btnSave">' + dict.btnSave + '</span>';
+        }
+    }
+
+    // -------- Wire interactions --------
+    document.querySelectorAll('.seg').forEach(seg => {
+        const key = seg.dataset.setting;
+        seg.querySelectorAll('.seg__opt').forEach(opt => {
+            opt.addEventListener('click', () => {
+                if (state[key] === opt.dataset.val) return;
+                state[key] = opt.dataset.val;
+                reflect();
+                checkDirty();
+            });
+        });
+    });
+
+    // Save button
+    saveBtn.addEventListener('click', () => {
+        save();
+        savedState = JSON.stringify(state);
+        const dict = i18n[state.lang] || i18n.ko;
+        saveBtn.classList.remove('is-dirty');
+        saveBtn.classList.add('is-saved');
+        saveBtn.innerHTML = checkSvg + ' <span data-i18n="btnSaved">' + dict.btnSaved + '</span>';
+        showToast(dict.toastSaved);
+    });
+
+    // Reset
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        const dict = i18n[state.lang] || i18n.ko;
+        if (!confirm(dict.confirmReset)) return;
+        state = Object.assign({}, defaults);
+        save();
+        savedState = JSON.stringify(state);
+        reflect();
+        checkDirty();
+        const dictAfter = i18n[state.lang] || i18n.ko;
+        saveBtn.classList.remove('is-dirty');
+        saveBtn.classList.add('is-saved');
+        saveBtn.innerHTML = checkSvg + ' <span data-i18n="btnResetDone">' + dictAfter.btnResetDone + '</span>';
+        showToast(dictAfter.toastReset);
+    });
+
+    reflect();
+</script>
+</body>
+</html>

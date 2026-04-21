@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOFA · SMC ICU Protocol</title>
+    <script src="settings-init.js?v=1776350000"></script>
+<link href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=1776350000">
+<link rel="stylesheet" href="calculator.css?v=1776350000">
+<style>
+.container { --cat-color: var(--smc-blue); }
+.sofa-group { margin-top: 6px; }
+.sofa-seg { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 8px; }
+.sofa-seg__btn {
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+  border-radius: 10px;
+  padding: 10px 4px 8px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  line-height: 1.15;
+  text-align: center;
+}
+.sofa-seg__btn b { font-size: 15px; font-weight: 900; color: var(--text-primary); }
+.sofa-seg__btn[aria-pressed="true"] {
+  border-color: var(--smc-blue);
+  background: color-mix(in srgb, var(--smc-blue) 8%, #fff);
+  color: var(--smc-blue);
+}
+.sofa-seg__btn[aria-pressed="true"] b { color: var(--smc-blue); }
+.sofa-crit {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  line-height: 1.3;
+  padding: 0 2px;
+}
+html[data-theme="dark"] .sofa-seg__btn[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--smc-blue) 12%, #161b22);
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="header header--page">
+    <div class="header__top">
+      <button class="icon-btn icon-btn--back" onclick="window.location.href='calculator.html'" aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <div class="header__title">
+        <span class="header__eyebrow">Calculator</span>
+        <div class="header__h1">SOFA Score</div>
+      </div>
+      <button class="icon-btn icon-btn--bookmark" aria-label="Save" aria-pressed="false">
+        <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="main main--page">
+    <div class="calc-intro">
+      <div class="calc-intro__title">Sequential Organ Failure Assessment</div>
+      <div class="calc-intro__desc">Quantifies organ dysfunction across six systems. Daily change tracks course; increase ≥ 2 defines sepsis in the setting of infection.</div>
+    </div>
+
+    <section class="calc-sect">
+      <div class="calc-sect__hd">
+        <span class="calc-sect__num">01</span>
+        <span class="calc-sect__title">Respiration — PaO₂/FiO₂</span>
+        <div class="calc-sect__rule"></div>
+      </div>
+      <div class="sofa-seg" data-k="resp">
+        <button class="sofa-seg__btn" data-p="0"><b>0</b>≥ 400</button>
+        <button class="sofa-seg__btn" data-p="1"><b>1</b>&lt; 400</button>
+        <button class="sofa-seg__btn" data-p="2"><b>2</b>&lt; 300</button>
+        <button class="sofa-seg__btn" data-p="3"><b>3</b>&lt; 200 MV</button>
+        <button class="sofa-seg__btn" data-p="4"><b>4</b>&lt; 100 MV</button>
+      </div>
+    </section>
+
+    <section class="calc-sect">
+      <div class="calc-sect__hd">
+        <span class="calc-sect__num">02</span>
+        <span class="calc-sect__title">Coagulation — Platelets (×10³/μL)</span>
+        <div class="calc-sect__rule"></div>
+      </div>
+      <div class="sofa-seg" data-k="coag">
+        <button class="sofa-seg__btn" data-p="0"><b>0</b>≥ 150</button>
+        <button class="sofa-seg__btn" data-p="1"><b>1</b>&lt; 150</button>
+        <button class="sofa-seg__btn" data-p="2"><b>2</b>&lt; 100</button>
+        <button class="sofa-seg__btn" data-p="3"><b>3</b>&lt; 50</button>
+        <button class="sofa-seg__btn" data-p="4"><b>4</b>&lt; 20</button>
+      </div>
+    </section>
+
+    <section class="calc-sect">
+      <div class="calc-sect__hd">
+        <span class="calc-sect__num">03</span>
+        <span class="calc-sect__title">Liver — Bilirubin (mg/dL)</span>
+        <div class="calc-sect__rule"></div>
+      </div>
+      <div class="sofa-seg" data-k="liver">
+        <button class="sofa-seg__btn" data-p="0"><b>0</b>&lt; 1.2</button>
+        <button class="sofa-seg__btn" data-p="1"><b>1</b>1.2–1.9</button>
+        <button class="sofa-seg__btn" data-p="2"><b>2</b>2.0–5.9</button>
+        <button class="sofa-seg__btn" data-p="3"><b>3</b>6.0–11.9</button>
+        <button class="sofa-seg__btn" data-p="4"><b>4</b>≥ 12.0</button>
+      </div>
+    </section>
+
+    <section class="calc-sect">
+      <div class="calc-sect__hd">
+        <span class="calc-sect__num">04</span>
+        <span class="calc-sect__title">Cardiovascular — MAP / Vasopressors</span>
+        <div class="calc-sect__rule"></div>
+      </div>
+      <div class="sofa-seg" data-k="cv">
+        <button class="sofa-seg__btn" data-p="0"><b>0</b>MAP ≥ 70</button>
+        <button class="sofa-seg__btn" data-p="1"><b>1</b>MAP &lt; 70</button>
+        <button class="sofa-seg__btn" data-p="2"><b>2</b>Dop ≤5 / Dobu</button>
+        <button class="sofa-seg__btn" data-p="3"><b>3</b>Dop &gt;5 / NE ≤0.1</button>
+        <button class="sofa-seg__btn" data-p="4"><b>4</b>Dop &gt;15 / NE &gt;0.1</button>
+      </div>
+      <p class="sofa-crit">Doses in μg/kg/min. NE = norepinephrine; Epi doses follow NE thresholds.</p>
+    </section>
+
+    <section class="calc-sect">
+      <div class="calc-sect__hd">
+        <span class="calc-sect__num">05</span>
+        <span class="calc-sect__title">CNS — Glasgow Coma Scale</span>
+        <div class="calc-sect__rule"></div>
+      </div>
+      <div class="sofa-seg" data-k="cns">
+        <button class="sofa-seg__btn" data-p="0"><b>0</b>15</button>
+        <button class="sofa-seg__btn" data-p="1"><b>1</b>13–14</button>
+        <button class="sofa-seg__btn" data-p="2"><b>2</b>10–12</button>
+        <button class="sofa-seg__btn" data-p="3"><b>3</b>6–9</button>
+        <button class="sofa-seg__btn" data-p="4"><b>4</b>&lt; 6</button>
+      </div>
+    </section>
+
+    <section class="calc-sect">
+      <div class="calc-sect__hd">
+        <span class="calc-sect__num">06</span>
+        <span class="calc-sect__title">Renal — Creatinine / Urine Output</span>
+        <div class="calc-sect__rule"></div>
+      </div>
+      <div class="sofa-seg" data-k="renal">
+        <button class="sofa-seg__btn" data-p="0"><b>0</b>Cr &lt; 1.2</button>
+        <button class="sofa-seg__btn" data-p="1"><b>1</b>1.2–1.9</button>
+        <button class="sofa-seg__btn" data-p="2"><b>2</b>2.0–3.4</button>
+        <button class="sofa-seg__btn" data-p="3"><b>3</b>3.5–4.9 / UO&lt;500</button>
+        <button class="sofa-seg__btn" data-p="4"><b>4</b>≥5.0 / UO&lt;200</button>
+      </div>
+      <p class="sofa-crit">Cr in mg/dL; UO in mL/day.</p>
+    </section>
+
+    <section class="calc-sect">
+      <div class="calc-sect__hd">
+        <span class="calc-sect__num">07</span>
+        <span class="calc-sect__title">Interpretation</span>
+        <div class="calc-sect__rule"></div>
+      </div>
+      <div class="calc-interp">
+        <div class="calc-interp__row"><span class="calc-interp__range">0–6</span><span class="calc-interp__desc">Mortality &lt; 10%</span></div>
+        <div class="calc-interp__row"><span class="calc-interp__range">7–9</span><span class="calc-interp__desc">Mortality 15–20%</span></div>
+        <div class="calc-interp__row"><span class="calc-interp__range">10–12</span><span class="calc-interp__desc">Mortality 40–50%</span></div>
+        <div class="calc-interp__row"><span class="calc-interp__range">13–14</span><span class="calc-interp__desc">Mortality 50–60%</span></div>
+        <div class="calc-interp__row"><span class="calc-interp__range">≥ 15</span><span class="calc-interp__desc">Mortality &gt; 80%</span></div>
+      </div>
+    </section>
+
+    <button class="calc-reset" onclick="resetAll()">
+      <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+      Reset
+    </button>
+
+    <div class="calc-refs">
+      <p>Vincent JL, Moreno R, Takala J, et al. The SOFA (Sepsis-related Organ Failure Assessment) score to describe organ dysfunction/failure. Intensive Care Med. 1996;22(7):707-10.</p>
+    </div>
+
+    <div class="calc-result is-empty" id="result">
+      <div class="calc-result__row">
+        <span class="calc-result__label">SOFA Total</span>
+        <span class="calc-result__value" id="total">—<small>/ 24</small></span>
+      </div>
+      <div class="calc-result__interp" id="interp"></div>
+      <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:10px;font-size:10.5px;font-weight:700;letter-spacing:0.6px;opacity:0.9">
+        <span>Resp <span id="v-resp" style="margin-left:2px;font-weight:900;font-size:12px">—</span></span>
+        <span>Coag <span id="v-coag" style="margin-left:2px;font-weight:900;font-size:12px">—</span></span>
+        <span>Liver <span id="v-liver" style="margin-left:2px;font-weight:900;font-size:12px">—</span></span>
+        <span>CV <span id="v-cv" style="margin-left:2px;font-weight:900;font-size:12px">—</span></span>
+        <span>CNS <span id="v-cns" style="margin-left:2px;font-weight:900;font-size:12px">—</span></span>
+        <span>Renal <span id="v-renal" style="margin-left:2px;font-weight:900;font-size:12px">—</span></span>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast">Reset</div>
+
+    <nav class="bottom-nav">
+    <div class="nav-item" onclick="window.location.href='index.html'"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg><span class="nav-item__label">Home</span></div>
+    <div class="nav-item" onclick="window.location.href='protocols.html'"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8m8 4H8"/></svg><span class="nav-item__label">Protocols</span></div>
+    <div class="nav-item active" onclick="window.location.href='calculator.html'"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h.01M8 14h2M12 14h2M16 14h.01M8 18h8"/></svg><span class="nav-item__label">Calculator</span></div>
+    <div class="nav-item" onclick="window.location.href='saved.html'"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg><span class="nav-item__label">Saved</span></div>
+    <div class="nav-item" onclick="window.location.href='info.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg><span class="nav-item__label">Information</span></div>
+  </nav>
+</div>
+
+<script>
+const keys = ['resp','coag','liver','cv','cns','renal'];
+const state = {}; keys.forEach(k => state[k] = null);
+
+document.querySelectorAll('.sofa-seg').forEach(group => {
+  const k = group.dataset.k;
+  group.querySelectorAll('.sofa-seg__btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const p = Number(btn.dataset.p);
+      state[k] = p;
+      group.querySelectorAll('.sofa-seg__btn').forEach(b => b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'));
+      render();
+    });
+  });
+});
+
+function render() {
+  keys.forEach(k => document.getElementById('v-' + k).textContent = state[k] ?? '—');
+  const result = document.getElementById('result');
+  const total = document.getElementById('total');
+  const interp = document.getElementById('interp');
+  const allSet = keys.every(k => state[k] !== null);
+  if (allSet) {
+    const sum = keys.reduce((a, k) => a + state[k], 0);
+    total.innerHTML = `${sum}<small>/ 24</small>`;
+    result.classList.remove('is-empty');
+    let msg;
+    if (sum <= 6) msg = 'Low risk — mortality < 10%.';
+    else if (sum <= 9) msg = 'Moderate — mortality 15–20%.';
+    else if (sum <= 12) msg = 'High — mortality 40–50%.';
+    else if (sum <= 14) msg = 'Very high — mortality 50–60%.';
+    else msg = 'Extreme — mortality > 80%.';
+    interp.textContent = msg;
+  } else {
+    total.innerHTML = '—<small>/ 24</small>';
+    result.classList.add('is-empty');
+    interp.textContent = '';
+  }
+}
+
+function resetAll() {
+  keys.forEach(k => state[k] = null);
+  document.querySelectorAll('.sofa-seg__btn').forEach(b => b.setAttribute('aria-pressed', 'false'));
+  render();
+  const t = document.getElementById('toast');
+  t.textContent = 'Reset'; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1400);
+}
+</script>
+
+<script>
+(function(){
+  const btn=document.querySelector('.icon-btn--bookmark');
+  if(!btn) return;
+  const key='smc-bookmark:'+(location.pathname.split('/').pop()||'index');
+  let saved=false;
+  try{ saved=localStorage.getItem(key)==='1'; }catch(e){}
+  if(saved){ btn.classList.add('is-saved'); btn.setAttribute('aria-pressed','true'); }
+  btn.addEventListener('click',function(ev){
+    ev.stopPropagation();
+    saved=!saved;
+    btn.classList.toggle('is-saved',saved);
+    btn.setAttribute('aria-pressed',saved?'true':'false');
+    btn.classList.remove('is-animating'); void btn.offsetWidth; btn.classList.add('is-animating');
+    setTimeout(()=>btn.classList.remove('is-animating'),650);
+    try{ saved?localStorage.setItem(key,'1'):localStorage.removeItem(key); }catch(e){}
+    if(typeof showToast==='function') showToast(saved?'Saved':'Removed from saved');
+  });
+})();
+</script>
+<script src="recent.js?v=1776350000"></script>
+</body>
+</html>

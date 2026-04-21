@@ -1,0 +1,811 @@
+/* ============================================================
+   SMC ICU Protocol - Shared Design System
+   Based on 2026 SMC Visual Identity Guidelines Ver 3.0
+   ============================================================ */
+
+/* ---- Language switching ---- */
+/* Default: Korean shown, English hidden */
+[data-lang="en"]:not(html) { display: none !important; }
+/* When html lang = en: flip */
+html[data-lang="en"] [data-lang="en"] { display: revert !important; }
+html[data-lang="en"] [data-lang="ko"] { display: none !important; }
+/* Inline elements need inline revert */
+html[data-lang="en"] span[data-lang="en"],
+html[data-lang="en"] a[data-lang="en"] { display: inline !important; }
+html[data-lang="en"] div[data-lang="en"],
+html[data-lang="en"] section[data-lang="en"],
+html[data-lang="en"] p[data-lang="en"] { display: block !important; }
+html[data-lang="en"] li[data-lang="en"] { display: list-item !important; }
+/* For flex containers that use data-lang */
+html[data-lang="en"] .p-group[data-lang="en"],
+html[data-lang="en"] .calc-group[data-lang="en"] { display: flex !important; }
+
+:root {
+    /* Primary Brand */
+    --samsung-blue: #1428a0;
+    --smc-blue: #0a4bff;
+    --smc-blue-80: #2e70ff;
+    --smc-blue-60: #508eff;
+    --smc-blue-40: #8cbaff;
+    --smc-blue-20: #bedaff;
+
+    /* Neutral */
+    --smc-white: #ffffff;
+    --smc-black: #000000;
+    --smc-black-90: #191919;
+    --smc-black-80: #333333;
+    --smc-black-70: #4c4c4c;
+    --smc-black-60: #666666;
+
+    /* Point Colors (SMC 8 accents) */
+    --smc-pink:    #ff78c8;
+    --smc-red:     #fa4b50;
+    --smc-orange:  #ff871e;
+    --smc-yellow:  #ffdc00;
+    --smc-green:   #32e65a;
+    --smc-mint:    #00dcd2;
+    --smc-sky:     #00b4ff;
+    --smc-purple:  #8264ff;
+
+    /* Category Map — refined editorial palette
+       Monochrome icons; category color lives in left stripe accent only.
+       Hues chosen for depth + clinical seriousness (no pastel/muddy). */
+    --cat-neurology:   #2e70ff;  /* SMC Blue 80 — lighter than header, AA-readable on white */
+    --cat-cardiology:  #2e70ff;  /* crimson */
+    --cat-pulmonology: #2e70ff;  /* ocean */
+    --cat-gi:          #2e70ff;  /* terracotta */
+    --cat-nephrology:  #2e70ff;  /* forest */
+    --cat-infection:   #2e70ff;  /* burgundy (warning, serious) */
+    --cat-procedure:   #2e70ff;  /* charcoal */
+
+    /* Icon monotone — unified across all 7 categories */
+    --icon-ink: #0f265e;  /* deep SMC navy */
+
+    /* Surfaces */
+    --bg-app: #f5f7fb;
+    --bg-card: #ffffff;
+    --bg-accent: #eef2ff;
+    --bg-subtle: #f0f3f9;
+
+    /* Borders */
+    --border-subtle: #e5e9f2;
+    --border-strong: #cfd6e5;
+
+    /* Text */
+    --text-primary: var(--smc-black-90);
+    --text-secondary: var(--smc-black-70);
+    --text-tertiary: var(--smc-black-60);
+
+    /* Radius */
+    --r-sm: 10px;
+    --r-md: 14px;
+    --r-lg: 18px;
+    --r-xl: 24px;
+    --r-hero: 28px;
+
+    /* Shadows (brand-tinted) */
+    --shadow-xs: 0 1px 2px rgba(20, 40, 160, 0.04);
+    --shadow-sm: 0 2px 8px rgba(20, 40, 160, 0.05);
+    --shadow-md: 0 8px 24px rgba(20, 40, 160, 0.08);
+    --shadow-lg: 0 16px 40px rgba(20, 40, 160, 0.12);
+    --shadow-header: 0 10px 32px rgba(10, 75, 255, 0.22);
+
+    /* Motion */
+    --ease-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    /* App dimensions */
+    --app-max: 428px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+}
+
+html, body {
+    font-family: 'SUIT Variable', 'SUIT', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg-app);
+    color: var(--text-primary);
+    line-height: 1.5;
+    position: relative;
+    overflow-x: hidden;
+    font-feature-settings: "ss02", "ss03";
+}
+
+/* Ambient blue wash — echoes header, fades to app bg */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 90% 40% at 50% 0%,
+            rgba(10, 75, 255, 0.06) 0%,
+            rgba(10, 75, 255, 0.02) 45%,
+            transparent 75%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.container {
+    max-width: var(--app-max);
+    margin: 0 auto;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+}
+
+/* ---------------------------------------------------------------
+   HEADER — Unified gradient (SMC Blue → Samsung Blue)
+   Variants: .header--brand (main), .header--page (category/detail)
+   --------------------------------------------------------------- */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    width: 100%;
+    max-width: var(--app-max);
+    background: linear-gradient(135deg, var(--smc-blue) 0%, var(--samsung-blue) 100%);
+    color: var(--smc-white);
+    overflow: hidden;
+    border-radius: 0 0 var(--r-hero) var(--r-hero);
+    box-shadow: var(--shadow-header);
+    z-index: 100;
+}
+
+/* Animated ambient orbs */
+.header::before,
+.header::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.18) 0%, transparent 70%);
+    animation: orbFloat 22s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.header::before {
+    width: 380px;
+    height: 380px;
+    top: -200px;
+    right: -140px;
+}
+
+.header::after {
+    width: 280px;
+    height: 280px;
+    bottom: -140px;
+    left: -100px;
+    animation-delay: -11s;
+}
+
+@keyframes orbFloat {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33%      { transform: translate(30px, -30px) scale(1.08); }
+    66%      { transform: translate(-20px, 20px) scale(0.92); }
+}
+
+.header--brand { padding: 28px 24px 24px; }
+.header--page  { padding: 22px 20px 22px; }
+
+.header__top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 20px;
+}
+
+.header--page .header__top { margin-bottom: 0; }
+
+.header__brand {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--smc-white);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+    flex: 1;
+}
+
+.header__title {
+    flex: 1;
+    min-width: 0;
+}
+
+.header__eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.75);
+    margin-bottom: 4px;
+    display: block;
+}
+
+.header__h1 {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    color: var(--smc-white);
+    line-height: 1.2;
+}
+
+.header__h1--lg {
+    font-size: 26px;
+    letter-spacing: -0.8px;
+}
+
+/* Icon buttons within header */
+.icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.25s var(--ease-out);
+    color: var(--smc-white);
+    flex-shrink: 0;
+}
+
+.icon-btn:hover {
+    background: rgba(255, 255, 255, 0.22);
+    transform: translateY(-1px);
+}
+
+.icon-btn:active { transform: translateY(0) scale(0.96); }
+
+.icon-btn svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.icon-btn--back svg { stroke-width: 2.5; }
+
+/* Bookmark toggle — visual state change + tactile micro-animation */
+.icon-btn--bookmark { position: relative; overflow: visible; }
+.icon-btn--bookmark svg {
+    transition: fill 0.22s var(--ease-out),
+                stroke 0.22s var(--ease-out),
+                transform 0.35s var(--ease-spring);
+}
+.icon-btn--bookmark.is-saved {
+    background: rgba(255, 255, 255, 0.96);
+    border-color: rgba(255, 255, 255, 0.96);
+}
+.icon-btn--bookmark.is-saved svg {
+    fill: var(--smc-blue);
+    stroke: var(--smc-blue);
+}
+/* Tactile pop when toggled */
+@keyframes bookmarkPop {
+    0%   { transform: scale(1); }
+    35%  { transform: scale(0.72) rotate(-6deg); }
+    70%  { transform: scale(1.22) rotate(4deg); }
+    100% { transform: scale(1) rotate(0deg); }
+}
+.icon-btn--bookmark.is-animating svg {
+    animation: bookmarkPop 0.55s var(--ease-spring);
+}
+/* Confetti-like emerging ring on save */
+.icon-btn--bookmark.is-animating::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: inherit;
+    border: 2px solid var(--smc-blue-40);
+    opacity: 0;
+    animation: bookmarkRing 0.6s var(--ease-out);
+}
+@keyframes bookmarkRing {
+    0%   { opacity: 0.9; transform: scale(0.85); }
+    100% { opacity: 0;   transform: scale(1.45); }
+}
+
+/* Search bar inside header */
+.search {
+    position: relative;
+    z-index: 1;
+}
+
+.search__input {
+    width: 100%;
+    padding: 14px 18px 14px 46px;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    border-radius: var(--r-md);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 500;
+    outline: none;
+    transition: all 0.25s var(--ease-out);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.search__input::placeholder {
+    color: var(--text-tertiary);
+    font-weight: 400;
+}
+
+.search__input:focus {
+    background: var(--smc-white);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
+}
+
+.search__icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+}
+
+.search__icon svg {
+    width: 100%;
+    height: 100%;
+    stroke: var(--smc-blue);
+    stroke-width: 2.5;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* Chips inside header (category/meta) */
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.18);
+    color: var(--smc-white);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.chip__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+/* ---------------------------------------------------------------
+   MAIN CONTENT
+   --------------------------------------------------------------- */
+.main {
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-bottom: 120px;
+    position: relative;
+    z-index: 1;
+}
+
+.main--brand { padding-top: 184px; }   /* after header--brand */
+.main--page  { padding-top: 128px; }   /* after header--page */
+
+.section {
+    margin-bottom: 28px;
+    animation: fadeUp 0.5s var(--ease-out) both;
+}
+
+.section__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.section__title {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+    color: var(--text-primary);
+}
+
+.section__title--lg {
+    font-size: 22px;
+    letter-spacing: -0.6px;
+}
+
+.section__meta {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-tertiary);
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------------
+   BOTTOM NAV (unified)
+   --------------------------------------------------------------- */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: var(--app-max);
+    background: rgba(238, 243, 252, 0.96);  /* #eef3fc — unified with card tile tint */
+    backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(10, 75, 255, 0.10);  /* faint blue echo of header */
+    padding: 10px 20px 24px;
+    display: flex;
+    justify-content: space-around;
+    box-shadow: 0 -8px 28px rgba(20, 40, 160, 0.08);
+    z-index: 100;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    transition: all 0.25s var(--ease-out);
+    color: var(--text-tertiary);
+    padding: 8px 12px;
+    border-radius: 12px;
+    position: relative;
+    flex: 1;
+}
+
+.nav-item::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 28px;
+    height: 3px;
+    background: var(--smc-blue);
+    border-radius: 0 0 3px 3px;
+    opacity: 0;
+    transition: opacity 0.25s;
+}
+
+.nav-item.active { color: var(--smc-blue); }
+.nav-item.active::before { opacity: 1; }
+.nav-item:hover:not(.active) { color: var(--smc-black-80); }
+
+.nav-item svg {
+    width: 22px;
+    height: 22px;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 0.25s var(--ease-spring);
+}
+
+.nav-item.active svg { transform: scale(1.08); }
+
+.nav-item__label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+/* ---------------------------------------------------------------
+   TOAST
+   --------------------------------------------------------------- */
+.toast {
+    position: fixed;
+    bottom: 96px;
+    left: 50%;
+    transform: translateX(-50%) translateY(16px);
+    background: var(--smc-black-90);
+    color: var(--smc-white);
+    padding: 11px 18px;
+    border-radius: var(--r-sm);
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s var(--ease-out);
+    z-index: 200;
+    max-width: calc(var(--app-max) - 40px);
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* ---------------------------------------------------------------
+   CARD base
+   --------------------------------------------------------------- */
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--r-lg);
+    padding: 18px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.35s var(--ease-out);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-strong);
+}
+
+/* ---------------------------------------------------------------
+   ANIMATIONS
+   --------------------------------------------------------------- */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideFade {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes headerIn {
+    from { opacity: 0; transform: translateY(-12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.header { animation: headerIn 0.5s var(--ease-out) both; }
+
+/* ---------------------------------------------------------------
+   FONT SIZE SCALING (sm / lg)
+   "md" is the default — no overrides needed.
+   Applied via html[data-font] attribute set by settings-init.js
+   --------------------------------------------------------------- */
+
+/* ---- Small ---- */
+html[data-font="sm"] .header__brand        { font-size: 20px; }
+html[data-font="sm"] .header__h1           { font-size: 20px; }
+html[data-font="sm"] .header__h1--lg       { font-size: 23px; }
+html[data-font="sm"] .search__input        { font-size: 13.5px; }
+html[data-font="sm"] .section__title       { font-size: 16px; }
+html[data-font="sm"] .section__title--lg   { font-size: 20px; }
+html[data-font="sm"] .toast                { font-size: 11.5px; }
+/* Category page cards (inline styles in each page) */
+html[data-font="sm"] .protocol-card__title { font-size: 13.5px; }
+html[data-font="sm"] .protocol-card__desc  { font-size: 11px; }
+html[data-font="sm"] .protocol-card__foot  { font-size: 9.5px; }
+/* Index page cards */
+html[data-font="sm"] .cat-card__name       { font-size: 13px; }
+html[data-font="sm"] .cat-card__count      { font-size: 9.5px; }
+/* Search results */
+html[data-font="sm"] .sr-item__title       { font-size: 12px; }
+html[data-font="sm"] .sr-item__meta        { font-size: 10px; }
+
+/* ---- Large ---- */
+html[data-font="lg"] .header__brand        { font-size: 25px; }
+html[data-font="lg"] .header__h1           { font-size: 25px; }
+html[data-font="lg"] .header__h1--lg       { font-size: 30px; }
+html[data-font="lg"] .search__input        { font-size: 17px; }
+html[data-font="lg"] .section__title       { font-size: 21px; }
+html[data-font="lg"] .section__title--lg   { font-size: 25px; }
+html[data-font="lg"] .toast                { font-size: 15px; }
+html[data-font="lg"] .protocol-card__title { font-size: 17.5px; }
+html[data-font="lg"] .protocol-card__desc  { font-size: 14.5px; }
+html[data-font="lg"] .protocol-card__foot  { font-size: 12px; }
+html[data-font="lg"] .cat-card__name       { font-size: 17px; }
+html[data-font="lg"] .cat-card__count      { font-size: 12px; }
+html[data-font="lg"] .sr-item__title       { font-size: 15.5px; }
+html[data-font="lg"] .sr-item__meta        { font-size: 12.5px; }
+
+/* ---------------------------------------------------------------
+   DARK THEME
+   Applied via html[data-theme="dark"] attribute.
+   Redefines custom properties + overrides hardcoded colors.
+   --------------------------------------------------------------- */
+html[data-theme="dark"] {
+    /* Surfaces */
+    --bg-app:    #0d1117;
+    --bg-card:   #161b22;
+    --bg-accent: #1c2333;
+    --bg-subtle: #1c2333;
+
+    /* Borders */
+    --border-subtle: #2a3140;
+    --border-strong: #3d4656;
+
+    /* Text — high-contrast on dark */
+    --text-primary:   #e6edf3;
+    --text-secondary: #a8b5c4;
+    --text-tertiary:  #7d8a9a;
+
+    /* Neutrals for dark */
+    --smc-white:    #e6edf3;
+    --smc-black-90: #e6edf3;
+    --smc-black-80: #c9d1d9;
+    --smc-black-70: #a8b5c4;
+    --smc-black-60: #7d8a9a;
+
+    /* Brand — slightly brighter on dark */
+    --smc-blue: #3b82f6;
+    --samsung-blue: #1e40af;
+    --smc-blue-80: #60a5fa;
+    --smc-blue-60: #93c5fd;
+    --smc-blue-40: #3b82f6;
+    --smc-blue-20: #1e3a5f;
+
+    /* Category palette — lifted for dark bg contrast */
+    --cat-neurology:   #60a5fa;
+    --cat-cardiology:  #60a5fa;
+    --cat-pulmonology: #60a5fa;
+    --cat-gi:          #60a5fa;
+    --cat-nephrology:  #60a5fa;
+    --cat-infection:   #60a5fa;
+    --cat-procedure:   #60a5fa;
+
+    /* Point colors — brighter variants */
+    --smc-red:     #f87171;
+    --smc-orange:  #fb923c;
+    --smc-green:   #4ade80;
+    --smc-pink:    #f9a8d4;
+    --smc-yellow:  #fde047;
+    --smc-mint:    #2dd4bf;
+    --smc-sky:     #38bdf8;
+    --smc-purple:  #a78bfa;
+
+    /* Icon ink — light on dark */
+    --icon-ink: #93c5fd;
+
+    /* Shadows — darker, less blue-tinted */
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.4);
+    --shadow-header: 0 10px 32px rgba(0, 0, 0, 0.45);
+
+    color-scheme: dark;
+}
+
+/* Body ambient wash — darker tint */
+html[data-theme="dark"] body::before {
+    background:
+        radial-gradient(ellipse 90% 40% at 50% 0%,
+            rgba(59, 130, 246, 0.08) 0%,
+            rgba(59, 130, 246, 0.03) 45%,
+            transparent 75%);
+}
+
+/* Header — deeper gradient */
+html[data-theme="dark"] .header {
+    background: linear-gradient(135deg, #1e40af 0%, #0f172a 100%);
+}
+html[data-theme="dark"] .header::before,
+html[data-theme="dark"] .header::after {
+    background: radial-gradient(circle, rgba(96, 165, 250, 0.12) 0%, transparent 70%);
+}
+
+/* Search input */
+html[data-theme="dark"] .search__input {
+    background: rgba(22, 27, 34, 0.95);
+    border-color: rgba(59, 130, 246, 0.25);
+    color: var(--text-primary);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+html[data-theme="dark"] .search__input::placeholder { color: var(--text-tertiary); }
+html[data-theme="dark"] .search__input:focus {
+    background: #161b22;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* Bottom nav */
+html[data-theme="dark"] .bottom-nav {
+    background: rgba(13, 17, 23, 0.96);
+    border-top: 1px solid rgba(59, 130, 246, 0.12);
+    box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.3);
+}
+html[data-theme="dark"] .nav-item:hover:not(.active) { color: var(--text-primary); }
+
+/* Toast */
+html[data-theme="dark"] .toast {
+    background: #e6edf3;
+    color: #0d1117;
+}
+
+/* Card hover */
+html[data-theme="dark"] .card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* Bookmark saved state */
+html[data-theme="dark"] .icon-btn--bookmark.is-saved {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.35);
+}
+
+/* Chip styling */
+html[data-theme="dark"] .chip {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* ---- Dark: color-mix tint base (replace #fff with dark surface) ---- */
+/* Protocol card number badge */
+html[data-theme="dark"] .protocol-card__num {
+    background: color-mix(in srgb, var(--cat-color) 15%, #161b22);
+}
+/* Category card — index page */
+html[data-theme="dark"] .cat-card__badge {
+    background: var(--bg-subtle);
+}
+html[data-theme="dark"] .cat-card.is-ready .cat-card__badge {
+    background: color-mix(in srgb, var(--cat-color) 15%, #161b22);
+}
+/* Search results */
+html[data-theme="dark"] .search-results {
+    background: #161b22;
+    border-color: #2a3140;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+html[data-theme="dark"] .sr-item__icon--protocol {
+    background: color-mix(in srgb, var(--smc-blue) 15%, #161b22);
+}
+html[data-theme="dark"] .sr-item__icon--section {
+    background: color-mix(in srgb, var(--cat-procedure) 15%, #161b22);
+}
+html[data-theme="dark"] .sr-item__icon--calculator {
+    background: color-mix(in srgb, var(--smc-orange) 15%, #161b22);
+}
+html[data-theme="dark"] .sr-item__title mark {
+    background: color-mix(in srgb, var(--smc-blue) 25%, #161b22);
+}
+
+/* ---- Explicit text & body colors for safety ---- */
+html[data-theme="dark"] body {
+    background: #0d1117;
+    color: #e6edf3;
+}
+html[data-theme="dark"] .header__brand {
+    color: #e6edf3;
+}
+html[data-theme="dark"] .header__h1 {
+    color: #e6edf3;
+}
+html[data-theme="dark"] .header__eyebrow {
+    color: rgba(230, 237, 243, 0.7);
+}
+html[data-theme="dark"] .section__title {
+    color: #e6edf3;
+}
+html[data-theme="dark"] .section__meta {
+    color: #7d8a9a;
+}
+/* Card text */
+html[data-theme="dark"] .card {
+    background: #161b22;
+    border-color: #2d3748;
+}
+/* Nav item label */
+html[data-theme="dark"] .nav-item__label {
+    color: inherit;
+}

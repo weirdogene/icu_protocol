@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMC ICU Protocol</title>
+    <script src="settings-init.js?v=1776350000"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=1776350000">
+    <style>
+        /* ============================================================
+           Main page — Refined Clinical Editorial
+           Icons carry color; cards stay neutral.
+           ============================================================ */
+
+        /* ---- Search results ---- */
+        .search { position: relative; z-index: 10; }
+
+        .search__clear {
+            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+            width: 28px; height: 28px; border-radius: 50%;
+            background: var(--bg-subtle); border: none; cursor: pointer;
+            display: none; align-items: center; justify-content: center;
+            transition: background 0.2s;
+        }
+        .search__clear svg {
+            width: 14px; height: 14px; stroke: var(--text-tertiary);
+            stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .search__clear:hover { background: var(--border-subtle); }
+        .search__clear.show { display: flex; }
+
+        .search-results {
+            position: absolute;
+            left: 24px; right: 24px;
+            top: calc(100% - 10px);
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--r-lg);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06);
+            max-height: 360px; overflow-y: auto;
+            display: none; flex-direction: column;
+            -webkit-overflow-scrolling: touch;
+            z-index: 10;
+        }
+        .search-results.show { display: flex; }
+
+        /* When search is active, let header show overflow so dropdown is visible */
+        .header.search-open { overflow: visible !important; }
+
+        .search-results__empty {
+            padding: 28px 18px; text-align: center;
+            font-size: 13px; color: var(--text-tertiary); font-weight: 500;
+        }
+
+        .sr-group-label {
+            padding: 10px 16px 4px;
+            font-size: 10px; font-weight: 800; letter-spacing: 1px;
+            text-transform: uppercase; color: var(--text-tertiary);
+        }
+        .sr-group-label:not(:first-child) { border-top: 1px solid var(--border-subtle); margin-top: 2px; }
+
+        .sr-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 16px; cursor: pointer;
+            transition: background 0.15s;
+        }
+        .sr-item:last-child { border-radius: 0 0 var(--r-lg) var(--r-lg); }
+        .sr-item:hover, .sr-item.is-focused { background: var(--bg-subtle); }
+
+        .sr-item__icon {
+            width: 32px; height: 32px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .sr-item__icon svg {
+            width: 15px; height: 15px; stroke: currentColor;
+            stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .sr-item__icon--protocol {
+            background: color-mix(in srgb, var(--smc-blue) 10%, #fff);
+            color: var(--smc-blue);
+        }
+        .sr-item__icon--section {
+            background: color-mix(in srgb, var(--cat-procedure, #334155) 10%, #fff);
+            color: var(--cat-procedure, #334155);
+        }
+        .sr-item__icon--calculator {
+            background: color-mix(in srgb, var(--smc-orange, #e67700) 10%, #fff);
+            color: var(--smc-orange, #e67700);
+        }
+
+        .sr-item__body { flex: 1; min-width: 0; }
+        .sr-item__title {
+            font-size: 13.5px; font-weight: 700; color: var(--text-primary);
+            line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .sr-item__title mark {
+            background: color-mix(in srgb, var(--smc-blue) 18%, #fff);
+            color: inherit; border-radius: 2px; padding: 0 1px;
+        }
+        .sr-item__meta {
+            font-size: 11px; color: var(--text-tertiary); font-weight: 500;
+            margin-top: 1px;
+        }
+        .sr-item__arrow {
+            width: 18px; height: 18px; flex-shrink: 0;
+        }
+        .sr-item__arrow svg {
+            width: 14px; height: 14px; stroke: var(--text-tertiary); stroke-width: 2;
+            fill: none; stroke-linecap: round; stroke-linejoin: round;
+        }
+
+        /* Dim category cards when search is active */
+        .main--brand.search-active { opacity: 0.3; pointer-events: none; transition: opacity 0.2s; }
+
+        /* Backdrop to close search */
+        .search-backdrop {
+            position: fixed; inset: 0; z-index: 5; display: none;
+        }
+        .search-backdrop.show { display: block; }
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .cat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--r-lg);
+            padding: 12px 14px 10px;
+            cursor: pointer;
+            transition: transform 0.35s var(--ease-out), box-shadow 0.35s var(--ease-out), border-color 0.35s var(--ease-out);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-xs);
+            min-height: 96px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            animation: slideFade 0.5s var(--ease-out) both;
+        }
+
+        /* Always-visible category signal stripe (subtle until hover) */
+        .cat-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 16px; bottom: 16px;
+            width: 2px;
+            background: var(--cat-color);
+            opacity: 0.35;
+            border-radius: 0 2px 2px 0;
+            transition: all 0.35s var(--ease-out);
+        }
+
+        .cat-card:hover {
+            transform: translateY(-3px);
+            border-color: color-mix(in srgb, var(--cat-color) 45%, var(--border-subtle));
+            box-shadow: 0 12px 28px color-mix(in srgb, var(--cat-color) 12%, transparent), var(--shadow-sm);
+        }
+
+        .cat-card:hover::before {
+            opacity: 1;
+            width: 3px;
+            top: 0; bottom: 0;
+        }
+
+        .cat-card__top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Icon — circular soft tint + colored outline icon */
+        .cat-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--tile-bg, #eef3fc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.35s var(--ease-spring);
+            position: relative;
+        }
+
+        /* subtle ring halo on hover */
+        .cat-icon::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 1px solid color-mix(in srgb, var(--cat-color) 30%, transparent);
+            opacity: 0;
+            transition: opacity 0.3s var(--ease-out);
+        }
+
+        .cat-card:hover .cat-icon {
+            background: color-mix(in srgb, var(--cat-color) 12%, #eef3fc);
+            transform: scale(1.06);
+        }
+
+        .cat-card:hover .cat-icon::after { opacity: 1; }
+
+        .cat-icon svg {
+            width: 22px;
+            height: 22px;
+            color: var(--icon-ink);
+            fill: currentColor;
+            stroke: currentColor;
+            overflow: visible;
+        }
+        .cat-icon svg.is-stroke { fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+        .cat-card:hover .cat-icon svg { color: var(--smc-blue); }
+
+        .cat-card__chev {
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: translateX(-4px);
+            transition: all 0.3s var(--ease-out);
+            background: var(--cat-color);
+        }
+
+        .cat-card__chev svg {
+            width: 11px; height: 11px;
+            stroke: #fff;
+            stroke-width: 3;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .cat-card.is-ready:hover .cat-card__chev {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .cat-card__name {
+            font-size: 15px;
+            font-weight: 800;
+            letter-spacing: -0.35px;
+            color: var(--text-primary);
+            line-height: 1.2;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 8px;
+        }
+
+        .cat-card__foot {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            position: relative;
+            z-index: 1;
+            padding-top: 8px;
+            border-top: 1px dashed var(--border-subtle);
+        }
+
+        .cat-card__count {
+            font-size: 10.5px;
+            font-weight: 700;
+            color: var(--text-tertiary);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .cat-card__count b {
+            color: var(--cat-color);
+            font-weight: 800;
+            margin-right: 2px;
+        }
+
+        .cat-card__badge {
+            font-size: 9px;
+            font-weight: 800;
+            padding: 3px 7px;
+            border-radius: 999px;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            background: var(--bg-subtle);
+            color: var(--text-tertiary);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .cat-card__badge::before {
+            content: '';
+            width: 5px; height: 5px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .cat-card.is-ready .cat-card__badge {
+            background: color-mix(in srgb, var(--cat-color) 12%, #fff);
+            color: var(--cat-color);
+        }
+
+        .cat-card.is-pending { opacity: 0.78; }
+        .cat-card.is-pending:hover { opacity: 1; }
+
+        /* Category color mapping (SMC point colors — saturation held back via tints) */
+        .cat-card.neurology   { --cat-color: var(--cat-neurology); }
+        .cat-card.cardiology  { --cat-color: var(--cat-cardiology); }
+        .cat-card.pulmonology { --cat-color: var(--cat-pulmonology); }
+        .cat-card.gi          { --cat-color: var(--cat-gi); }
+        .cat-card.nephrology  { --cat-color: var(--cat-nephrology); }
+        .cat-card.infection   { --cat-color: var(--cat-infection); }
+        .cat-card.procedure   { --cat-color: var(--cat-procedure); }
+
+        .cat-card:nth-child(1) { animation-delay: 0.05s; }
+        .cat-card:nth-child(2) { animation-delay: 0.10s; }
+        .cat-card:nth-child(3) { animation-delay: 0.15s; }
+        .cat-card:nth-child(4) { animation-delay: 0.20s; }
+        .cat-card:nth-child(5) { animation-delay: 0.25s; }
+        .cat-card:nth-child(6) { animation-delay: 0.30s; }
+        .cat-card:nth-child(7) { animation-delay: 0.35s; }
+
+        /* Dark theme — index-specific */
+        html[data-theme="dark"] .cat-icon {
+            background: #1c2333;
+        }
+        html[data-theme="dark"] .cat-card:hover .cat-icon {
+            background: color-mix(in srgb, var(--cat-color) 15%, #1c2333);
+        }
+        html[data-theme="dark"] .search-results {
+            background: #161b22;
+            border-color: #2a3140;
+        }
+
+        /* ---- Recently Viewed ---- */
+        .recent-section { margin-bottom: 6px; }
+        .recent-section .section__head { margin-bottom: 10px; }
+        .recent-scroll {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+        .recent-scroll::-webkit-scrollbar { display: none; }
+
+        .recent-card {
+            position: relative;
+            flex: 0 0 auto;
+            width: 150px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--r-md);
+            padding: 12px 13px 10px;
+            cursor: pointer;
+            scroll-snap-align: start;
+            transition: border-color 0.2s, background 0.2s, transform 0.25s var(--ease-out);
+            animation: slideFade 0.4s var(--ease-out) both;
+        }
+        .recent-card__close {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: transparent;
+            border: none;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            color: var(--text-tertiary);
+            opacity: 0.6;
+            transition: opacity 0.15s, background 0.15s, color 0.15s;
+            padding: 0;
+        }
+        .recent-card__close:hover {
+            opacity: 1;
+            background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+            color: var(--text-primary);
+        }
+        .recent-card__close svg {
+            width: 12px;
+            height: 12px;
+            stroke: currentColor;
+            stroke-width: 2.4;
+            fill: none;
+            stroke-linecap: round;
+        }
+        .recent-card:nth-child(1) { animation-delay: 0.03s; }
+        .recent-card:nth-child(2) { animation-delay: 0.07s; }
+        .recent-card:nth-child(3) { animation-delay: 0.10s; }
+        .recent-card:nth-child(4) { animation-delay: 0.13s; }
+        .recent-card:nth-child(5) { animation-delay: 0.16s; }
+
+        .recent-card:hover {
+            border-color: color-mix(in srgb, var(--smc-blue) 40%, var(--border-subtle));
+            background: color-mix(in srgb, var(--smc-blue) 3%, #fff);
+            transform: translateY(-2px);
+        }
+        .recent-card__eyebrow {
+            font-size: 9.5px;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: var(--smc-blue);
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .recent-card__title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.35;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            letter-spacing: -0.15px;
+            margin-bottom: 8px;
+        }
+        .recent-card__time {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-tertiary);
+        }
+
+        /* Dark overrides */
+        html[data-theme="dark"] .recent-card:hover {
+            background: color-mix(in srgb, var(--smc-blue) 6%, #161b22);
+            border-color: color-mix(in srgb, var(--smc-blue) 35%, #2a3140);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header header--brand">
+            <div class="header__top">
+                <div class="header__brand">SMC ICU Protocol</div>
+                <button class="icon-btn" aria-label="Settings" onclick="window.location.href='settings.html'">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                </button>
+            </div>
+            <div class="search">
+                <div class="search__icon">
+                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                </div>
+                <input type="text" class="search__input" placeholder="Search protocols & calculators..." id="searchInput" autocomplete="off">
+                <button class="search__clear" id="searchClear" aria-label="Clear">
+                    <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <!-- Search results — inside header, overflow toggled by JS -->
+            <div class="search-results" id="searchResults"></div>
+        </header>
+
+        <!-- Main -->
+        <main class="main main--brand">
+            <!-- Recently Viewed -->
+            <section class="section recent-section" id="recentSection" style="display:none">
+                <div class="section__head">
+                    <div class="section__title">Recently Viewed</div>
+                </div>
+                <div class="recent-scroll" id="recentScroll"></div>
+            </section>
+
+            <!-- Categories -->
+            <section class="section">
+                <div class="section__head">
+                    <div class="section__title section__title--lg">Categories</div>
+                    <div class="section__meta">7 AREAS</div>
+                </div>
+
+                <div class="category-grid">
+                    <!-- Neurology — brain with visible gyri/sulci -->
+                    <div class="cat-card neurology is-ready" data-href="neurology.html">
+                        <div>
+                            <div class="cat-card__top">
+                                <div class="cat-icon">
+                                    <!-- Phosphor brain-fill -->
+                                    <svg viewBox="0 0 256 256"><path d="M212,76V72a44,44,0,0,0-74.86-31.31,3.93,3.93,0,0,0-1.14,2.8v88.72a4,4,0,0,0,6.2,3.33A47.67,47.67,0,0,1,167.68,128a8.18,8.18,0,0,1,8.31,7.58,8,8,0,0,1-8,8.42,32,32,0,0,0-32,32v33.88a4,4,0,0,0,1.49,3.12,47.92,47.92,0,0,0,74.21-17.16,4,4,0,0,0-4.49-5.56A68.06,68.06,0,0,1,192,192h-7.73a8.18,8.18,0,0,1-8.25-7.47,8,8,0,0,1,8-8.53h8a51.6,51.6,0,0,0,24-5.88v0A52,52,0,0,0,212,76Zm-12,36h-4a36,36,0,0,1-36-36V72a8,8,0,0,1,16,0v4a20,20,0,0,0,20,20h4a8,8,0,0,1,0,16ZM88,28A44.05,44.05,0,0,0,44,72v4a52,52,0,0,0-4,94.12h0A51.6,51.6,0,0,0,64,176h7.73A8.18,8.18,0,0,1,80,183.47,8,8,0,0,1,72,192H64a67.48,67.48,0,0,1-15.21-1.73,4,4,0,0,0-4.5,5.55A47.93,47.93,0,0,0,118.51,213a4,4,0,0,0,1.49-3.12V176a32,32,0,0,0-32-32,8,8,0,0,1-8-8.42A8.18,8.18,0,0,1,88.32,128a47.67,47.67,0,0,1,25.48,7.54,4,4,0,0,0,6.2-3.33V43.49a4,4,0,0,0-1.14-2.81A43.85,43.85,0,0,0,88,28Zm8,48a36,36,0,0,1-36,36H56a8,8,0,0,1,0-16h4A20,20,0,0,0,80,76V72a8,8,0,0,1,16,0Z"/></svg>
+                                </div>
+                                <div class="cat-card__chev"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+                            </div>
+                            <div class="cat-card__name">Neurology</div>
+                        </div>
+                        <div class="cat-card__foot">
+                            <div class="cat-card__count"><b>3</b>protocols</div>
+                        </div>
+                    </div>
+
+                    <!-- Cardiology — heart filled with white ECG pulse -->
+                    <div class="cat-card cardiology is-ready" data-href="cardiology.html">
+                        <div>
+                            <div class="cat-card__top">
+                                <div class="cat-icon">
+                                    <!-- Phosphor heart-straight-fill — clean solid heart -->
+                                    <svg viewBox="0 0 256 256"><path d="M178,36c-21,0-39.26,9.47-50,25.34C117.26,45.47,99,36,78,36A62.07,62.07,0,0,0,16,98c0,74,103.79,130.66,108.21,133a8,8,0,0,0,7.58,0C136.21,228.66,240,172,240,98A62.07,62.07,0,0,0,178,36Z"/></svg>
+                                </div>
+                                <div class="cat-card__chev"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+                            </div>
+                            <div class="cat-card__name">Cardiology</div>
+                        </div>
+                        <div class="cat-card__foot">
+                            <div class="cat-card__count"><b>4</b>protocols</div>
+                        </div>
+                    </div>
+
+                    <!-- Pulmonology — inflated lungs with trachea/carina -->
+                    <div class="cat-card pulmonology is-ready" data-href="pulmonology.html">
+                        <div>
+                            <div class="cat-card__top">
+                                <div class="cat-icon">
+                                    <!-- Healthicons lungs (CC0) -->
+                                    <svg viewBox="0 0 48 48" fill="currentColor"><path d="M16.542 11.991C22.3921 11.9958 21.8536 19.9527 21.8511 23.1357C21.8478 27.198 22.8451 35.3972 19.7112 38.5181C16.5177 41.6984 10.1346 43.2846 6.94587 40.6296C3.75713 37.9745 9.09663 11.9849 16.542 11.991Z"/><path d="M31.4826 12.0033C25.6326 11.9985 26.158 19.9563 26.1554 23.1392C26.152 27.2016 25.1413 35.3991 28.27 38.5252C31.4583 41.7107 37.8388 43.3074 41.0319 40.6576C44.2249 38.0077 38.928 12.0094 31.4826 12.0033Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M23.0175 5.99927C23.0175 5.99927 23.0175 5.99915 24.0175 5.99997C25.0175 6.00079 25.0175 6.00091 25.0175 6.00091L25.0056 20.4938C25.0039 22.5951 24.0675 23.7995 23.0074 24.4169C22.51 24.7066 22.0215 24.847 21.6634 24.9163C21.4824 24.9514 21.3289 24.9694 21.2159 24.9787C21.1592 24.9834 21.1123 24.9859 21.0765 24.9873C21.0587 24.988 21.0436 24.9884 21.0314 24.9886L21.0154 24.9888L21.0091 24.9888L21.0052 24.9888C21.0052 24.9888 21.004 24.9888 21.0048 23.9888C21.0056 22.9888 21.0045 22.9888 21.0045 22.9888H21.0035L21.0016 22.9889L20.9986 22.9889L20.9954 22.9889C20.9954 22.9889 20.9976 22.9889 21.0004 22.9887C21.0086 22.9884 21.0261 22.9876 21.0514 22.9855C21.1024 22.9813 21.1831 22.9722 21.2832 22.9528C21.4872 22.9133 21.7484 22.8357 22.0009 22.6886C22.4404 22.4327 23.0044 21.8892 23.0056 20.4922L23.0175 5.99927Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M25.0175 6.00091C25.0175 6.00091 25.0175 6.00079 24.0175 5.99997C23.0175 5.99915 23.0175 5.99927 23.0175 5.99927L23.0056 20.4922C23.0039 22.5935 23.9382 23.7994 24.9974 24.4185C25.4943 24.709 25.9825 24.8502 26.3405 24.9201C26.5215 24.9555 26.675 24.9738 26.7879 24.9833C26.8446 24.988 26.8916 24.9906 26.9273 24.9921C26.9452 24.9928 26.9603 24.9932 26.9724 24.9934L26.9884 24.9937L26.9947 24.9937L26.9974 24.9937L26.9986 24.9937C26.9986 24.9937 26.9998 24.9937 27.0006 23.9937C27.0014 22.9937 27.0026 22.9937 27.0026 22.9937L27.0036 22.9937L27.0055 22.9937L27.0085 22.9938L27.0117 22.9938C27.0117 22.9938 27.0107 22.9938 27.0066 22.9936C26.9984 22.9933 26.981 22.9924 26.9557 22.9903C26.9047 22.986 26.824 22.9768 26.724 22.9572C26.52 22.9174 26.2589 22.8393 26.0067 22.6919C25.5676 22.4352 25.0044 21.8908 25.0056 20.4938L25.0175 6.00091Z"/></svg>
+                                </div>
+                                <div class="cat-card__chev"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+                            </div>
+                            <div class="cat-card__name">Pulmonology</div>
+                        </div>
+                        <div class="cat-card__foot">
+                            <div class="cat-card__count"><b>6</b>protocols</div>
+                        </div>
+                    </div>
+
+                    <!-- GI & Metabolism — coiled intestines (large intestine frame + small intestine coil) -->
+                    <div class="cat-card gi is-ready" data-href="gi.html">
+                        <div>
+                            <div class="cat-card__top">
+                                <div class="cat-icon">
+                                    <!-- Healthicons intestine (CC0) -->
+                                    <svg viewBox="0 0 48 48"><path d="M26.2 4C27.8569 4 29.2 5.34315 29.2 7V11.8769C29.2 12.7103 28.9144 13.5172 28.3634 14.1676C27.8644 14.7568 27.2732 15.0716 26.8522 15.2434C26.064 15.565 25.2071 15.6459 24.6429 15.6823C24.0379 15.7213 23.36 15.7259 22.7505 15.73L22.6768 15.7305C22.0123 15.735 21.379 15.7403 20.7581 15.7731C19.4258 15.8434 18.6096 16.0283 18.1898 16.258C18.1063 16.3037 18.066 16.3367 18.0494 16.3529C18.2255 16.4205 18.4631 16.4925 18.7744 16.5615C20.1924 16.8759 22.1332 16.9383 24.5214 17.015L25.0984 17.0337C27.5102 17.1128 30.4236 17.2279 32.7451 17.9315C33.9361 18.2925 35.2493 18.8848 36.2859 19.9451C37.4045 21.0894 38 22.5752 38 24.2615C38 26.0512 37.289 27.5996 35.9694 28.6936C34.7921 29.6696 33.3442 30.1067 32.0942 30.3318C29.6993 30.7631 26.6763 30.622 24.1036 30.502L23.8608 30.4907C20.9864 30.3572 18.6275 30.2662 16.9768 30.5678C16.5988 30.6369 16.3228 30.7168 16.1294 30.793C16.0783 30.8131 16.036 30.8318 16.0014 30.8484C16.0073 31.0329 16.0307 31.1524 16.05 31.222C16.0712 31.2982 16.0916 31.3299 16.0979 31.3392C16.1027 31.3466 16.1605 31.4351 16.4274 31.5525C17.1024 31.8497 18.2904 31.9881 20.0269 31.9458C20.8178 31.9265 21.6166 31.8753 22.4349 31.8228L22.5152 31.8176C23.3257 31.7657 24.1994 31.7102 24.9757 31.7087C25.6783 31.7074 26.6714 31.741 27.5724 32.0533C28.0523 32.2196 28.7205 32.5362 29.2823 33.168C29.9031 33.8661 30.2 34.7318 30.2 35.6V41C30.2 42.6569 28.8569 44 27.2 44C25.5431 44 24.2 42.6569 24.2 41V37.73C23.8169 37.7474 23.3863 37.7741 22.8989 37.8054L22.7825 37.8128C21.9917 37.8636 21.0862 37.9217 20.1731 37.944C18.3596 37.9882 15.9976 37.9189 14.0101 37.0441C12.9513 36.578 11.8965 35.8407 11.1227 34.6929C10.3429 33.5363 10 32.1874 10 30.759C10 28.9705 10.7056 27.4201 12.0214 26.3204C13.1974 25.3374 14.6457 24.8945 15.8982 24.6656C18.3073 24.2254 21.3485 24.3671 23.9305 24.4874L24.1392 24.4971C27.0156 24.6307 29.3764 24.7247 31.0308 24.4268C31.4096 24.3586 31.6864 24.2794 31.8804 24.2038C31.9247 24.1865 31.9624 24.1703 31.9942 24.1556C31.9932 24.1475 31.9921 24.1407 31.9911 24.1351C31.9264 24.0716 31.6729 23.8761 31.0049 23.6736C29.5764 23.2407 27.4898 23.1154 24.9016 23.0304C24.673 23.0229 24.4395 23.0158 24.2022 23.0085H24.2022C22.0041 22.941 19.4789 22.8634 17.4756 22.4193C16.3536 22.1705 15.042 21.7394 13.9659 20.8637C12.7503 19.8745 12 18.4449 12 16.7179C12 15.4732 12.2828 14.2876 12.9161 13.2434C13.5465 12.2038 14.4151 11.4838 15.3102 10.9942C16.9904 10.075 18.9742 9.85886 20.4419 9.78141C21.221 9.7403 21.9877 9.73505 22.6357 9.73061C22.8378 9.72923 23.0253 9.7279 23.2 9.726V7C23.2 5.34315 24.5431 4 26.2 4Z" fill="currentColor"/></svg>
+                                </div>
+                                <div class="cat-card__chev"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+                            </div>
+                            <div class="cat-card__name">GI &amp; Metabolism</div>
+                        </div>
+                        <div class="cat-card__foot">
+                            <div class="cat-card__count"><b>2</b>protocols</div>
+                        </div>
+                    </div>
+
+                    <!-- Nephrology — single kidney bean with hilum & ureter -->
+                    <div class="cat-card nephrology is-ready" data-href="nephrology.html">
+                        <div>
+                            <div class="cat-card__top">
+                                <div class="cat-icon">
+                                    <!-- Healthicons kidneys (CC0) -->
+                                    <svg viewBox="0 0 48 48" fill="currentColor"><path d="M12.548 30.7532C1.68377 26.171 5.97137 10.7042 13.513 8.14865C16.6416 7.08852 20.0938 10.6056 20.0717 12.7893C20.0621 13.7335 19.5749 14.6541 19.0673 15.6132C18.4009 16.8725 17.6993 18.1982 17.9972 19.7308C18.5221 22.4309 19.11 26.9868 17.5952 29.1494C16.0803 31.312 14.5569 31.6005 12.548 30.7532Z"/><path d="M34.3473 8.14865C41.889 10.7042 46.1766 26.171 35.3124 30.7532C33.3034 31.6005 31.78 31.312 30.2652 29.1494C28.7504 26.9868 29.3383 22.4309 29.8631 19.7308C30.161 18.1982 29.4595 16.8725 28.793 15.6132C28.2854 14.6541 27.7982 13.7335 27.7887 12.7893C27.7666 10.6056 31.2188 7.08852 34.3473 8.14865Z"/><path d="M28.6181 22.7796C28.6867 23.7773 28.6873 23.7772 28.6879 23.7772L28.7036 23.7759C28.7019 23.7761 28.6934 23.7771 28.6791 23.7794C28.6504 23.784 28.6001 23.7936 28.5357 23.8118C28.4046 23.849 28.2318 23.917 28.0626 24.0376C27.7729 24.2439 27.3469 24.7021 27.3469 25.8583V40.3244C27.3469 40.3245 27.3469 40.3245 26.3469 40.3245C25.3469 40.3245 25.3469 40.3241 25.3469 40.324V25.8583C25.3469 24.0919 26.0565 23.0108 26.9024 22.4084C27.301 22.1246 27.696 21.971 27.9907 21.8875C28.1393 21.8454 28.2665 21.82 28.3619 21.8047C28.4974 21.7865 28.5482 21.7821 28.5482 21.7821C28.5489 21.782 28.5495 21.782 28.6181 22.7796Z"/><path d="M19.2423 22.7796C19.1737 23.7773 19.173 23.7772 19.1724 23.7772L19.1565 23.7759C19.1582 23.7761 19.167 23.7771 19.1812 23.7794C19.21 23.784 19.2603 23.7936 19.3246 23.8118C19.4557 23.849 19.6285 23.917 19.7978 24.0376C20.0875 24.2439 20.5135 24.7021 20.5135 25.8583V40.3244C20.5135 40.3245 20.5135 40.3245 21.5135 40.3245C22.5135 40.3245 22.5135 40.3241 22.5135 40.324V25.8583C22.5135 24.0919 21.8038 23.0108 20.9579 22.4084C20.5594 22.1246 20.1644 21.971 19.8696 21.8875C19.7211 21.8454 19.5939 21.82 19.4985 21.8047C19.3629 21.7865 19.3121 21.7821 19.3121 21.7821C19.3115 21.782 19.3108 21.782 19.2423 22.7796Z"/></svg>
+                                </div>
+                                <div class="cat-card__chev"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+                            </div>
+                            <div class="cat-card__name">Nephrology</div>
+                        </div>
+                        <div class="cat-card__foot">
+                            <div class="cat-card__count"><b>1</b>protocol</div>
+                        </div>
+                    </div>
+
+                    <!-- Infection — virus with spike proteins (filled) -->
+                    <div class="cat-card infection is-ready" data-href="infection.html">
+                        <div>
+                            <div class="cat-card__top">
+                                <div class="cat-icon">
+                                    <!-- Phosphor virus-fill -->
+                                    <svg viewBox="0 0 256 256"><path d="M240,120H223.66a95.52,95.52,0,0,0-22.39-53.95l12.39-12.39a8,8,0,0,0-11.32-11.32L190,54.73A95.52,95.52,0,0,0,136,32.34V16a8,8,0,0,0-16,0V32.34A95.52,95.52,0,0,0,66.05,54.73L53.66,42.34A8,8,0,0,0,42.34,53.66L54.73,66.05a95.52,95.52,0,0,0-22.39,54H16a8,8,0,0,0,0,16H32.34A95.52,95.52,0,0,0,54.73,190L42.34,202.34a8,8,0,0,0,11.32,11.32l12.39-12.39a95.52,95.52,0,0,0,54,22.39V240a8,8,0,0,0,16,0V223.66A95.52,95.52,0,0,0,190,201.27l12.39,12.39a8,8,0,0,0,11.32-11.32L201.27,190A95.52,95.52,0,0,0,223.66,136H240a8,8,0,0,0,0-16ZM80,108a28,28,0,1,1,28,28A28,28,0,0,1,80,108Zm48,84a16,16,0,1,1,16-16A16,16,0,0,1,128,192Zm48-48a16,16,0,1,1,16-16A16,16,0,0,1,176,144Z"/></svg>
+                                </div>
+                                <div class="cat-card__chev"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+                            </div>
+                            <div class="cat-card__name">Infection</div>
+                        </div>
+                        <div class="cat-card__foot">
+                            <div class="cat-card__count"><b>1</b>protocol</div>
+                        </div>
+                    </div>
+
+                    <!-- Procedure — syringe diagonal (filled) -->
+                    <div class="cat-card procedure is-ready" data-href="procedure.html">
+                        <div>
+                            <div class="cat-card__top">
+                                <div class="cat-icon">
+                                    <!-- Phosphor syringe-fill -->
+                                    <svg viewBox="0 0 256 256"><path d="M237.66,77.6a8,8,0,0,1-11.32,0L208,59.25,179.3,88l34.35,34.35a8,8,0,0,1-11.32,11.32L196,127.27l-84,84A16,16,0,0,1,100.65,216H51.26L29.6,237.66a8,8,0,0,1-11.72-.43,8.21,8.21,0,0,1,.61-11.1l21.45-21.46V155.28A16,16,0,0,1,44.63,144l15.18-15.18a4,4,0,0,1,5.66,0L94.3,157.63a8,8,0,1,0,11.32-11.32L76.78,117.47a4,4,0,0,1,0-5.66l11-11a4,4,0,0,1,5.66,0l28.84,28.84a8,8,0,1,0,11.32-11.32L104.79,89.46a4,4,0,0,1,0-5.66l23.87-23.86-6.35-6.35a8,8,0,0,1,.18-11.49,8.22,8.22,0,0,1,11.37.41L168,76.63l28.69-28.7L178.33,29.58a8,8,0,0,1,.17-11.49,8.23,8.23,0,0,1,11.38.41l47.78,47.78A8,8,0,0,1,237.66,77.6Z"/></svg>
+                                </div>
+                                <div class="cat-card__chev"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+                            </div>
+                            <div class="cat-card__name">Procedure</div>
+                        </div>
+                        <div class="cat-card__foot">
+                            <div class="cat-card__count"><b>2</b>protocols</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Search backdrop -->
+        <div class="search-backdrop" id="searchBackdrop"></div>
+
+        <!-- Toast -->
+        <div class="toast" id="toast">Coming soon</div>
+
+        <!-- Bottom Nav -->
+          <nav class="bottom-nav">
+    <div class="nav-item active"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg><span class="nav-item__label">Home</span></div>
+    <div class="nav-item" onclick="window.location.href='protocols.html'"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8m8 4H8"/></svg><span class="nav-item__label">Protocols</span></div>
+    <div class="nav-item" onclick="window.location.href='calculator.html'"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h.01M8 14h2M12 14h2M16 14h.01M8 18h8"/></svg><span class="nav-item__label">Calculator</span></div>
+    <div class="nav-item" onclick="window.location.href='saved.html'"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg><span class="nav-item__label">Saved</span></div>
+    <div class="nav-item" onclick="window.location.href='info.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg><span class="nav-item__label">Information</span></div>
+  </nav>
+    </div>
+
+    <script>
+        /* ---- Toast ---- */
+        const toast = document.getElementById('toast');
+        let toastTimer;
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+        }
+
+        /* ---- Cat-card click ---- */
+        document.querySelectorAll('.cat-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const href = this.dataset.href;
+                if (href) { window.location.href = href; return; }
+                const name = this.querySelector('.cat-card__name').textContent;
+                showToast(`${name} — Coming soon`);
+            });
+        });
+
+        document.querySelectorAll('[data-nav-toast]').forEach(el => {
+            el.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showToast(`${el.dataset.navToast} — Coming soon`);
+            });
+        });
+
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                if (this.classList.contains('active')) return;
+                if (this.getAttribute('onclick')) return;
+                showToast(`${this.querySelector('.nav-item__label').textContent} — Coming soon`);
+            });
+        });
+
+        /* ============================================================
+           Search — protocols + sections + calculators
+           ============================================================ */
+        const SEARCH_DATA = [
+            /* ---- Neurology ---- */
+            {t:'protocol', title:'Pain, Agitation, Sedation, Delirium & Sleep Management', cat:'Neurology', href:'neurology.html'},
+            {t:'protocol', title:'Hypertonic & Osmolar Therapy', cat:'Neurology', href:'neurology.html'},
+            {t:'protocol', title:'Targeted Temperature Management (TTM)', cat:'Neurology', href:'neurology.html'},
+            /* ---- Cardiology ---- */
+            {t:'protocol', title:'Veno-Arterial ECMO (VA-ECMO)', cat:'Cardiology', href:'cardiology.html'},
+            {t:'protocol', title:'Massive Transfusion Protocol', cat:'Cardiology', href:'cardiology.html'},
+            {t:'protocol', title:'Pulmonary Thromboembolism Management', cat:'Cardiology', href:'cardiology.html'},
+            {t:'protocol', title:'Venous Thromboembolism Prophylaxis', cat:'Cardiology', href:'cardiology.html'},
+            /* ---- Pulmonology ---- */
+            {t:'protocol', title:'Mechanical Ventilation Weaning', cat:'Pulmonology', href:'pulmonology.html'},
+            {t:'protocol', title:'Lung-Protective Ventilation', cat:'Pulmonology', href:'pulmonology.html'},
+            {t:'protocol', title:'Noninvasive Ventilation (NIV)', cat:'Pulmonology', href:'pulmonology.html'},
+            {t:'protocol', title:'Prone Position in ARDS', cat:'Pulmonology', href:'pulmonology.html'},
+            {t:'protocol', title:'Prevention of Ventilator-Associated Pneumonia', cat:'Pulmonology', href:'vap-toc.html'},
+            {t:'protocol', title:'Veno-Venous ECMO (VV-ECMO)', cat:'Pulmonology', href:'ecmo-toc.html',
+             keys:'ECMO 체외막산소화 cannulation circuit weaning respiratory failure'},
+            /* ---- GI ---- */
+            {t:'protocol', title:'ICU Nutrition Protocol', cat:'GI & Metabolism', href:'nutr-toc.html',
+             keys:'영양 enteral parenteral feeding EN PN protein energy calorie'},
+            {t:'protocol', title:'Stress Ulcer Prophylaxis', cat:'GI & Metabolism', href:'sup-toc.html',
+             keys:'스트레스 궤양 PPI H2RA esomeprazole famotidine'},
+            /* ---- Nephrology ---- */
+            {t:'protocol', title:'CRRT Protocol', cat:'Nephrology', href:'nephrology.html'},
+            /* ---- Infection ---- */
+            {t:'protocol', title:'ICU Antibiotics Guideline', cat:'Infection', href:'infection.html'},
+            /* ---- Procedure ---- */
+            {t:'protocol', title:'Airway Management Protocol', cat:'Procedure', href:'airway-toc.html'},
+            {t:'protocol', title:'Vascular Access Management', cat:'Procedure', href:'procedure.html'},
+
+            /* ---- Airway Management sections ---- */
+            {t:'section', title:'Decision to Intubate', parent:'Airway Management', cat:'Procedure', href:'airway-s1.html',
+             keys:'indications contraindications consent intubation'},
+            {t:'section', title:'Pre-Intubation Assessment', parent:'Airway Management', cat:'Procedure', href:'airway-s2.html',
+             keys:'anatomic difficulty physiological MACOCHA score'},
+            {t:'section', title:'Preparation', parent:'Airway Management', cat:'Procedure', href:'airway-s3.html',
+             keys:'personnel monitoring equipment IV access medications'},
+            {t:'section', title:'Standard Rapid Sequence Intubation (RSI)', parent:'Airway Management', cat:'Procedure', href:'airway-s4.html',
+             keys:'RSI rapid sequence induction paralysis succinylcholine rocuronium'},
+            {t:'section', title:'Anatomically Difficult Airway', parent:'Airway Management', cat:'Procedure', href:'airway-s5.html',
+             keys:'difficult airway awake intubation video laryngoscope fiberoptic'},
+            {t:'section', title:'Physiologically Difficult Airway', parent:'Airway Management', cat:'Procedure', href:'airway-s6.html',
+             keys:'hypoxia hypotension acidosis modified RSI hemodynamic'},
+            {t:'section', title:'Crash Airway', parent:'Airway Management', cat:'Procedure', href:'airway-s7.html',
+             keys:'crash emergency CPR cardiopulmonary resuscitation cardiac arrest'},
+            {t:'section', title:'Failed Airway Management', parent:'Airway Management', cat:'Procedure', href:'airway-s8.html',
+             keys:'failed CICO CVCO cannot intubate cannot oxygenate cricothyrotomy surgical airway'},
+            {t:'section', title:'Post-Intubation Management', parent:'Airway Management', cat:'Procedure', href:'airway-s9.html',
+             keys:'confirm tube position secure analgosedation mechanical ventilation documentation'},
+            {t:'section', title:'References', parent:'Airway Management', cat:'Procedure', href:'airway-toc.html'},
+            {t:'section', title:'Abbreviations', parent:'Airway Management', cat:'Procedure', href:'airway-toc.html'},
+
+            /* ---- VAP Prevention sections ---- */
+            {t:'section', title:'Definition', parent:'VAP Prevention', cat:'Pulmonology', href:'vap-s1.html',
+             keys:'ventilator-associated pneumonia VAP definition criteria'},
+            {t:'section', title:'Indication', parent:'VAP Prevention', cat:'Pulmonology', href:'vap-s2.html',
+             keys:'patient population mechanical ventilation indication'},
+            {t:'section', title:'Recommendations', parent:'VAP Prevention', cat:'Pulmonology', href:'vap-s3.html',
+             keys:'general care aspiration prevention oral hygiene suction head elevation chlorhexidine subglottic'},
+            {t:'section', title:'References', parent:'VAP Prevention', cat:'Pulmonology', href:'vap-toc.html'},
+
+            /* ---- Stress Ulcer Prophylaxis sections ---- */
+            {t:'section', title:'Indication', parent:'Stress Ulcer Prophylaxis', cat:'GI & Metabolism', href:'sup-s1.html',
+             keys:'적응증 risk factors mechanical ventilation coagulopathy'},
+            {t:'section', title:'Medication', parent:'Stress Ulcer Prophylaxis', cat:'GI & Metabolism', href:'sup-s2.html',
+             keys:'약물 PPI H2RA esomeprazole famotidine pantoprazole'},
+            {t:'section', title:'Duration', parent:'Stress Ulcer Prophylaxis', cat:'GI & Metabolism', href:'sup-s3.html',
+             keys:'기간 discontinuation de-escalation'},
+            {t:'section', title:'Reference', parent:'Stress Ulcer Prophylaxis', cat:'GI & Metabolism', href:'sup-s4.html'},
+
+            /* ---- VV-ECMO sections ---- */
+            {t:'section', title:'Patient Selection', parent:'VV-ECMO', cat:'Pulmonology', href:'ecmo-s1.html',
+             keys:'환자 선택 indication criteria respiratory failure ARDS cannulation'},
+            {t:'section', title:'Circuit Management 1 — Console Setting', parent:'VV-ECMO', cat:'Pulmonology', href:'ecmo-s2.html',
+             keys:'서킷 관리 콘솔 설정 console setting blood flow sweep gas FiO₂ oxygenation SaO₂ PaCO₂'},
+            {t:'section', title:'Circuit Management 2 — Anticoagulation', parent:'VV-ECMO', cat:'Pulmonology', href:'ecmo-s3.html',
+             keys:'항응고 heparin UFH argatroban ACT aPTT anti-Xa HIT bleeding'},
+            {t:'section', title:'Circuit Management 3 — Emergency Complications', parent:'VV-ECMO', cat:'Pulmonology', href:'ecmo-s4.html',
+             keys:'응급 합병증 decannulation circuit rupture air pump failure'},
+            {t:'section', title:'Circuit Management 4 — Common Problems', parent:'VV-ECMO', cat:'Pulmonology', href:'ecmo-s5.html',
+             keys:'흔한 문제 recirculation hemolysis thrombosis oxygenator clot'},
+            {t:'section', title:'Medical Management During ECMO', parent:'VV-ECMO', cat:'Pulmonology', href:'ecmo-s6.html',
+             keys:'의학적 관리 sedation hemodynamics ventilator renal hematology rehabilitation'},
+            {t:'section', title:'Hypoxemia During VV ECMO', parent:'VV-ECMO', cat:'Pulmonology', href:'ecmo-s7.html',
+             keys:'저산소혈증 hypoxemia troubleshooting desaturation'},
+            {t:'section', title:'Monitoring During ECMO', parent:'VV-ECMO', cat:'Pulmonology', href:'ecmo-s8.html',
+             keys:'모니터링 labs daily checklist ACT hemolysis'},
+            {t:'section', title:'Weaning from ECMO', parent:'VV-ECMO', cat:'Pulmonology', href:'ecmo-s9.html',
+             keys:'이탈 weaning decannulation sweep gas off trial futility'},
+            {t:'section', title:'Reference', parent:'VV-ECMO', cat:'Pulmonology', href:'ecmo-s10.html'},
+
+            /* ---- ICU Nutrition sections ---- */
+            {t:'section', title:'Selection of Nutritional Support', parent:'ICU Nutrition', cat:'GI & Metabolism', href:'nutr-s1.html',
+             keys:'영양 방법 선택 enteral parenteral oral'},
+            {t:'section', title:'Indications and Timing', parent:'ICU Nutrition', cat:'GI & Metabolism', href:'nutr-s2.html',
+             keys:'적응증 시작 시기 early nutrition 24-48h'},
+            {t:'section', title:'Route of Administration', parent:'ICU Nutrition', cat:'GI & Metabolism', href:'nutr-s3.html',
+             keys:'투여 경로 gastric post-pyloric nasogastric nasojejunal'},
+            {t:'section', title:'Nutritional Goals', parent:'ICU Nutrition', cat:'GI & Metabolism', href:'nutr-s4.html',
+             keys:'투여 목표 energy protein calorie kcal'},
+            {t:'section', title:'Administration, Dosing, and Advancement', parent:'ICU Nutrition', cat:'GI & Metabolism', href:'nutr-s5.html',
+             keys:'투여 방법 용량 증량 trophic full feeding'},
+            {t:'section', title:'Supplemental Parenteral Nutrition', parent:'ICU Nutrition', cat:'GI & Metabolism', href:'nutr-s6.html',
+             keys:'보충적 정맥영양 PN TPN'},
+            {t:'section', title:'Monitoring', parent:'ICU Nutrition', cat:'GI & Metabolism', href:'nutr-s7.html',
+             keys:'모니터링 GRV gastric residual electrolytes refeeding'},
+            {t:'section', title:'Formula Selection', parent:'ICU Nutrition', cat:'GI & Metabolism', href:'nutr-s8.html',
+             keys:'영양액 선택 formula standard immune-modulating'},
+            {t:'section', title:'Complications', parent:'ICU Nutrition', cat:'GI & Metabolism', href:'nutr-s9.html',
+             keys:'합병증 aspiration diarrhea hyperglycemia refeeding syndrome'},
+            {t:'section', title:'Disease-Specific Considerations', parent:'ICU Nutrition', cat:'GI & Metabolism', href:'nutr-s10.html',
+             keys:'질환별 고려사항 ARDS sepsis liver kidney pancreatitis'},
+            {t:'section', title:'Discontinuation and Transition', parent:'ICU Nutrition', cat:'GI & Metabolism', href:'nutr-s11.html',
+             keys:'영양치료 종료 전환 oral diet transition'},
+            {t:'section', title:'Post-ICU Nutrition Therapy', parent:'ICU Nutrition', cat:'GI & Metabolism', href:'nutr-s12.html',
+             keys:'중환자실 퇴실 후 영양치료 rehabilitation'},
+            {t:'section', title:'References', parent:'ICU Nutrition', cat:'GI & Metabolism', href:'nutr-s13.html'},
+            {t:'section', title:'Prokinetic Agents', parent:'ICU Nutrition', cat:'GI & Metabolism', href:'nutr-s14.html',
+             keys:'위장관 운동촉진제 Mosapride Metoclopramide Domperidone Prucalopride prokinetic agents'},
+            {t:'section', title:'EN Formulas', parent:'ICU Nutrition', cat:'GI & Metabolism', href:'nutr-s15.html',
+             keys:'경장영양액 formula 뉴케어 메디웰 그린비아 RTH fiber-free fiber-containing'},
+
+            /* ---- Calculators ---- */
+            {t:'calc', title:'Glasgow Coma Scale (GCS)', cat:'Severity Scores', href:'calc-gcs.html',
+             keys:'eye verbal motor consciousness level coma'},
+            {t:'calc', title:'SOFA Score', cat:'Severity Scores', href:'calc-sofa.html',
+             keys:'sequential organ failure assessment sepsis'},
+            {t:'calc', title:'APACHE II', cat:'Severity Scores', href:'calc-apache2.html',
+             keys:'acute physiology chronic health evaluation mortality'},
+            {t:'calc', title:'4T Score (HIT)', cat:'Severity Scores', href:'calc-4ts.html',
+             keys:'4T score HIT heparin induced thrombocytopenia pretest clinical probability 4T 점수'},
+            {t:'calc', title:'Creatinine Clearance', cat:'Renal & Electrolytes', href:'calc-crcl.html',
+             keys:'Cockcroft-Gault CrCl GFR renal function'},
+            {t:'calc', title:'Corrected Calcium', cat:'Renal & Electrolytes', href:'calc-corrected-ca.html',
+             keys:'albumin hypocalcemia calcium correction'},
+            {t:'calc', title:'Anion Gap', cat:'Renal & Electrolytes', href:'calc-anion-gap.html',
+             keys:'metabolic acidosis AG NAGMA HAGMA'},
+            {t:'calc', title:'Vasoactive-Inotropic Score (VIS)', cat:'Cardiovascular', href:'calc-vis.html',
+             keys:'vasopressor inotrope hemodynamic support'},
+            {t:'calc', title:'Cardiac Output (Fick)', cat:'Cardiovascular', href:'calc-fick-co.html',
+             keys:'Fick oxygen consumption CO CI cardiac index'},
+            {t:'calc', title:'A-a Gradient', cat:'Respiratory', href:'calc-aa-gradient.html',
+             keys:'alveolar-arterial oxygen gradient PaO2 PAO2 hypoxemia'},
+            {t:'calc', title:'Steroid Conversion Calculator', cat:'Pharmacology', href:'calc-steroid.html'},
+            {t:'calc', title:'FENa Calculator', cat:'Renal & Electrolytes', href:'calc-fena.html',
+             keys:'fractional excretion sodium prerenal intrinsic renal'},
+            {t:'calc', title:'TTKG Calculator', cat:'Renal & Electrolytes', href:'calc-ttkg.html',
+             keys:'transtubular potassium gradient hyperkalemia hypokalemia aldosterone'},
+            {t:'calc', title:'Na Correction (Glucose)', cat:'Renal & Electrolytes', href:'calc-na-correction.html',
+             keys:'sodium correction glucose hyperglycemia Katz Hillier'},
+            {t:'calc', title:'Free Water Deficit', cat:'Renal & Electrolytes', href:'calc-fwd.html',
+             keys:'hypernatremia dehydration total body water Adrogué Madias'},
+            {t:'calc', title:'Sodium Deficit', cat:'Renal & Electrolytes', href:'calc-na-deficit.html',
+             keys:'hyponatremia 3% saline hypertonic sodium replacement'},
+            {t:'calc', title:'Drug Infusion Rate', cat:'Pharmacology', href:'calc-drip.html',
+             keys:'drip norepinephrine epinephrine dopamine dobutamine vasopressin milrinone midazolam propofol fentanyl dexmedetomidine infusion rate mcg/kg/min'},
+        ];
+
+        // Pre-compute searchable string (title + cat + parent + keys)
+        SEARCH_DATA.forEach(d => {
+            d._lc = [d.title, d.cat, d.parent || '', d.keys || ''].join(' ').toLowerCase();
+        });
+
+        const searchInput    = document.getElementById('searchInput');
+        const searchResults  = document.getElementById('searchResults');
+        const searchClear    = document.getElementById('searchClear');
+        const searchBackdrop = document.getElementById('searchBackdrop');
+        const mainContent    = document.querySelector('.main--brand');
+        let focusIdx = -1;
+
+        function escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+        function highlightMatch(text, query) {
+            if (!query) return text;
+            const re = new RegExp('(' + escapeRe(query) + ')', 'gi');
+            return text.replace(re, '<mark>$1</mark>');
+        }
+
+        function doSearch(raw) {
+            const q = raw.trim().toLowerCase();
+            searchClear.classList.toggle('show', raw.length > 0);
+
+            if (!q) { closeSearch(); return; }
+
+            const matches = SEARCH_DATA.filter(d => d._lc.includes(q));
+
+            // Group by type
+            const protocols = matches.filter(d => d.t === 'protocol');
+            const sections  = matches.filter(d => d.t === 'section');
+            const calcs     = matches.filter(d => d.t === 'calc');
+
+            searchResults.innerHTML = '';
+
+            if (matches.length === 0) {
+                searchResults.innerHTML = '<div class="search-results__empty">No results for "' + raw.trim().replace(/</g,'&lt;') + '"</div>';
+                openSearch();
+                return;
+            }
+
+            if (protocols.length) {
+                searchResults.innerHTML += '<div class="sr-group-label">Protocols</div>';
+                protocols.forEach(d => searchResults.appendChild(makeItem(d, raw.trim())));
+            }
+            if (sections.length) {
+                searchResults.innerHTML += '<div class="sr-group-label">Sections</div>';
+                sections.forEach(d => searchResults.appendChild(makeItem(d, raw.trim())));
+            }
+            if (calcs.length) {
+                searchResults.innerHTML += '<div class="sr-group-label">Calculators</div>';
+                calcs.forEach(d => searchResults.appendChild(makeItem(d, raw.trim())));
+            }
+
+            focusIdx = -1;
+            openSearch();
+        }
+
+        function makeItem(d, query) {
+            const el = document.createElement('div');
+            el.className = 'sr-item';
+            el.dataset.href = d.href;
+
+            let iconClass, iconSvg, meta;
+            if (d.t === 'calc') {
+                iconClass = 'sr-item__icon--calculator';
+                iconSvg = '<svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h.01M8 14h2M12 14h2M16 14h.01M8 18h8"/></svg>';
+                meta = d.cat;
+            } else if (d.t === 'section') {
+                iconClass = 'sr-item__icon--section';
+                iconSvg = '<svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h14"/></svg>';
+                meta = d.parent + ' · ' + d.cat;
+            } else {
+                iconClass = 'sr-item__icon--protocol';
+                iconSvg = '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8m8 4H8"/></svg>';
+                meta = d.cat;
+            }
+
+            el.innerHTML = `
+                <div class="sr-item__icon ${iconClass}">${iconSvg}</div>
+                <div class="sr-item__body">
+                    <div class="sr-item__title">${highlightMatch(d.title, query)}</div>
+                    <div class="sr-item__meta">${meta}</div>
+                </div>
+                <div class="sr-item__arrow"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+            `;
+
+            el.addEventListener('click', () => {
+                window.location.href = d.href;
+            });
+
+            return el;
+        }
+
+        const headerEl = document.querySelector('.header');
+
+        function openSearch() {
+            headerEl.classList.add('search-open');
+            searchResults.classList.add('show');
+            searchBackdrop.classList.add('show');
+            mainContent.classList.add('search-active');
+        }
+
+        function closeSearch() {
+            headerEl.classList.remove('search-open');
+            searchResults.classList.remove('show');
+            searchBackdrop.classList.remove('show');
+            mainContent.classList.remove('search-active');
+            focusIdx = -1;
+        }
+
+        function clearSearch() {
+            searchInput.value = '';
+            searchClear.classList.remove('show');
+            closeSearch();
+            searchInput.blur();
+        }
+
+        /* Events */
+        searchInput.addEventListener('input', () => doSearch(searchInput.value));
+        searchInput.addEventListener('focus', () => { if (searchInput.value.trim()) doSearch(searchInput.value); });
+        searchClear.addEventListener('click', clearSearch);
+        searchBackdrop.addEventListener('click', clearSearch);
+
+        /* Keyboard navigation */
+        searchInput.addEventListener('keydown', (e) => {
+            const items = searchResults.querySelectorAll('.sr-item');
+            if (!items.length) {
+                if (e.key === 'Escape') clearSearch();
+                return;
+            }
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                focusIdx = Math.min(focusIdx + 1, items.length - 1);
+                updateFocus(items);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                focusIdx = Math.max(focusIdx - 1, 0);
+                updateFocus(items);
+            } else if (e.key === 'Enter' && focusIdx >= 0) {
+                e.preventDefault();
+                items[focusIdx].click();
+            } else if (e.key === 'Escape') {
+                clearSearch();
+            }
+        });
+
+        function updateFocus(items) {
+            items.forEach((el, i) => el.classList.toggle('is-focused', i === focusIdx));
+            if (focusIdx >= 0) items[focusIdx].scrollIntoView({ block: 'nearest' });
+        }
+
+        /* ============================================================
+           Recently Viewed — render stored entries
+           ============================================================ */
+        (function () {
+            var KEY = 'smc-recent-pages';
+            try {
+                var list = JSON.parse(localStorage.getItem(KEY) || '[]');
+                if (!list.length) return;
+
+                var section = document.getElementById('recentSection');
+                var scroll  = document.getElementById('recentScroll');
+                if (!section || !scroll) return;
+
+                function relativeTime(ts) {
+                    var diff = Math.floor((Date.now() - ts) / 1000);
+                    if (diff < 60) return 'Just now';
+                    var m = Math.floor(diff / 60);
+                    if (m < 60) return m + 'm ago';
+                    var h = Math.floor(m / 60);
+                    if (h < 24) return h + 'h ago';
+                    var d = Math.floor(h / 24);
+                    if (d === 1) return 'Yesterday';
+                    if (d < 7) return d + 'd ago';
+                    return new Date(ts).toLocaleDateString();
+                }
+
+                function removeEntry(href) {
+                    try {
+                        var cur = JSON.parse(localStorage.getItem(KEY) || '[]');
+                        cur = cur.filter(function (e) { return e.href !== href; });
+                        localStorage.setItem(KEY, JSON.stringify(cur));
+                    } catch (e) { /* ignore */ }
+                }
+
+                list.forEach(function (entry) {
+                    var card = document.createElement('div');
+                    card.className = 'recent-card';
+                    card.innerHTML =
+                        '<button class="recent-card__close" aria-label="Remove">' +
+                            '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>' +
+                        '</button>' +
+                        '<div class="recent-card__eyebrow">' + (entry.eyebrow || '') + '</div>' +
+                        '<div class="recent-card__title">' + (entry.title || '') + '</div>' +
+                        '<div class="recent-card__time">' + relativeTime(entry.time) + '</div>';
+                    card.addEventListener('click', function () {
+                        window.location.href = entry.href;
+                    });
+                    card.querySelector('.recent-card__close').addEventListener('click', function (ev) {
+                        ev.stopPropagation();
+                        removeEntry(entry.href);
+                        card.remove();
+                        if (!scroll.children.length) section.style.display = 'none';
+                    });
+                    scroll.appendChild(card);
+                });
+
+                section.style.display = '';
+            } catch (e) { /* ignore */ }
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protocols · SMC ICU Protocol</title>
+    <script src="settings-init.js?v=1776350000"></script>
+    <link href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=1776350000">
+    <style>
+        /* ---- Filter chips ---- */
+        .filter-bar {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding: 2px 0 14px;
+            margin: -4px -2px 4px;
+            scroll-snap-type: x proximity;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .filter-bar::-webkit-scrollbar { display: none; }
+
+        .chip {
+            flex-shrink: 0;
+            padding: 7px 12px;
+            font-size: 11.5px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            color: var(--text-secondary);
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 999px;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+            scroll-snap-align: start;
+        }
+        .chip:hover { border-color: color-mix(in srgb, var(--smc-blue) 30%, var(--border-subtle)); }
+        .chip.is-active {
+            background: var(--text-primary);
+            border-color: var(--text-primary);
+            color: #fff;
+        }
+        .chip__count {
+            display: inline-block;
+            margin-left: 6px;
+            font-size: 10.5px;
+            font-weight: 800;
+            color: var(--text-tertiary);
+            font-variant-numeric: tabular-nums;
+        }
+        .chip.is-active .chip__count { color: color-mix(in srgb, #fff 75%, transparent); }
+
+        /* ---- Category group ---- */
+        .proto-group {
+            margin-bottom: 24px;
+            animation: fadeUp 0.4s var(--ease-out) both;
+        }
+        .proto-group.is-hidden { display: none; }
+
+        .proto-group__head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 2px 0 12px;
+            padding: 0 2px;
+        }
+        .proto-group__dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--cat-color);
+            flex-shrink: 0;
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--cat-color) 18%, transparent);
+        }
+        .proto-group__name {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-primary);
+        }
+        .proto-group__rule {
+            flex: 1;
+            height: 1px;
+            background: var(--border-subtle);
+        }
+        .proto-group__tally {
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: 0.6px;
+            color: var(--text-tertiary);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ---- Protocol card ---- */
+        .proto-list { display: flex; flex-direction: column; gap: 10px; }
+
+        .proto-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--r-lg);
+            padding: 14px 16px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.25s var(--ease-out), border-color 0.25s, box-shadow 0.25s;
+            animation: slideFade 0.4s var(--ease-out) both;
+        }
+        .proto-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 12px; bottom: 12px;
+            width: 2px;
+            background: var(--cat-color);
+            opacity: 0.5;
+            border-radius: 0 2px 2px 0;
+            transition: opacity 0.25s, width 0.25s;
+        }
+        .proto-card:hover {
+            transform: translateY(-1px);
+            border-color: color-mix(in srgb, var(--smc-blue) 30%, var(--border-subtle));
+            box-shadow: 0 6px 18px rgba(20, 40, 160, 0.05);
+        }
+        .proto-card:hover::before { opacity: 1; width: 3px; }
+        .proto-card.is-pending { opacity: 0.72; }
+        .proto-card.is-pending:hover { opacity: 0.95; }
+
+        .proto-card__head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .proto-card__body { flex: 1; min-width: 0; }
+        .proto-card__title {
+            font-size: 14.5px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+            color: var(--text-primary);
+            line-height: 1.3;
+        }
+        .proto-card__title .star {
+            display: inline-block;
+            margin-left: 4px;
+            font-size: 11px;
+            color: var(--smc-orange);
+            vertical-align: 1px;
+        }
+        .proto-card__meta {
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            font-variant-numeric: tabular-nums;
+        }
+        .proto-card__cat {
+            color: var(--cat-color);
+            font-weight: 800;
+        }
+        .proto-card__meta .dot {
+            width: 3px; height: 3px; border-radius: 50%;
+            background: var(--border-subtle);
+            display: inline-block;
+        }
+        .proto-card__status {
+            font-size: 9.5px;
+            font-weight: 800;
+            letter-spacing: 0.8px;
+            padding: 3px 7px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+        .proto-card__status--ready  { color: var(--cat-color); background: color-mix(in srgb, var(--cat-color) 10%, #fff); }
+        .proto-card__status--draft  { color: #a16207; background: #fef9c3; }
+        .proto-card__status--soon   { color: var(--text-tertiary); background: var(--bg-subtle); }
+
+        .proto-card__arrow {
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            background: var(--bg-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.25s, transform 0.25s var(--ease-spring);
+        }
+        .proto-card__arrow svg {
+            width: 11px; height: 11px;
+            stroke: var(--text-tertiary);
+            stroke-width: 2.5;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: stroke 0.25s;
+        }
+        .proto-card:hover .proto-card__arrow {
+            background: var(--smc-blue);
+            transform: translateX(2px);
+        }
+        .proto-card:hover .proto-card__arrow svg { stroke: #fff; }
+
+        .proto-card:nth-child(1) { animation-delay: 0.03s; }
+        .proto-card:nth-child(2) { animation-delay: 0.07s; }
+        .proto-card:nth-child(3) { animation-delay: 0.11s; }
+        .proto-card:nth-child(4) { animation-delay: 0.15s; }
+        .proto-card:nth-child(5) { animation-delay: 0.19s; }
+        .proto-card:nth-child(6) { animation-delay: 0.23s; }
+
+        /* Category scoping */
+        .proto-group.neurology   { --cat-color: var(--cat-neurology); }
+        .proto-group.cardiology  { --cat-color: var(--cat-cardiology); }
+        .proto-group.pulmonology { --cat-color: var(--cat-pulmonology); }
+        .proto-group.gi          { --cat-color: var(--cat-gi); }
+        .proto-group.nephrology  { --cat-color: var(--cat-nephrology); }
+        .proto-group.infection   { --cat-color: var(--cat-infection); }
+        .proto-group.procedure   { --cat-color: var(--cat-procedure); }
+
+        /* Summary strip at top */
+        .summary {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            padding: 2px 2px 12px;
+            border-bottom: 1px solid var(--border-subtle);
+            margin-bottom: 14px;
+        }
+        .summary__total {
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            color: var(--text-primary);
+            font-variant-numeric: tabular-nums;
+        }
+        .summary__total small {
+            margin-left: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+        }
+        .summary__breakdown {
+            display: flex;
+            gap: 14px;
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: var(--text-tertiary);
+        }
+        .summary__breakdown b {
+            color: var(--text-primary);
+            font-variant-numeric: tabular-nums;
+            margin-right: 3px;
+        }
+        .summary__breakdown .ready b { color: var(--smc-blue); }
+
+        .empty {
+            padding: 40px 20px;
+            text-align: center;
+            color: var(--text-tertiary);
+            font-size: 13px;
+        }
+        .empty.is-hidden { display: none; }
+
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header header--page">
+        <div class="header__top">
+            <button class="icon-btn icon-btn--back" onclick="window.location.href='index.html'" aria-label="Back">
+                <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            </button>
+            <div class="header__title">
+                <span class="header__eyebrow">Library</span>
+                <div class="header__h1">Protocols</div>
+            </div>
+            <span class="icon-btn" aria-hidden="true" style="visibility:hidden"></span>
+        </div>
+    </header>
+
+    <main class="main main--page">
+        <!-- Summary -->
+        <div class="summary">
+            <div class="summary__total">19<small>total</small></div>
+            <div class="summary__breakdown">
+                <span class="ready"><b>2</b>Ready</span>
+                <span><b>1</b>Draft</span>
+                <span><b>16</b>Soon</span>
+            </div>
+        </div>
+
+        <!-- Filter chips -->
+        <div class="filter-bar" id="filterBar">
+            <button class="chip is-active" data-filter="all">All<span class="chip__count">19</span></button>
+            <button class="chip" data-filter="ready">Ready<span class="chip__count">2</span></button>
+            <button class="chip" data-filter="neurology">Neurology<span class="chip__count">3</span></button>
+            <button class="chip" data-filter="cardiology">Cardiology<span class="chip__count">4</span></button>
+            <button class="chip" data-filter="pulmonology">Pulmonology<span class="chip__count">6</span></button>
+            <button class="chip" data-filter="gi">GI &amp; Metab<span class="chip__count">2</span></button>
+            <button class="chip" data-filter="nephrology">Nephrology<span class="chip__count">1</span></button>
+            <button class="chip" data-filter="infection">Infection<span class="chip__count">1</span></button>
+            <button class="chip" data-filter="procedure">Procedure<span class="chip__count">2</span></button>
+        </div>
+
+        <!-- Neurology -->
+        <section class="proto-group neurology" data-cat="neurology">
+            <div class="proto-group__head">
+                <span class="proto-group__dot"></span>
+                <span class="proto-group__name">Neurology</span>
+                <div class="proto-group__rule"></div>
+                <span class="proto-group__tally">03</span>
+            </div>
+            <div class="proto-list">
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                <div class="proto-card" data-status="ready" data-href="vap-toc.html">
+                    <div class="proto-card__head">
+                        <div class="proto-card__body">
+                            <div class="proto-card__title">Ventilator-Associated Pneumonia Prevention</div>
+                            <div class="proto-card__meta"><span class="proto-card__cat">Pulmonology</span><span class="dot"></span><span>4 sections</span><span class="dot"></span><span>Rev. 2026.03</span></div>
+                        </div>
+                        <div class="proto-card__arrow"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+                    </div>
+                </div>
+                <div class="proto-card" data-status="ready" data-href="ecmo-toc.html">
+                    <div class="proto-card__head">
+                        <div class="proto-card__body">
+                            <div class="proto-card__title">Veno-Venous ECMO (VV-ECMO)</div>
+                            <div class="proto-card__meta"><span class="proto-card__cat">Pulmonology</span><span class="dot"></span><span>Severe ARDS</span></div>
+                        </div>
+                        <div class="proto-card__arrow"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- GI & Metabolism -->
+        <section class="proto-group gi" data-cat="gi">
+            <div class="proto-group__head">
+                <span class="proto-group__dot"></span>
+                <span class="proto-group__name">GI &amp; Metabolism</span>
+                <div class="proto-group__rule"></div>
+                <span class="proto-group__tally">02</span>
+            </div>
+            <div class="proto-list"><div class="proto-card" data-status="ready" data-href="nutr-toc.html">
+                    <div class="proto-card__head">
+                        <div class="proto-card__body">
+                            <div class="proto-card__title">ICU Nutrition Protocol</div>
+                            <div class="proto-card__meta"><span class="proto-card__cat">GI &amp; Metab</span><span class="dot"></span><span>Enteral / parenteral</span></div>
+                        </div>
+                        <div class="proto-card__arrow"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+                    </div>
+                </div>
+                <div class="proto-card" data-status="ready" data-href="sup-toc.html">
+                    <div class="proto-card__head">
+                        <div class="proto-card__body">
+                            <div class="proto-card__title">Stress Ulcer Prophylaxis</div>
+                            <div class="proto-card__meta"><span class="proto-card__cat">GI &amp; Metab</span><span class="dot"></span><span>SUP indication</span></div>
+                        </div>
+                        <div class="proto-card__arrow"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Nephrology -->
+        <section class="proto-group nephrology" data-cat="nephrology">
+            <div class="proto-group__head">
+                <span class="proto-group__dot"></span>
+                <span class="proto-group__name">Nephrology</span>
+                <div class="proto-group__rule"></div>
+                <span class="proto-group__tally">01</span>
+            </div>
+            <div class="proto-list"><div class="proto-card" data-status="ready" data-href="airway-toc.html">
+                    <div class="proto-card__head">
+                        <div class="proto-card__body">
+                            <div class="proto-card__title">Airway Management Protocol</div>
+                            <div class="proto-card__meta"><span class="proto-card__cat">Procedure</span><span class="dot"></span><span>11 sections</span><span class="dot"></span><span>Rev. 2026.03</span></div>
+                        </div>
+                        <div class="proto-card__arrow"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+                    </div>
+                </div>
+                

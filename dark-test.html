@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dark Mode Test</title>
+<link href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=1776350000">
+<link rel="stylesheet" href="protocol.css?v=1776350000">
+<style>.container { --cat-color: var(--cat-neurology); }</style>
+</head>
+<body>
+<div class="container">
+  <header class="header header--page">
+    <div class="header__top">
+      <div class="header__title">
+        <span class="header__eyebrow">Airway · Section 1 of 11</span>
+        <div class="header__h1">Dark Mode Test</div>
+      </div>
+    </div>
+  </header>
+  <main class="main main--page">
+    <div class="sec-progress"><div class="sec-progress__bar" style="width:50%"></div></div>
+    <div class="p-sect__body"><div class="p-group"><h3 class="p-sub"><span class="p-num">1.</span>Test Heading</h3>
+<div class="p-item p-l2"><span class="p-num">(1)</span>This is L2 text</div>
+<div class="p-item p-l3"><span class="p-num">①</span>This is L3 text</div>
+<div class="p-item p-l4"><span class="p-num">•</span>This is L4 text</div>
+<p class="p-note">This is a note</p>
+</div></div>
+    <div style="padding:20px;margin:20px 0;background:red;color:white;font-size:16px;border-radius:8px;">
+      DEBUG: bg-app = <span id="d1"></span><br>
+      bg-card = <span id="d2"></span><br>
+      text-primary = <span id="d3"></span><br>
+      data-theme = <span id="d4"></span>
+    </div>
+  </main>
+  <nav class="bottom-nav">
+    <div class="nav-item active"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg><span class="nav-item__label">Test</span></div>
+  </nav>
+</div>
+<script>
+var s = getComputedStyle(document.documentElement);
+document.getElementById('d1').textContent = s.getPropertyValue('--bg-app');
+document.getElementById('d2').textContent = s.getPropertyValue('--bg-card');
+document.getElementById('d3').textContent = s.getPropertyValue('--text-primary');
+document.getElementById('d4').textContent = document.documentElement.getAttribute('data-theme') || '(none)';
+</script>
+</body>
+</html>

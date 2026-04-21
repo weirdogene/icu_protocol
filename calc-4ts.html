@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>4T Score · SMC ICU Protocol</title>
+    <script src="settings-init.js?v=1776350000"></script>
+<link href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=1776350000">
+<link rel="stylesheet" href="calculator.css?v=1776350000">
+<style>
+.container { --cat-color: var(--smc-blue); }
+.t4-opts { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.t4-opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.t4-opt__p {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--text-secondary) 10%, transparent);
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+}
+.t4-opt__txt {
+  flex: 1;
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text-primary);
+}
+.t4-opt[aria-pressed="true"] {
+  border-color: var(--smc-blue);
+  background: color-mix(in srgb, var(--smc-blue) 6%, #fff);
+}
+.t4-opt[aria-pressed="true"] .t4-opt__p {
+  background: var(--smc-blue);
+  color: #fff;
+}
+.t4-opt[aria-pressed="true"] .t4-opt__txt {
+  color: var(--smc-blue);
+  font-weight: 600;
+}
+html[data-theme="dark"] .t4-opt[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--smc-blue) 12%, #161b22);
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="header header--page">
+    <div class="header__top">
+      <button class="icon-btn icon-btn--back" onclick="window.location.href='calculator.html'" aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <div class="header__title">
+        <span class="header__eyebrow">Calculator</span>
+        <div class="header__h1">4T Score</div>
+      </div>
+      <button class="icon-btn icon-btn--bookmark" aria-label="Save" aria-pressed="false">
+        <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="main main--page">
+    <div class="calc-intro">
+      <div class="calc-intro__title"><span data-lang="ko">헤파린 유발 혈소판 감소증 (HIT) 임상 평가</span><span data-lang="en">Pretest Clinical Score for HIT</span></div>
+      <div class="calc-intro__desc"><span data-lang="ko">헤파린 유발 혈소판 감소증(HIT)의 임상 확률을 평가하는 4가지 항목의 합산 점수. 각 항목 0–2점, 총 0–8점.</span><span data-lang="en">Scores clinical probability of heparin-induced thrombocytopenia. Four categories, each 0–2 points (total 0–8).</span></div>
+    </div>
+
+    <section class="calc-sect">
+      <div class="calc-sect__hd">
+        <span class="calc-sect__num">01</span>
+        <span class="calc-sect__title"><span data-lang="ko">혈소판 감소증</span><span data-lang="en">Thrombocytopenia</span></span>
+        <div class="calc-sect__rule"></div>
+      </div>
+      <div class="t4-opts" data-k="tcp">
+        <button class="t4-opt" data-p="2"><span class="t4-opt__p">2</span><span class="t4-opt__txt"><span data-lang="ko">혈소판 수 &gt; 50% 감소, 최저치 ≥ 20,000/μL</span><span data-lang="en">Platelet fall &gt; 50% and nadir ≥ 20,000/μL</span></span></button>
+        <button class="t4-opt" data-p="1"><span class="t4-opt__p">1</span><span class="t4-opt__txt"><span data-lang="ko">혈소판 수 30–50% 감소, 또는 최저치 10,000–19,000/μL</span><span data-lang="en">Platelet fall 30–50%, or nadir 10,000–19,000/μL</span></span></button>
+        <button class="t4-opt" data-p="0"><span class="t4-opt__p">0</span><span class="t4-opt__txt"><span data-lang="ko">혈소판 수 &lt; 30% 감소, 또는 최저치 &lt; 10,000/μL</span><span data-lang="en">Platelet fall &lt; 30%, or nadir &lt; 10,000/μL</span></span></button>
+      </div>
+    </section>
+
+    <section class="calc-sect">
+      <div class="calc-sect__hd">
+        <span class="calc-sect__num">02</span>
+        <span class="calc-sect__title"><span data-lang="ko">혈소판 감소 시점</span><span data-lang="en">Timing of Platelet Count Fall</span></span>
+        <div class="calc-sect__rule"></div>
+      </div>
+      <div class="t4-opts" data-k="timing">
+        <button class="t4-opt" data-p="2"><span class="t4-opt__p">2</span><span class="t4-opt__txt"><span data-lang="ko">명확한 발현 시점이 5–10일이거나, 혈소판 감소가 1일 이내에 발생 (최근 30일 이내 헤파린 노출)</span><span data-lang="en">Clear onset days 5–10 or fall ≤ 1 day (prior heparin exposure within 30 days)</span></span></button>
+        <button class="t4-opt" data-p="1"><span class="t4-opt__p">1</span><span class="t4-opt__txt"><span data-lang="ko">5–10일째에 감소하지만 발현 시점이 불명확; 10일 이후 발생; 또는 1일 이내 감소 (최근 30–100일 사이 헤파린 노출)</span><span data-lang="en">Consistent with days 5–10 fall, but unclear; onset after day 10; or fall ≤ 1 day (prior heparin 30–100 days ago)</span></span></button>
+        <button class="t4-opt" data-p="0"><span class="t4-opt__p">0</span><span class="t4-opt__txt"><span data-lang="ko">최근 노출 없이 ≤ 4일째 혈소판 감소</span><span data-lang="en">Platelet fall ≤ 4 days without recent exposure</span></span></button>
+      </div>
+    </section>
+
+    <section class="calc-sect">
+      <div class="calc-sect__hd">
+        <span class="calc-sect__num">03</span>
+        <span class="calc-sect__title"><span data-lang="ko">혈전증 또는 기타 후유증</span><span data-lang="en">Thrombosis or Other Sequelae</span></span>
+        <div class="calc-sect__rule"></div>
+      </div>
+      <div class="t4-opts" data-k="thr">
+        <button class="t4-opt" data-p="2"><span class="t4-opt__p">2</span><span class="t4-opt__txt"><span data-lang="ko">새로 확인된 혈전증; 피부 괴사; 정맥내 헤파린 볼루스 투약 후 급성 전신 반응</span><span data-lang="en">New confirmed thrombosis; skin necrosis; acute systemic reaction after IV UFH bolus</span></span></button>
+        <button class="t4-opt" data-p="1"><span class="t4-opt__p">1</span><span class="t4-opt__txt"><span data-lang="ko">진행성 또는 재발성 혈전증; 괴사가 없는 홍반성 피부 병변; 혈전증 의증</span><span data-lang="en">Progressive or recurrent thrombosis; non-necrotizing erythematous skin lesions; suspected thrombosis</span></span></button>
+        <button class="t4-opt" data-p="0"><span class="t4-opt__p">0</span><span class="t4-opt__txt"><span data-lang="ko">없음</span><span data-lang="en">None</span></span></button>
+      </div>
+    </section>
+
+    <section class="calc-sect">
+      <div class="calc-sect__hd">
+        <span class="calc-sect__num">04</span>
+        <span class="calc-sect__title"><span data-lang="ko">혈소판 감소의 다른 원인</span><span data-lang="en">Other Causes of Thrombocytopenia</span></span>
+        <div class="calc-sect__rule"></div>
+      </div>
+      <div class="t4-opts" data-k="other">
+        <button class="t4-opt" data-p="2"><span class="t4-opt__p">2</span><span class="t4-opt__txt"><span data-lang="ko">없음</span><span data-lang="en">None apparent</span></span></button>
+        <button class="t4-opt" data-p="1"><span class="t4-opt__p">1</span><span class="t4-opt__txt"><span data-lang="ko">가능성 있음</span><span data-lang="en">Possible</span></span></button>
+        <button class="t4-opt" data-p="0"><span class="t4-opt__p">0</span><span class="t4-opt__txt"><span data-lang="ko">확실함</span><span data-lang="en">Definite</span></span></button>
+      </div>
+    </section>
+
+    <section class="calc-sect">
+      <div class="calc-sect__hd">
+        <span class="calc-sect__num">05</span>
+        <span class="calc-sect__title"><span data-lang="ko">결과 해석</span><span data-lang="en">Interpretation</span></span>
+        <div class="calc-sect__rule"></div>
+      </div>
+      <div class="calc-interp">
+        <div class="calc-interp__row"><span class="calc-interp__range">0–3</span><span class="calc-interp__desc"><span data-lang="ko">저위험 (HIT 확률 낮음, &lt; 5%)</span><span data-lang="en">Low probability (&lt; 5%)</span></span></div>
+        <div class="calc-interp__row"><span class="calc-interp__range">4–5</span><span class="calc-interp__desc"><span data-lang="ko">중등도 위험 (~14%)</span><span data-lang="en">Intermediate probability (~14%)</span></span></div>
+        <div class="calc-interp__row"><span class="calc-interp__range">6–8</span><span class="calc-interp__desc"><span data-lang="ko">고위험 (~64%)</span><span data-lang="en">High probability (~64%)</span></span></div>
+      </div>
+    </section>
+
+    <button class="calc-reset" onclick="resetAll()">
+      <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+      Reset
+    </button>
+
+    <div class="calc-refs">
+      <p>Lo GK, Juhl D, Warkentin TE, et al. Evaluation of pretest clinical score (4 T&#x27;s) for the diagnosis of heparin-induced thrombocytopenia. J Thromb Haemost. 2006;4(4):759-65.</p>
+    </div>
+
+    <div class="calc-result is-empty" id="result">
+      <div class="calc-result__row">
+        <span class="calc-result__label">4T Score</span>
+        <span class="calc-result__value" id="total">—<small>/ 8</small></span>
+      </div>
+      <div class="calc-result__interp" id="interp"></div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast">Reset</div>
+
+    <nav class="bottom-nav">
+    <div class="nav-item" onclick="window.location.href='index.html'"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg><span class="nav-item__label">Home</span></div>
+    <div class="nav-item" onclick="window.location.href='protocols.html'"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8m8 4H8"/></svg><span class="nav-item__label">Protocols</span></div>
+    <div class="nav-item active" onclick="window.location.href='calculator.html'"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h.01M8 14h2M12 14h2M16 14h.01M8 18h8"/></svg><span class="nav-item__label">Calculator</span></div>
+    <div class="nav-item" onclick="window.location.href='saved.html'"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg><span class="nav-item__label">Saved</span></div>
+    <div class="nav-item" onclick="window.location.href='info.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg><span class="nav-item__label">Information</span></div>
+  </nav>
+</div>
+
+<script>
+const keys = ['tcp', 'timing', 'thr', 'other'];
+const state = {}; keys.forEach(k => state[k] = null);
+
+document.querySelectorAll('.t4-opts').forEach(group => {
+  const k = group.dataset.k;
+  group.querySelectorAll('.t4-opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const p = Number(btn.dataset.p);
+      state[k] = p;
+      group.querySelectorAll('.t4-opt').forEach(b => b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'));
+      render();
+    });
+  });
+});
+
+function render() {
+  const result = document.getElementById('result');
+  const total = document.getElementById('total');
+  const interp = document.getElementById('interp');
+  const allSet = keys.every(k => state[k] !== null);
+  if (allSet) {
+    const sum = keys.reduce((a, k) => a + state[k], 0);
+    total.innerHTML = `${sum}<small>/ 8</small>`;
+    result.classList.remove('is-empty');
+    let msg;
+    if (sum <= 3) msg = 'Low probability of HIT (< 5%).';
+    else if (sum <= 5) msg = 'Intermediate probability of HIT (~14%).';
+    else msg = 'High probability of HIT (~64%).';
+    interp.textContent = msg;
+  } else {
+    total.innerHTML = '—<small>/ 8</small>';
+    result.classList.add('is-empty');
+    interp.textContent = '';
+  }
+}
+
+function resetAll() {
+  keys.forEach(k => state[k] = null);
+  document.querySelectorAll('.t4-opt').forEach(b => b.setAttribute('aria-pressed', 'false'));
+  render();
+  const t = document.getElementById('toast');
+  t.textContent = 'Reset'; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1400);
+}
+</script>
+
+<script>
+(function(){
+  const btn=document.querySelector('.icon-btn--bookmark');
+  if(!btn) return;
+  const key='smc-bookmark:'+(location.pathname.split('/').pop()||'index');
+  let saved=false;
+  try{ saved=localStorage.getItem(key)==='1'; }catch(e){}
+  if(saved){ btn.classList.add('is-saved'); btn.setAttribute('aria-pressed','true'); }
+  btn.addEventListener('click',function(ev){
+    ev.stopPropagation();
+    saved=!saved;
+    btn.classList.toggle('is-saved',saved);
+    btn.setAttribute('aria-pressed',saved?'true':'false');
+    btn.classList.remove('is-animating'); void btn.offsetWidth; btn.classList.add('is-animating');
+    setTimeout(()=>btn.classList.remove('is-animating'),650);
+    try{ saved?localStorage.setItem(key,'1'):localStorage.removeItem(key); }catch(e){}
+    if(typeof showToast==='function') showToast(saved?'Saved':'Removed from saved');
+  });
+})();
+</script>
+<script src="recent.js?v=1776350000"></script>
+</body>
+</html>

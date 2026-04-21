@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pain, Sedation, Delirium Management · SMC ICU Protocol</title>
+    <script src="settings-init.js?v=1776350000"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=1776350000">
+    <style>
+        /* Bigger page header to host protocol title */
+        .header--protocol { padding: 22px 20px 20px; }
+
+        .header__proto-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .header__proto-chip__dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--cat-purple);
+            box-shadow: 0 0 8px var(--cat-purple);
+        }
+
+        .header__proto-title {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.6px;
+            color: #fff;
+            line-height: 1.25;
+        }
+
+        .header__actions {
+            position: absolute;
+            top: 22px;
+            right: 20px;
+            display: flex;
+            gap: 8px;
+            z-index: 2;
+        }
+
+        .header__back {
+            position: absolute;
+            top: 22px;
+            left: 20px;
+            z-index: 2;
+        }
+
+        .header__body {
+            position: relative;
+            z-index: 1;
+            padding: 48px 52px 0;
+        }
+
+        /* Summary bar */
+        .summary-bar {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+            animation: fadeUp 0.5s var(--ease-out) both;
+        }
+
+        .summary-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--r-md);
+            padding: 12px 10px;
+            text-align: center;
+            box-shadow: var(--shadow-xs);
+        }
+
+        .summary-item__label {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-tertiary);
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .summary-item__value {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -0.3px;
+        }
+
+        .summary-item__value--accent { color: var(--cat-purple); }
+
+        /* Section tabs */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--r-md);
+            padding: 4px;
+            margin-bottom: 18px;
+            position: sticky;
+            top: 116px;
+            z-index: 50;
+            box-shadow: var(--shadow-xs);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 9px 6px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-tertiary);
+            border-radius: var(--r-sm);
+            cursor: pointer;
+            transition: all 0.25s var(--ease-out);
+        }
+
+        .tab.active {
+            background: var(--cat-purple);
+            color: #fff;
+            box-shadow: 0 4px 10px color-mix(in srgb, var(--cat-purple) 35%, transparent);
+        }
+
+        .tab:not(.active):hover {
+            color: var(--text-primary);
+            background: var(--bg-subtle);
+        }
+
+        /* Content blocks */
+        .block {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--r-lg);
+            padding: 18px;
+            margin-bottom: 14px;
+            box-shadow: var(--shadow-xs);
+            animation: fadeUp 0.5s var(--ease-out) both;
+        }
+
+        .block__head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .block__num {
+            width: 26px;
+            height: 26px;
+            border-radius: 8px;
+            background: color-mix(in srgb, var(--cat-purple) 12%, #fff);
+            color: var(--cat-purple);
+            font-size: 12px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .block__title {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -0.3px;
+            flex: 1;
+        }
+
+        .block__subtitle {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            letter-spacing: 0.3px;
+        }
+
+        /* Key-value list */
+        .kv-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .kv-row {
+            display: grid;
+            grid-template-columns: 90px 1fr;
+            gap: 10px;
+            padding: 10px 12px;
+            background: var(--bg-subtle);
+            border-radius: var(--r-sm);
+        }
+
+        .kv-row__k {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-tertiary);
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            align-self: center;
+        }
+
+        .kv-row__v {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.45;
+        }
+
+        /* Scale table (RASS) */
+        .scale-table {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            border-radius: var(--r-sm);
+            overflow: hidden;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .scale-row {
+            display: grid;
+            grid-template-columns: 48px 1fr 2fr;
+            gap: 10px;
+            padding: 10px 12px;
+            background: #fff;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .scale-row + .scale-row { border-top: 1px solid var(--border-subtle); }
+
+        .scale-row__score {
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+        }
+
+        .scale-row__label {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .scale-row__desc {
+            color: var(--text-tertiary);
+            line-height: 1.4;
+        }
+
+        /* Score coloring */
+        .scale-row--pos-high { background: color-mix(in srgb, var(--smc-red) 6%, #fff); }
+        .scale-row--pos-high .scale-row__score { color: var(--smc-red); }
+
+        .scale-row--pos-low { background: color-mix(in srgb, var(--smc-orange) 6%, #fff); }
+        .scale-row--pos-low .scale-row__score { color: var(--smc-orange); }
+
+        .scale-row--zero .scale-row__score { color: var(--cat-purple); }
+        .scale-row--zero { background: color-mix(in srgb, var(--cat-purple) 5%, #fff); }
+
+        .scale-row--neg-low { background: color-mix(in srgb, var(--smc-sky) 5%, #fff); }
+        .scale-row--neg-low .scale-row__score { color: var(--smc-sky); }
+
+        .scale-row--neg-high { background: color-mix(in srgb, var(--samsung-blue) 5%, #fff); }
+        .scale-row--neg-high .scale-row__score { color: var(--samsung-blue); }
+
+        /* Medication cards */
+        .med-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .med-card {
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--r-md);
+            padding: 14px;
+            background: #fff;
+        }
+
+        .med-card__top {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .med-card__name {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -0.3px;
+        }
+
+        .med-card__class {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--cat-purple);
+            background: color-mix(in srgb, var(--cat-purple) 12%, #fff);
+            padding: 3px 7px;
+            border-radius: 5px;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+
+        .med-card__dose {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .med-card__dose b {
+            color: var(--text-primary);
+            font-weight: 800;
+        }
+
+        .med-card__note {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed var(--border-subtle);
+            font-size: 11px;
+            color: var(--text-tertiary);
+            line-height: 1.5;
+        }
+
+        /* Callout */
+        .callout {
+            display: flex;
+            gap: 10px;
+            padding: 12px 14px;
+            border-radius: var(--r-sm);
+            background: color-mix(in srgb, var(--smc-red) 8%, #fff);
+            border: 1px solid color-mix(in srgb, var(--smc-red) 20%, #fff);
+            margin-top: 12px;
+        }
+
+        .callout__icon {
+            width: 20px; height: 20px;
+            flex-shrink: 0;
+            color: var(--smc-red);
+        }
+
+        .callout__icon svg {
+            width: 100%; height: 100%;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .callout__text {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        .callout__text b { color: var(--smc-red); }
+
+        /* Floating action bar */
+        .action-bar {
+            position: fixed;
+            bottom: 86px;
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: calc(var(--app-max) - 40px);
+            width: calc(100% - 40px);
+            display: flex;
+            gap: 8px;
+            z-index: 90;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 13px 16px;
+            border: none;
+            border-radius: var(--r-md);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: -0.2px;
+            cursor: pointer;
+            transition: all 0.25s var(--ease-out);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 6px 20px rgba(20, 40, 160, 0.12);
+        }
+
+        .action-btn--primary {
+            background: var(--cat-purple);
+            color: #fff;
+            flex: 2;
+        }
+
+        .action-btn--primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 24px color-mix(in srgb, var(--cat-purple) 35%, transparent);
+        }
+
+        .action-btn--secondary {
+            background: #fff;
+            color: var(--text-primary);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .action-btn--secondary:hover {
+            border-color: var(--cat-purple);
+            color: var(--cat-purple);
+        }
+
+        .action-btn svg {
+            width: 16px; height: 16px;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* Extra bottom padding so action bar doesn't overlap content */
+        .main--protocol { padding-top: 140px; padding-bottom: 170px; }
+
+        .container { --cat-purple: var(--cat-neurology); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header header--protocol">
+            <button class="icon-btn icon-btn--back header__back" onclick="window.location.href='neurology.html'" aria-label="Back">
+                <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            </button>
+            <div class="header__actions">
+                <button class="icon-btn" aria-label="Share" data-nav-toast="Share">
+                    <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
+                </button>
+                <button class="icon-btn" id="bookmark-btn" aria-label="Bookmark">
+                    <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+                </button>
+            </div>
+            <div class="header__body">
+                <div class="header__proto-chip">
+                    <span class="header__proto-chip__dot"></span>
+                    Neurology · 01
+                </div>
+                <div class="header__proto-title">Pain, Sedation, Delirium Management</div>
+            </div>
+        </header>
+
+        <!-- Main -->
+        <main class="main main--protocol">
+            <!-- Summary -->
+            <div class="summary-bar">
+                <div class="summary-item">
+                    <div class="summary-item__label">Reading</div>
+                    <div class="summary-item__value">8 min</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-item__label">Updated</div>
+                    <div class="summary-item__value">2026.03</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-item__label">Evidence</div>
+                    <div class="summary-item__value summary-item__value--accent">Level A</div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <div class="tab active" data-tab="assessment">Assessment</div>
+                <div class="tab" data-tab="management">Management</div>
+                <div class="tab" data-tab="monitoring">Monitoring</div>
+                <div class="tab" data-tab="refs">Refs</div>
+            </div>
+
+            <!-- Block 1: Indications / Overview -->
+            <div class="block">
+                <div class="block__head">
+                    <div class="block__num">1</div>
+                    <div class="block__title">Indications &amp; Goals</div>
+                </div>
+                <div class="kv-list">
+                    <div class="kv-row">
+                        <div class="kv-row__k">Population</div>
+                        <div class="kv-row__v">Adult ICU patients on mechanical ventilation or with RASS ≥ +2</div>
+                    </div>
+                    <div class="kv-row">
+                        <div class="kv-row__k">Targets</div>
+                        <div class="kv-row__v">Pain NRS/CPOT ≤ 3, RASS 0 to −2, CAM-ICU negative</div>
+                    </div>
+                    <div class="kv-row">
+                        <div class="kv-row__k">Frequency</div>
+                        <div class="kv-row__v">At least every 4 hours; hourly when titrating sedation</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Block 2: RASS Scale -->
+            <div class="block">
+                <div class="block__head">
+                    <div class="block__num">2</div>
+                    <div>
+                        <div class="block__title">RASS (Richmond Agitation-Sedation Scale)</div>
+                        <div class="block__subtitle">Sedation &amp; agitation assessment — 10-point scale</div>
+                    </div>
+                </div>
+                <div class="scale-table">
+                    <div class="scale-row scale-row--pos-high"><div class="scale-row__score">+4</div><div class="scale-row__label">Combative</div><div class="scale-row__desc">Overtly combative or violent; immediate danger to staff</div></div>
+                    <div class="scale-row scale-row--pos-high"><div class="scale-row__score">+3</div><div class="scale-row__label">Very agitated</div><div class="scale-row__desc">Pulls on or removes tubes/catheters; aggressive</div></div>
+                    <div class="scale-row scale-row--pos-low"><div class="scale-row__score">+2</div><div class="scale-row__label">Agitated</div><div class="scale-row__desc">Frequent non-purposeful movement; fights ventilator</div></div>
+                    <div class="scale-row scale-row--pos-low"><div class="scale-row__score">+1</div><div class="scale-row__label">Restless</div><div class="scale-row__desc">Anxious but movements not aggressive</div></div>
+                    <div class="scale-row scale-row--zero"><div class="scale-row__score">0</div><div class="scale-row__label">Alert &amp; calm</div><div class="scale-row__desc">Spontaneously pays attention — target state</div></div>
+                    <div class="scale-row scale-row--neg-low"><div class="scale-row__score">−1</div><div class="scale-row__label">Drowsy</div><div class="scale-row__desc">Sustained eye opening to voice ( ≥ 10 sec )</div></div>
+                    <div class="scale-row scale-row--neg-low"><div class="scale-row__score">−2</div><div class="scale-row__label">Light sedation</div><div class="scale-row__desc">Briefly opens eyes to voice ( &lt; 10 sec )</div></div>
+                    <div class="scale-row scale-row--neg-high"><div class="scale-row__score">−3</div><div class="scale-row__label">Moderate sedation</div><div class="scale-row__desc">Movement to voice but no eye contact</div></div>
+                    <div class="scale-row scale-row--neg-high"><div class="scale-row__score">−4</div><div class="scale-row__label">Deep sedation</div><div class="scale-row__desc">No response to voice; movement to physical stimulation</div></div>
+                    <div class="scale-row scale-row--neg-high"><div class="scale-row__score">−5</div><div class="scale-row__label">Unarousable</div><div class="scale-row__desc">No response to voice or physical stimulation</div></div>
+                </div>
+            </div>
+
+            <!-- Block 3: Medications -->
+            <div class="block">
+                <div class="block__head">
+                    <div class="block__num">3</div>
+                    <div>
+                        <div class="block__title">1st-line Sedation Agents</div>
+                        <div class="block__subtitle">Per SCCM guidelines · continuous IV infusion</div>
+                    </div>
+                </div>
+                <div class="med-grid">
+                    <div class="med-card">
+                        <div class="med-card__top">
+                            <div class="med-card__name">Dexmedetomidine</div>
+                            <div class="med-card__class">α2-agonist</div>
+                        </div>
+                        <div class="med-card__dose">
+                            Loading <b>1 µg/kg IV over 10 min</b> (optional)<br>
+                            Maintenance <b>0.2 – 1.4 µg/kg/hr</b>
+                        </div>
+                        <div class="med-card__note">
+                            Preferred for lower delirium risk. Monitor for bradycardia and hypotension.
+                        </div>
+                    </div>
+
+                    <div class="med-card">
+                        <div class="med-card__top">
+                            <div class="med-card__name">Propofol</div>
+                            <div class="med-card__class">GABA-A</div>
+                        </div>
+                        <div class="med-card__dose">
+                            Infusion <b>5 – 50 µg/kg/min</b><br>
+                            Titrate by 5 µg/kg/min q 5 min
+                        </div>
+                        <div class="med-card__note">
+                            Monitor for PRIS (lactate, CK, triglycerides) if &gt; 48 h or high-dose.
+                        </div>
+                    </div>
+
+                    <div class="med-card">
+                        <div class="med-card__top">
+                            <div class="med-card__name">Midazolam</div>
+                            <div class="med-card__class">Benzodiazepine</div>
+                        </div>
+                        <div class="med-card__dose">
+                            Infusion <b>0.02 – 0.1 mg/kg/hr</b>
+                        </div>
+                        <div class="med-card__note">
+                            2nd-line due to delirium risk. Accumulates in hepatic/renal impairment.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="callout">
+                    <div class="callout__icon">
+                        <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+                    </div>
+                    <div class="callout__text">
+                        <b>Avoid benzodiazepines:</b> associated with prolonged ventilation, longer ICU stay, and higher delirium incidence. Reserve for cases with no alternative and use the lowest effective dose.
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Action bar -->
+        <div class="action-bar">
+            <button class="action-btn action-btn--secondary" data-nav-toast="Download PDF">
+                <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>
+                PDF
+            </button>
+            <button class="action-btn action-btn--primary" data-nav-toast="Start order set">
+                <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                Start Order Set
+            </button>
+        </div>
+
+        <!-- Toast -->
+        <div class="toast" id="toast">Coming soon</div>
+
+        <!-- Bottom Nav -->
+          <nav class="bottom-nav">
+    <div class="nav-item" onclick="window.location.href='index.html'"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg><span class="nav-item__label">Home</span></div>
+    <div class="nav-item active" onclick="window.location.href='protocols.html'"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8m8 4H8"/></svg><span class="nav-item__label">Protocols</span></div>
+    <div class="nav-item" onclick="window.location.href='calculator.html'"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h.01M8 14h2M12 14h2M16 14h.01M8 18h8"/></svg><span class="nav-item__label">Calculator</span></div>
+    <div class="nav-item" onclick="window.location.href='saved.html'"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg><span class="nav-item__label">Saved</span></div>
+    <div class="nav-item" onclick="window.location.href='info.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg><span class="nav-item__label">Information</span></div>
+  </nav>
+    </div>
+
+    <script>
+        const toast = document.getElementById('toast');
+        let toastTimer;
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+        }
+
+        // Tabs
+        document.querySelectorAll('.tab').forEach(t => {
+            t.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+                this.classList.add('active');
+                if (this.dataset.tab !== 'assessment') {
+                    showToast(`${this.textContent} section — Coming soon`);
+                }
+            });
+        });
+
+        // Bookmark toggle
+        const bookmarkBtn = document.getElementById('bookmark-btn');
+        let bookmarked = false;
+        bookmarkBtn.addEventListener('click', () => {
+            bookmarked = !bookmarked;
+            bookmarkBtn.querySelector('svg').setAttribute('fill', bookmarked ? 'currentColor' : 'none');
+            showToast(bookmarked ? 'Added to bookmarks' : 'Removed from bookmarks');
+        });
+
+        // Generic toast triggers
+        document.querySelectorAll('[data-nav-toast]').forEach(el => {
+            el.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showToast(`${el.dataset.navToast} — Coming soon`);
+            });
+        });
+
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                if (this.classList.contains('active')) return;
+                if (this.getAttribute('onclick')) return;
+                showToast(`${this.querySelector('.nav-item__label').textContent} — Coming soon`);
+            });
+        });
+    </script>
+<script src="recent.js?v=1776350000"></script>
+</body>
+</html>
