@@ -151,30 +151,32 @@
 
 /* L4: • bullet */
 .p-l4 {
-    font-size: 13px;
+    font-size: 13.5px;
+    font-weight: 500;
     margin: 3px 0 3px 40px;
     padding-left: 16px;
-    color: var(--text-secondary);
+    color: var(--text-primary);
     line-height: 1.55;
 }
 .p-l4 .p-num {
     left: 4px;
     top: -1px;
-    color: var(--text-tertiary);
+    color: var(--text-secondary);
     font-weight: 700;
     font-size: 14px;
 }
 
 /* L5: – en-dash */
 .p-l5 {
-    font-size: 12.5px;
+    font-size: 13.5px;
+    font-weight: 500;
     margin: 2px 0 2px 58px;
     padding-left: 14px;
-    color: var(--text-tertiary);
-    line-height: 1.5;
+    color: var(--text-primary);
+    line-height: 1.55;
 }
 .p-l5 .p-num {
-    color: var(--text-tertiary);
+    color: var(--text-secondary);
     font-weight: 700;
 }
 
@@ -184,6 +186,19 @@
     color: var(--text-secondary);
     line-height: 1.6;
     margin: 8px 0 10px;
+}
+/* Section intro directive — prominent block, cat-color accent */
+.p-intro {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--text-primary);
+    background: color-mix(in srgb, var(--cat-color) 7%, transparent);
+    border-left: 3px solid var(--cat-color);
+    border-radius: 6px;
+    padding: 11px 14px;
+    margin: 0 0 14px;
+    line-height: 1.5;
+    letter-spacing: -0.1px;
 }
 /* p-note indent modifiers — align to and match the preceding list level */
 .p-note.p-note--l2 { margin-left: 26px; font-size: 14px; color: var(--text-primary); line-height: 1.6; }
@@ -306,13 +321,33 @@ html[data-theme="dark"] .p-ref-card:active {
     overflow-wrap: break-word;
 }
 .p-table thead th,
-.p-table tr:first-child th {
+.p-table th {
     background: #BEDAFF;
     color: #0b2a52;
     font-size: 12px;
     font-weight: 800;
     letter-spacing: 0.2px;
     border-bottom: 1px solid #a6c8f0;
+}
+/* Cell content — nested bullet hierarchy for mid-table lists */
+.p-table .p-cell-head,
+.p-table .p-cell-sub {
+    display: flex;
+    gap: 6px;
+    line-height: 1.55;
+    margin: 2px 0;
+}
+.p-table .p-cell-head { padding-left: 2px; }
+.p-table .p-cell-sub { padding-left: 16px; }
+.p-table .p-cell-bul {
+    flex-shrink: 0;
+    width: 10px;
+    color: var(--text-secondary);
+    font-weight: 700;
+}
+.p-table .p-cell-head strong {
+    font-weight: 700;
+    color: var(--text-primary);
 }
 .p-table tr:last-child td,
 .p-table tr:last-child th {
@@ -1009,8 +1044,8 @@ html[data-font="sm"] .p-sect__title { font-size: 15px; }
 html[data-font="sm"] .p-sub         { font-size: 14px; }
 html[data-font="sm"] .p-l2          { font-size: 12.5px; }
 html[data-font="sm"] .p-l3          { font-size: 12px; }
-html[data-font="sm"] .p-l4          { font-size: 11.5px; }
-html[data-font="sm"] .p-l5          { font-size: 11px; }
+html[data-font="sm"] .p-l4          { font-size: 12px; }
+html[data-font="sm"] .p-l5          { font-size: 12px; }
 html[data-font="sm"] .p-note        { font-size: 12px; }
 html[data-font="sm"] .sec-dd__title { font-size: 13px; }
 html[data-font="sm"] .toc-item      { font-size: 12px; }
@@ -1021,8 +1056,8 @@ html[data-font="lg"] .p-sect__title { font-size: 19.5px; }
 html[data-font="lg"] .p-sub         { font-size: 17.5px; }
 html[data-font="lg"] .p-l2          { font-size: 16px; }
 html[data-font="lg"] .p-l3          { font-size: 15.5px; }
-html[data-font="lg"] .p-l4          { font-size: 15px; }
-html[data-font="lg"] .p-l5          { font-size: 14.5px; }
+html[data-font="lg"] .p-l4          { font-size: 15.5px; }
+html[data-font="lg"] .p-l5          { font-size: 15.5px; }
 html[data-font="lg"] .p-note        { font-size: 15.5px; }
 html[data-font="lg"] .sec-dd__title { font-size: 16.5px; }
 html[data-font="lg"] .toc-item      { font-size: 15px; }
@@ -1076,16 +1111,16 @@ html[data-theme="dark"] .p-l3 .p-num {
     color: #a8b5c4;
 }
 html[data-theme="dark"] .p-l4 {
-    color: #c0c8d4;
+    color: #d0d7e0;
 }
 html[data-theme="dark"] .p-l4 .p-num {
-    color: #7d8a9a;
-}
-html[data-theme="dark"] .p-l5 {
     color: #a8b5c4;
 }
+html[data-theme="dark"] .p-l5 {
+    color: #d0d7e0;
+}
 html[data-theme="dark"] .p-l5 .p-num {
-    color: #7d8a9a;
+    color: #a8b5c4;
 }
 html[data-theme="dark"] .p-note {
     color: #a8b5c4;

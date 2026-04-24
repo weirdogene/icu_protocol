@@ -15,13 +15,31 @@
     var page = location.pathname.split('/').pop() || 'index.html';
 
     // Only track saveable content pages (protocol sections & calculators)
-    var isSaveable = /^(airway-s\d+|airway-toc|vap-s\d+|vap-toc|sup-s\d+|sup-toc|ecmo-s\d+|ecmo-toc|nutr-s\d+|nutr-toc|calc-)/.test(page);
+    var isSaveable = /^(airway-s\d+|airway-toc|vap-s\d+|vap-toc|sup-s\d+|sup-toc|ecmo-s\d+|ecmo-toc|nutr-s\d+|nutr-toc|wean-s\d+|wean-toc|calc-)/.test(page);
     if (!isSaveable) return;
+
+    function pickLangs(el) {
+        if (!el) return { ko: '', en: '' };
+        var koEl = el.querySelector('[data-lang="ko"]');
+        var enEl = el.querySelector('[data-lang="en"]');
+        if (koEl || enEl) {
+            var ko = koEl ? koEl.textContent.trim() : '';
+            var en = enEl ? enEl.textContent.trim() : '';
+            return { ko: ko || en, en: en || ko };
+        }
+        var text = el.textContent.trim();
+        return { ko: text, en: text };
+    }
+
+    var titleText = pickLangs(titleEl);
+    var eyebrowText = pickLangs(eyebrowEl);
 
     var entry = {
         href: page,
-        title: titleEl.textContent.trim(),
-        eyebrow: eyebrowEl ? eyebrowEl.textContent.trim() : '',
+        title_ko: titleText.ko,
+        title_en: titleText.en,
+        eyebrow_ko: eyebrowText.ko,
+        eyebrow_en: eyebrowText.en,
         time: Date.now()
     };
 

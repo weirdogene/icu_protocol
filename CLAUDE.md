@@ -21,7 +21,7 @@
 - `calculator.html` — 계산기 목록
 - `settings.html` — 설정 (테마, 폰트, 언어)
 - `{category}.html` — 카테고리별 프로토콜 목록 (neurology, cardiology, pulmonology, gi, nephrology, infection, procedure)
-- `{prefix}-toc.html` — 프로토콜 목차 (airway-toc, vap-toc, ecmo-toc, nutr-toc, sup-toc)
+- `{prefix}-toc.html` — 프로토콜 목차 (airway-toc, vap-toc, ecmo-toc, nutr-toc, sup-toc, wean-toc)
 - `{prefix}-s{N}.html` — 프로토콜 섹션 페이지
 - `calc-{name}.html` — 개별 계산기 페이지
 
@@ -33,10 +33,11 @@
 | VV-ECMO | ecmo | 10 | 완료 |
 | ICU Nutrition | nutr | 15 | 완료 |
 | Stress Ulcer Prophylaxis | sup | 4 | 완료 |
+| Mechanical Ventilation Weaning | wean | 7 | 완료 |
 
 ### 원본 문서
-- `eng_version/` — 영문 프로토콜 docx 파일 (5개)
-- `kor_version/` — 한글 프로토콜 docx 파일 (5개)
+- `eng_version/` — 영문 프로토콜 docx 파일 (6개)
+- `kor_version/` — 한글 프로토콜 docx 파일 (6개)
 
 ## 핵심 패턴
 
