@@ -34,6 +34,7 @@
 | ICU Nutrition | nutr | 15 | 완료 |
 | Stress Ulcer Prophylaxis | sup | 4 | 완료 |
 | Mechanical Ventilation Weaning | wean | 7 | 완료 |
+| BCID2 Antibiotic Guide | bcid-guide | — (단일 대화형 페이지) | 테스트 버전 |
 
 ### 원본 문서
 - `eng_version/` — 영문 프로토콜 docx 파일 (6개)

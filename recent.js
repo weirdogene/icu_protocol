@@ -15,7 +15,7 @@
     var page = location.pathname.split('/').pop() || 'index.html';
 
     // Only track saveable content pages (protocol sections & calculators)
-    var isSaveable = /^(airway-s\d+|airway-toc|vap-s\d+|vap-toc|sup-s\d+|sup-toc|ecmo-s\d+|ecmo-toc|nutr-s\d+|nutr-toc|wean-s\d+|wean-toc|calc-)/.test(page);
+    var isSaveable = /^(airway-s\d+|airway-toc|vap-s\d+|vap-toc|sup-s\d+|sup-toc|ecmo-s\d+|ecmo-toc|nutr-s\d+|nutr-toc|wean-s\d+|wean-toc|bcid-guide|calc-)/.test(page);
     if (!isSaveable) return;
 
     function pickLangs(el) {

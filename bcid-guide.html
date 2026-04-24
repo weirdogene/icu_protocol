@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BCID2 Antibiotic Guide · Infection</title>
+    <script src="settings-init.js?v=1776350000"></script>
+<link href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=1776350000">
+<link rel="stylesheet" href="protocol.css?v=1776350000">
+<style>
+.container { --cat-color: var(--cat-infection); }
+
+/* ---- BCID guide — interactive antibiotic selector ---- */
+.bcid-card {
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-card);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    margin: 10px 0;
+    box-shadow: 0 1px 2px rgba(20, 40, 160, 0.03);
+}
+.bcid-acc-head {
+    width: 100%;
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 10px;
+    padding: 14px;
+    background: transparent;
+    border: 0;
+    color: var(--text-primary);
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+}
+.bcid-acc-left { min-width: 0; flex: 1; }
+.bcid-acc-title {
+    font-weight: 800;
+    font-size: 14.5px;
+    line-height: 1.2;
+    letter-spacing: -0.1px;
+    color: var(--text-primary);
+}
+.bcid-acc-subsel {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    max-width: 100%;
+}
+.bcid-acc-subsel .dot {
+    width: 6px; height: 6px; border-radius: 999px;
+    background: var(--cat-color);
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 6px;
+    opacity: 0.9;
+}
+.bcid-acc-right {
+    width: 32px; height: 32px;
+    border-radius: 10px;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-subtle);
+    display: flex; align-items: center; justify-content: center;
+    flex: 0 0 auto;
+}
+.bcid-chev {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1;
+    user-select: none;
+}
+.bcid-acc-body { padding: 0 14px 14px; }
+.bcid-divider { height: 1px; background: var(--border-subtle); margin: 10px 0; }
+.bcid-hidden { display: none !important; }
+.bcid-disabled { opacity: 0.55; pointer-events: none; }
+
+.bcid-grid { display: grid; gap: 8px; }
+
+.bcid-choice {
+    display: flex; gap: 10px; align-items: center;
+    padding: 11px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-card);
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.12s, border-color 0.15s, background 0.15s, box-shadow 0.15s;
+    min-height: 48px;
+}
+.bcid-choice:active { transform: scale(0.99); }
+.bcid-choice .t {
+    font-weight: 600;
+    font-size: 13.5px;
+    color: var(--text-primary);
+    line-height: 1.35;
+}
+.bcid-cbx {
+    width: 20px; height: 20px; border-radius: 5px;
+    border: 2px solid var(--border-subtle);
+    display: flex; align-items: center; justify-content: center;
+    flex: 0 0 auto;
+    background: transparent;
+    color: transparent;
+    font-weight: 900;
+    line-height: 1;
+    font-size: 12px;
+}
+.bcid-choice.bcid-selected {
+    border-color: color-mix(in srgb, var(--cat-color) 65%, var(--border-subtle));
+    background: color-mix(in srgb, var(--cat-color) 10%, var(--bg-card));
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--cat-color) 25%, transparent) inset;
+}
+.bcid-choice.bcid-selected .bcid-cbx {
+    border-color: var(--cat-color);
+    background: var(--cat-color);
+    color: #fff;
+}
+
+.bcid-cat-panel {
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    background: var(--bg-subtle);
+    overflow: hidden;
+    margin-top: 10px;
+}
+.bcid-cat-head {
+    width: 100%;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    background: transparent;
+    border: 0;
+    color: var(--text-primary);
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+}
+.bcid-cat-title {
+    font-weight: 800; font-size: 13px;
+    white-space: nowrap;
+    letter-spacing: 0.2px;
+    color: var(--text-primary);
+}
+.bcid-cat-right {
+    width: 26px; height: 26px; border-radius: 8px;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-card);
+    display: flex; align-items: center; justify-content: center;
+    flex: 0 0 auto;
+}
+.bcid-cat-body { padding: 10px 12px 12px; }
+.bcid-cat-body.bcid-hidden { display: none !important; }
+
+.bcid-alert {
+    border-radius: 10px; padding: 10px 12px;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-subtle);
+    display: flex; gap: 10px; align-items: flex-start;
+    margin-top: 10px;
+}
+.bcid-alert .bcid-icon { font-size: 15px; line-height: 1.2; flex-shrink: 0; }
+.bcid-alert .bcid-msg { font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; }
+.bcid-alert.bcid-warn {
+    border-color: color-mix(in srgb, var(--smc-orange, #e67700) 40%, var(--border-subtle));
+    background: color-mix(in srgb, var(--smc-orange, #e67700) 7%, var(--bg-card));
+}
+.bcid-alert b { color: var(--text-primary); }
+
+.bcid-btnrow {
+    display: flex; gap: 8px;
+    margin-top: 12px;
+}
+.bcid-btn {
+    flex: 1;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    padding: 11px 12px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 13.5px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s, border-color 0.15s;
+}
+.bcid-btn:hover:not(:disabled) {
+    background: var(--bg-subtle);
+}
+.bcid-btn.bcid-primary {
+    border-color: color-mix(in srgb, var(--cat-color) 55%, var(--border-subtle));
+    background: color-mix(in srgb, var(--cat-color) 12%, var(--bg-card));
+    color: var(--cat-color);
+}
+.bcid-btn.bcid-primary:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--cat-color) 18%, var(--bg-card));
+}
+.bcid-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.bcid-results { display: grid; gap: 12px; }
+.bcid-result {
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    background: var(--bg-card);
+    padding: 14px;
+}
+.bcid-result h3 {
+    margin: 0; font-size: 14.5px; font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1.35;
+    letter-spacing: -0.1px;
+}
+.bcid-rx {
+    margin-top: 10px;
+    padding: 12px 14px; border-radius: 10px;
+    border: 1px solid color-mix(in srgb, var(--cat-color) 40%, var(--border-subtle));
+    background: color-mix(in srgb, var(--cat-color) 10%, var(--bg-card));
+    color: var(--text-primary);
+    font-size: 14.5px;
+    font-weight: 600;
+    line-height: 1.5;
+    letter-spacing: -0.1px;
+}
+.bcid-rx b {
+    color: var(--cat-color);
+    font-weight: 800;
+    margin-right: 2px;
+}
+.bcid-meta {
+    margin-top: 10px; font-size: 13px;
+    color: var(--text-primary);
+    font-weight: 500;
+    line-height: 1.5;
+}
+.bcid-meta b { color: var(--cat-color); font-weight: 800; }
+
+/* Dark theme overrides for BCID-specific surfaces */
+html[data-theme="dark"] .bcid-choice.bcid-selected .bcid-cbx { color: #fff; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="header header--page">
+    <div class="header__top">
+      <button class="icon-btn icon-btn--back" onclick="window.location.href='infection.html'" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div class="header__title">
+        <span class="header__eyebrow">Infection</span>
+        <div class="header__h1"><span data-lang="ko">BCID2 항생제 가이드</span><span data-lang="en">BCID2 Antibiotic Guide</span></div>
+      </div>
+      <button class="icon-btn icon-btn--bookmark" aria-label="Save" aria-pressed="false">
+        <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="main main--page">
+    <p class="p-intro"><span data-lang="ko">BCID2 패널에서 확인된 균과 내성 유전자를 선택하면 권장 항생제를 제안합니다. 본 가이드는 AST(감수성 검사)를 대체하지 않으며, 최종 동정·감수성 결과와 임상 상황을 함께 고려해야 합니다.</span><span data-lang="en">Select the organisms and resistance genes detected on the BCID2 panel to receive antibiotic suggestions. This guide does not replace AST — always incorporate final identification, susceptibility results, and the clinical context.</span></p>
+
+    <section class="bcid-card" id="panelOrganisms">
+      <button class="bcid-acc-head" data-acc="org">
+        <div class="bcid-acc-left">
+          <div class="bcid-acc-title"><span data-lang="ko">1. 병원체 선택</span><span data-lang="en">1. Organisms</span></div>
+          <div class="bcid-acc-subsel" id="subselOrg"><span class="dot"></span>None</div>
+        </div>
+        <div class="bcid-acc-right"><span class="bcid-chev" id="chevOrg">▲</span></div>
+      </button>
+      <div class="bcid-acc-body" id="accOrg">
+        <div id="categoryPanels"></div>
+        <div class="bcid-btnrow">
+          <button class="bcid-btn" id="btnResetTop"><span data-lang="ko">초기화</span><span data-lang="en">Reset</span></button>
+          <button class="bcid-btn bcid-primary" id="btnToGene" disabled><span data-lang="ko">다음: 내성 유전자</span><span data-lang="en">Next: Resistance genes</span></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="bcid-card bcid-hidden" id="panelGenes">
+      <button class="bcid-acc-head" data-acc="gene">
+        <div class="bcid-acc-left">
+          <div class="bcid-acc-title"><span data-lang="ko">2. 내성 유전자</span><span data-lang="en">2. Resistance genes</span></div>
+          <div class="bcid-acc-subsel" id="selectedGenesText"><span class="dot"></span><span data-lang="ko">탭하여 선택</span><span data-lang="en">Tap to select</span></div>
+        </div>
+        <div class="bcid-acc-right"><span class="bcid-chev" id="chevGene">▲</span></div>
+      </button>
+      <div class="bcid-acc-body" id="accGene">
+        <div id="geneDisabledAlert" class="bcid-alert bcid-warn bcid-hidden">
+          <div class="bcid-icon">⚠️</div>
+          <div class="bcid-msg"><span data-lang="ko">진균은 내성 유전자 확인 불가 (gene 선택 비활성화)</span><span data-lang="en">Fungi: resistance genes not applicable (gene selection disabled)</span></div>
+        </div>
+        <div class="bcid-divider"></div>
+        <div class="bcid-grid" id="geneBox"></div>
+        <div class="bcid-btnrow">
+          <button class="bcid-btn" id="btnBackToOrg"><span data-lang="ko">← 이전</span><span data-lang="en">← Back</span></button>
+          <button class="bcid-btn bcid-primary" id="btnReview"><span data-lang="ko">추천 확인</span><span data-lang="en">Review / Recommend</span></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="bcid-card bcid-hidden" id="panelResults">
+      <button class="bcid-acc-head" data-acc="res">
+        <div class="bcid-acc-left">
+          <div class="bcid-acc-title"><span data-lang="ko">3. 권장 항생제</span><span data-lang="en">3. Recommendations</span></div>
+          <div class="bcid-acc-subsel"><span class="dot"></span><span data-lang="ko">아래 결과 확인</span><span data-lang="en">See results below</span></div>
+        </div>
+        <div class="bcid-acc-right"><span class="bcid-chev" id="chevRes">▲</span></div>
+      </button>
+      <div class="bcid-acc-body" id="accRes">
+        <div class="bcid-alert bcid-warn" id="globalAlert" style="display:none">
+          <div class="bcid-icon">⚠️</div>
+          <div class="bcid-msg" id="globalAlertText"></div>
+        </div>
+        <div class="bcid-divider"></div>
+        <div class="bcid-results" id="resultsBox"></div>
+        <div class="bcid-btnrow">
+          <button class="bcid-btn" id="btnResetEnd"><span data-lang="ko">초기화</span><span data-lang="en">Reset</span></button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast">Saved</div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="window.location.href='index.html'"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg><span class="nav-item__label"><span data-lang="ko">홈</span><span data-lang="en">Home</span></span></div>
+    <div class="nav-item active" onclick="window.location.href='protocols.html'"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8m8 4H8"/></svg><span class="nav-item__label"><span data-lang="ko">프로토콜</span><span data-lang="en">Protocols</span></span></div>
+    <div class="nav-item" onclick="window.location.href='calculator.html'"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h.01M8 14h2M12 14h2M16 14h.01M8 18h8"/></svg><span class="nav-item__label"><span data-lang="ko">계산기</span><span data-lang="en">Calculator</span></span></div>
+    <div class="nav-item" onclick="window.location.href='saved.html'"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg><span class="nav-item__label"><span data-lang="ko">즐겨찾기</span><span data-lang="en">Saved</span></span></div>
+    <div class="nav-item" onclick="window.location.href='info.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg><span class="nav-item__label"><span data-lang="ko">정보</span><span data-lang="en">Information</span></span></div>
+  </nav>
+</div>
+
+<script>
+const toast=document.getElementById('toast');let t;
+function showToast(m){toast.textContent=m;toast.classList.add('show');clearTimeout(t);t=setTimeout(()=>toast.classList.remove('show'),1600);}
+document.querySelectorAll('.nav-item').forEach(i=>i.addEventListener('click',function(){if(this.classList.contains('active'))return;if(this.getAttribute('onclick'))return;showToast(this.querySelector('.nav-item__label').textContent+' — Coming soon');}));
+
+(function(){
+  const btn=document.querySelector('.icon-btn--bookmark');
+  if(!btn) return;
+  const key='smc-bookmark:'+(location.pathname.split('/').pop()||'index');
+  let saved=false;
+  try{ saved=localStorage.getItem(key)==='1'; }catch(e){}
+  if(saved){ btn.classList.add('is-saved'); btn.setAttribute('aria-pressed','true'); }
+  btn.addEventListener('click',function(ev){
+    ev.stopPropagation(); saved=!saved;
+    btn.classList.toggle('is-saved',saved); btn.setAttribute('aria-pressed',saved?'true':'false');
+    btn.classList.remove('is-animating'); void btn.offsetWidth; btn.classList.add('is-animating');
+    setTimeout(()=>btn.classList.remove('is-animating'),650);
+    try{ saved?localStorage.setItem(key,'1'):localStorage.removeItem(key); }catch(e){}
+    if(typeof showToast==='function') showToast(saved?'Saved':'Removed from saved');
+  });
+})();
+</script>
+
+<script>
+/* ============================================================
+   BCID2 antibiotic recommendation engine — preserved from source
+   ============================================================ */
+  const ORGANISMS = [{"id": "e_faecalis", "name": "Enterococcus faecalis", "category": "gp", "group": "Enterococcus_faecalis"}, {"id": "e_faecium", "name": "Enterococcus faecium", "category": "gp", "group": "Enterococcus_faecium"}, {"id": "listeria", "name": "Listeria monocytogenes", "category": "gp", "group": "Listeria"}, {"id": "staph_other", "name": "Staphylococcus spp. (Other Staphylococcus)", "category": "gp", "group": "Staphylococcus"}, {"id": "staph_aureus", "name": "Staphylococcus aureus", "category": "gp", "group": "Staphylococcus"}, {"id": "staph_epidermidis", "name": "Staphylococcus epidermidis", "category": "gp", "group": "Staphylococcus"}, {"id": "staph_lugdunensis", "name": "Staphylococcus lugdunensis", "category": "gp", "group": "Staphylococcus"}, {"id": "strep_other", "name": "Streptococcus spp. (Other Streptococcus)", "category": "gp", "group": "Streptococcus"}, {"id": "strep_agalactiae", "name": "Streptococcus agalactiae", "category": "gp", "group": "Streptococcus"}, {"id": "strep_pneumoniae", "name": "Streptococcus pneumoniae", "category": "gp", "group": "Streptococcus"}, {"id": "strep_pyogenes", "name": "Streptococcus pyogenes", "category": "gp", "group": "Streptococcus"}, {"id": "entero_other", "name": "Enterobacterales (Other Enterobacterales group)", "category": "gn", "group": "Enterobacterales"}, {"id": "entero_ecloacae", "name": "Enterobacter cloacae complex", "category": "gn", "group": "Enterobacterales"}, {"id": "entero_ecoli", "name": "Escherichia coli", "category": "gn", "group": "Enterobacterales"}, {"id": "entero_kaerogenes", "name": "Klebsiella aerogenes", "category": "gn", "group": "Enterobacterales"}, {"id": "entero_koxytoca", "name": "Klebsiella oxytoca", "category": "gn", "group": "Enterobacterales"}, {"id": "entero_kpneumoniae", "name": "Klebsiella pneumoniae group", "category": "gn", "group": "Enterobacterales"}, {"id": "entero_proteus", "name": "Proteus spp.", "category": "gn", "group": "Enterobacterales"}, {"id": "entero_salmonella", "name": "Salmonella spp.", "category": "gn", "group": "Enterobacterales"}, {"id": "entero_serratia", "name": "Serratia marcescens", "category": "gn", "group": "Enterobacterales"}, {"id": "p_aeruginosa", "name": "Pseudomonas aeruginosa", "category": "gn", "group": "Pseudomonas"}, {"id": "acb_complex", "name": "Acinetobacter calcoaceticus-baumannii complex", "category": "gn", "group": "Acinetobacter"}, {"id": "steno", "name": "Stenotrophomonas maltophilia", "category": "gn", "group": "Stenotrophomonas"}, {"id": "b_fragilis", "name": "Bacteroides fragilis", "category": "gn", "group": "Anaerobe"}, {"id": "h_influenzae", "name": "Haemophilus influenzae", "category": "gn", "group": "Haemophilus"}, {"id": "n_meningitidis", "name": "Neisseria meningitidis", "category": "gn", "group": "Neisseria"}, {"id": "c_albicans", "name": "Candida albicans", "category": "yeast", "group": "Candida"}, {"id": "c_auris", "name": "Candida auris", "category": "yeast", "group": "Candida"}, {"id": "c_glabrata", "name": "Candida glabrata", "category": "yeast", "group": "Candida"}, {"id": "c_krusei", "name": "Candida krusei", "category": "yeast", "group": "Candida"}, {"id": "c_parapsilosis", "name": "Candida parapsilosis", "category": "yeast", "group": "Candida"}, {"id": "c_tropicalis", "name": "Candida tropicalis", "category": "yeast", "group": "Candida"}, {"id": "crypto", "name": "Cryptococcus neoformans/gattii", "category": "yeast", "group": "Cryptococcus"}];
+  const GENES = [{"id": "ctxm", "name": "CTX-M", "category": ["gn"], "groups": ["Enterobacterales"]}, {"id": "kpc", "name": "KPC", "category": ["gn"], "groups": ["Enterobacterales", "Pseudomonas"]}, {"id": "oxa48", "name": "OXA-48-like", "category": ["gn"], "groups": ["Enterobacterales", "Pseudomonas"]}, {"id": "ndm", "name": "NDM", "category": ["gn"], "groups": ["Enterobacterales", "Pseudomonas"]}, {"id": "vim", "name": "VIM", "category": ["gn"], "groups": ["Enterobacterales", "Pseudomonas"]}, {"id": "imp", "name": "IMP", "category": ["gn"], "groups": ["Enterobacterales", "Pseudomonas"]}, {"id": "mcr1", "name": "mcr-1", "category": ["gn"], "groups": ["Acinetobacter"]}, {"id": "meca", "name": "mecA/C", "category": ["gp"], "groups": ["Staphylococcus"]}, {"id": "vana", "name": "vanA/B", "category": ["gp"], "groups": ["Enterococcus_faecalis", "Enterococcus_faecium"]}];
+  const RULES = {
+  "Enterobacterales": [
+    { when: (ctx)=>genesAny(['kpc','oxa48'])(ctx), rx: "Ceftazidime/avibactam", note: "KPC 또는 OXA-48-like 검출 시.", note_en: "KPC or OXA-48-like detected." },
+    { when: (ctx)=>genesAny(['imp','ndm','vim'])(ctx), rx: "Colistin + meropenem", note: "IMP/NDM/VIM 검출 시. 이 경우 ceftazidime/avibactam 효과 없음.", note_en: "IMP/NDM/VIM detected. Ceftazidime/avibactam is ineffective in this case." },
+    { when: (ctx)=>genesAny(['ctxm'])(ctx), rx: "Ertapenem 또는 meropenem", rx_en: "Ertapenem or meropenem", note: "CTX-M(ESBL) 검출 시.", note_en: "CTX-M (ESBL) detected." },
+    { when: (ctx)=>genesNone()(ctx), rx: "(auto)", note: "No gene: organism별로 ceftriaxone vs cefepime 자동 선택.", note_en: "No resistance gene detected: ceftriaxone vs cefepime auto-selected per organism." }
+  ],
+  "Pseudomonas": [
+    { when: (ctx)=>genesAny(['imp','kpc','oxa48','ndm','vim'])(ctx), rx: "Colistin + meropenem", note: "Carbapenemase gene 검출 시.", note_en: "Carbapenemase gene detected." },
+    { when: (ctx)=>genesNone()(ctx), rx: "Piperacillin/tazobactam 또는 cefepime 또는 meropenem", rx_en: "Piperacillin/tazobactam, cefepime, or meropenem", note: "본 검사만으로 carbapenem 내성 판단 어려움.", note_en: "This panel alone cannot determine carbapenem resistance." }
+  ],
+  "Acinetobacter": [
+    { when: (ctx)=>genesAny(['mcr1'])(ctx), rx: "High-dose ampicillin/sulbactam + meropenem", note: "mcr-1 detected." },
+    { when: (ctx)=>genesNone()(ctx), rx: "Colistin + meropenem", note: "mcr-1 not detected." }
+  ],
+  "Stenotrophomonas": [{ when: (ctx)=>any()(ctx), rx: "TMP/SMX 또는 levofloxacin", rx_en: "TMP/SMX or levofloxacin", note: "" }],
+  "Anaerobe": [{ when: (ctx)=>any()(ctx), rx: "Ceftriaxone + metronidazole", note: "" }],
+  "Haemophilus": [{ when: (ctx)=>any()(ctx), rx: "Ceftriaxone 또는 ampicillin/sulbactam", rx_en: "Ceftriaxone or ampicillin/sulbactam", note: "" }],
+  "Neisseria": [{ when: (ctx)=>any()(ctx), rx: "Ceftriaxone 2 g IV q12h", note: "" }],
+  "Enterococcus_faecalis": [
+    { when: (ctx)=>genesHas('vana')(ctx), rx: "Linezolid", note: "vanA/B detected." },
+    { when: (ctx)=>genesNoneOrNot('vana')(ctx), rx: "Ampicillin 또는 ampicillin/sulbactam", rx_en: "Ampicillin or ampicillin/sulbactam", note: "vanA/B not detected." }
+  ],
+  "Enterococcus_faecium": [
+    { when: (ctx)=>genesHas('vana')(ctx), rx: "Linezolid", note: "vanA/B detected." },
+    { when: (ctx)=>genesNoneOrNot('vana')(ctx), rx: "Vancomycin 또는 teicoplanin", rx_en: "Vancomycin or teicoplanin", note: "vanA/B not detected." }
+  ],
+  "Listeria": [{ when: (ctx)=>any()(ctx), rx: "Ampicillin", note: "" }],
+  "Staphylococcus": [
+    { when: (ctx)=>genesHas('meca')(ctx), rx: "Vancomycin 또는 teicoplanin", rx_en: "Vancomycin or teicoplanin", note: "mecA/C detected." },
+    { when: (ctx)=>genesNoneOrNot('meca')(ctx), rx: "Nafcillin 또는 cefazolin", rx_en: "Nafcillin or cefazolin", note: "mecA/C not detected." }
+  ],
+  "Streptococcus": [{ when: (ctx)=>any()(ctx), rx: "Ceftriaxone", note: "" }],
+  "Candida": [{ when: (ctx)=>any()(ctx), rx: "Caspofungin / Anidulafungin / Micafungin", note: "" }],
+  "Cryptococcus": [{ when: (ctx)=>any()(ctx), rx: "Amphotericin B + flucytosine", note: "" }]
+};
+
+  const CATEGORY_DEFS = [
+    { id:"gp", title_ko:"그람 양성균 (GPC)", title_en:"Gram-positive bacteria (GPC)" },
+    { id:"gn", title_ko:"그람 음성균 (GNB)", title_en:"Gram-negative bacteria (GNB)" },
+    { id:"yeast", title_ko:"진균", title_en:"Yeasts" },
+  ];
+
+  function genesAny(ids){ return (ctx) => ids.some(id => ctx.genes.has(id)); }
+  function genesHas(id){ return (ctx) => ctx.genes.has(id); }
+  function genesNone(){ return (ctx) => ctx.genes.size === 0; }
+  function genesNoneOrNot(id){ return (ctx) => (ctx.genes.size===0) || (!ctx.genes.has(id)); }
+  function any(){ return (_)=>true; }
+
+  const ENTERO_CEFEPIME_IDS = new Set(["entero_ecloacae","entero_kaerogenes","entero_serratia"]);
+
+  const state = { organisms:new Set(), genes:new Set() };
+
+  const subselOrg = document.getElementById("subselOrg");
+  const subselGene = document.getElementById("selectedGenesText");
+
+  const categoryPanels = document.getElementById("categoryPanels");
+  const geneBox = document.getElementById("geneBox");
+  const geneDisabledAlert = document.getElementById("geneDisabledAlert");
+
+  const accGene = document.getElementById("accGene");
+  const panelResults = document.getElementById("panelResults");
+  const resultsBox = document.getElementById("resultsBox");
+  const globalAlert = document.getElementById("globalAlert");
+  const globalAlertText = document.getElementById("globalAlertText");
+
+  const panelOrganisms = document.getElementById("panelOrganisms");
+  const panelGenes = document.getElementById("panelGenes");
+  const btnResetTop = document.getElementById("btnResetTop");
+  const btnToGene = document.getElementById("btnToGene");
+  const btnBackToOrg = document.getElementById("btnBackToOrg");
+  const btnReview = document.getElementById("btnReview");
+  const btnResetEnd = document.getElementById("btnResetEnd");
+
+  function showStep(step){
+    panelOrganisms.classList.toggle("bcid-hidden", step !== "org");
+    panelGenes.classList.toggle("bcid-hidden", step !== "gene");
+    panelResults.classList.toggle("bcid-hidden", step !== "res");
+  }
+
+  const ACC = {
+    org: {head:document.querySelector('[data-acc="org"]'), body:document.getElementById("accOrg"), chev:document.getElementById("chevOrg")},
+    gene:{head:document.querySelector('[data-acc="gene"]'), body:document.getElementById("accGene"), chev:document.getElementById("chevGene")},
+    res: {head:document.querySelector('[data-acc="res"]'), body:document.getElementById("accRes"), chev:document.getElementById("chevRes")},
+  };
+
+  function currentLang(){
+    return document.documentElement.getAttribute('data-lang') || 'ko';
+  }
+
+  function toggleAcc(key, forceOpen=null){
+    const b = ACC[key].body;
+    const open = forceOpen !== null ? forceOpen : b.classList.contains("bcid-hidden");
+    b.classList.toggle("bcid-hidden", !open);
+    ACC[key].chev.textContent = open ? "▲" : "▼";
+  }
+  Object.keys(ACC).forEach(k=>{
+    ACC[k].head.addEventListener("click", ()=>toggleAcc(k));
+  });
+  toggleAcc("org", true);
+  toggleAcc("gene", true);
+  toggleAcc("res", true);
+
+  function escapeHTML(s){
+    return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+  }
+
+  function renderChoices(container, items, selectedSet, onToggle){
+    container.innerHTML = "";
+    items.forEach(item=>{
+      const isSel = selectedSet.has(item.id);
+      const card = document.createElement("div");
+      card.className = "bcid-choice" + (isSel ? " bcid-selected" : "");
+      card.innerHTML = `<div class="bcid-cbx">${isSel ? "✓" : ""}</div><div class="t">${escapeHTML(item.label || item.name)}</div>`;
+      card.addEventListener("click", ()=>{
+        const now = selectedSet.has(item.id);
+        if(now) selectedSet.delete(item.id); else selectedSet.add(item.id);
+        onToggle();
+      });
+      container.appendChild(card);
+    });
+  }
+
+  function noneLabel(){ return currentLang()==='ko' ? '없음' : 'None'; }
+  function tapLabel(){ return currentLang()==='ko' ? '탭하여 선택' : 'Tap to select'; }
+
+  function setSubSelection(elSub, names){
+    if(!names.length){ elSub.innerHTML = `<span class="dot"></span>${noneLabel()}`; return; }
+    const preview = names.slice(0, 4);
+    const more = names.length > 4 ? ` +${names.length - 4}` : "";
+    elSub.innerHTML = `<span class="dot"></span>${escapeHTML(preview.join(" · "))}${escapeHTML(more)}`;
+  }
+
+  function setGeneSubSelection(elSub, names){
+    if(!elSub) return;
+    if(!names.length){ elSub.innerHTML = `<span class="dot"></span>${tapLabel()}`; return; }
+    const preview = names.slice(0, 4);
+    const more = names.length > 4 ? ` +${names.length - 4}` : "";
+    elSub.innerHTML = `<span class="dot"></span>${escapeHTML(preview.join(" · "))}${escapeHTML(more)}`;
+  }
+
+  function getSelectedOrganisms(){ return ORGANISMS.filter(o => state.organisms.has(o.id)); }
+  function getSelectedGeneNames(){ return Array.from(state.genes).map(id => GENES.find(g=>g.id===id)?.name).filter(Boolean); }
+
+  let openCat = "gp";
+
+  function renderCategoryPanels(){
+    categoryPanels.innerHTML = "";
+    CATEGORY_DEFS.forEach(cat=>{
+      const panel = document.createElement("div");
+      panel.className = "bcid-cat-panel";
+
+      const title = currentLang()==='ko' ? cat.title_ko : cat.title_en;
+      const head = document.createElement("button");
+      head.className = "bcid-cat-head";
+      head.innerHTML = `<div class="bcid-cat-title">${escapeHTML(title)}</div><div class="bcid-cat-right"><span class="bcid-chev">${openCat === cat.id ? "▲" : "▼"}</span></div>`;
+      head.addEventListener("click", ()=>{
+        openCat = (openCat === cat.id) ? "" : cat.id;
+        renderCategoryPanels();
+      });
+
+      const body = document.createElement("div");
+      body.className = "bcid-cat-body" + (openCat === cat.id ? "" : " bcid-hidden");
+
+      const grid = document.createElement("div");
+      grid.className = "bcid-grid";
+      body.appendChild(grid);
+
+      const items = ORGANISMS.filter(o=>o.category===cat.id).map(o=>({id:o.id, name:o.name}));
+      renderChoices(grid, items, state.organisms, ()=>{
+        panelResults.classList.add("bcid-hidden");
+        openCat = cat.id;
+        renderCategoryPanels();
+        syncGeneAvailability();
+        updateTopSummary();
+      });
+
+      panel.appendChild(head);
+      panel.appendChild(body);
+      categoryPanels.appendChild(panel);
+    });
+  }
+
+  function renderGenes(){
+    renderChoices(geneBox, GENES.map(g=>({id:g.id, name:g.name})), state.genes, ()=>{
+      panelResults.classList.add("bcid-hidden");
+      renderGenes();
+      updateTopSummary();
+      setGeneSubSelection(subselGene, getSelectedGeneNames());
+    });
+  }
+
+  function syncGeneAvailability(){
+    const orgs = getSelectedOrganisms();
+    const hasOrganism = orgs.length > 0;
+    const hasBacteria = orgs.some(o=>o.category==="gp" || o.category==="gn");
+    const hasOnlyYeast = hasOrganism && orgs.every(o=>o.category==="yeast");
+
+    btnToGene.disabled = !hasOrganism;
+
+    if(!hasOrganism){
+      state.genes.clear();
+      geneDisabledAlert.classList.add("bcid-hidden");
+      accGene.classList.add("bcid-disabled");
+      btnReview.disabled = true;
+      renderGenes();
+      updateTopSummary();
+      return;
+    }
+
+    accGene.classList.remove("bcid-disabled");
+
+    if(hasOnlyYeast){
+      state.genes.clear();
+      geneDisabledAlert.classList.remove("bcid-hidden");
+      geneBox.classList.add("bcid-disabled");
+    } else if(!hasBacteria){
+      state.genes.clear();
+      geneDisabledAlert.classList.add("bcid-hidden");
+      geneBox.classList.add("bcid-disabled");
+    } else {
+      geneDisabledAlert.classList.add("bcid-hidden");
+      geneBox.classList.remove("bcid-disabled");
+    }
+
+    btnReview.disabled = false;
+    renderGenes();
+    updateTopSummary();
+  }
+
+  function updateTopSummary(){
+    const orgs = getSelectedOrganisms();
+    const genes = getSelectedGeneNames();
+    setSubSelection(subselOrg, orgs.map(o=>o.name));
+    setGeneSubSelection(subselGene, genes);
+  }
+
+  function resolveForOrganism(org, genes){
+    if(org.group === "Enterobacterales" && genes.size === 0){
+      if(org.id === "entero_other"){
+        return {
+          rx: "Ceftriaxone 또는 cefepime (균종에 따라)",
+          rx_en: "Ceftriaxone or cefepime (organism-dependent)",
+          note: "Other Enterobacterales 선택 시 균종별 분기 불가. 가능하면 세부 균을 선택하세요.",
+          note_en: "Organism-specific branching is not possible for the 'Other Enterobacterales' option. Select a specific species when possible."
+        };
+      }
+      if(ENTERO_CEFEPIME_IDS.has(org.id)){
+        return { rx:"Cefepime", note:"No resistance genes detected" };
+      }
+      return { rx:"Ceftriaxone", note:"No resistance genes detected" };
+    }
+
+    const ctx = { genes };
+    const rules = RULES[org.group] || [];
+    for(const r of rules){
+      if(r.when(ctx)){
+        if(r.rx === "(auto)"){
+          return {
+            rx:"Ceftriaxone 또는 cefepime (균종에 따라)",
+            rx_en:"Ceftriaxone or cefepime (organism-dependent)",
+            note:r.note,
+            note_en:r.note_en
+          };
+        }
+        return r;
+      }
+    }
+    return { rx:"(No rule) — consult protocol/ID", note:"해당 룰이 아직 없습니다.", note_en:"No rule defined for this case yet." };
+  }
+
+  function computeRecommendations(){
+    const orgs = getSelectedOrganisms();
+    const genes = new Set(state.genes);
+
+    globalAlert.style.display = "none";
+    if(orgs.length>=2){
+      globalAlert.style.display = "";
+      globalAlertText.innerHTML =
+        '<span data-lang="ko">다균종 가능: 비대상균/혐기균/오염 가능성 및 감염원 고려. 필요 시 기존 경험적 광범위 치료 유지/조정.</span>' +
+        '<span data-lang="en">Polymicrobial possible: consider non-target organisms, anaerobes, or contamination, and the source of infection. If needed, maintain or adjust empirical broad-spectrum therapy.</span>';
+    }
+
+    resultsBox.innerHTML = orgs.map(o=>{
+      const r = resolveForOrganism(o, genes);
+      const rxKo = escapeHTML(r.rx);
+      const rxEn = escapeHTML(r.rx_en || r.rx);
+      const noteKo = r.note ? escapeHTML(r.note) : '';
+      const noteEn = r.note ? escapeHTML(r.note_en || r.note) : '';
+      const noteBlock = noteKo
+        ? `<div class="bcid-meta"><b><span data-lang="ko">비고</span><span data-lang="en">Note</span></b>: <span data-lang="ko">${noteKo}</span><span data-lang="en">${noteEn}</span></div>`
+        : '';
+      return `<div class="bcid-result"><h3>${escapeHTML(o.name)}</h3><div class="bcid-rx"><b><span data-lang="ko">권장</span><span data-lang="en">Preferred</span></b>: <span data-lang="ko">${rxKo}</span><span data-lang="en">${rxEn}</span></div>${noteBlock}</div>`;
+    }).join("");
+
+    showStep("res");
+    toggleAcc("res", true);
+    window.scrollTo({top: 0, behavior: "smooth"});
+  }
+
+  function resetAll(){
+    state.organisms.clear();
+    state.genes.clear();
+    openCat = "gp";
+    renderCategoryPanels();
+    renderGenes();
+    updateTopSummary();
+    syncGeneAvailability();
+    showStep("org");
+    toggleAcc("org", true);
+    window.scrollTo({top: 0, behavior: "smooth"});
+  }
+
+  btnResetTop.addEventListener("click", resetAll);
+  btnResetEnd.addEventListener("click", resetAll);
+
+  btnToGene.addEventListener("click", ()=>{
+    if(getSelectedOrganisms().length===0) return;
+    showStep("gene");
+    toggleAcc("gene", true);
+    window.scrollTo({top: 0, behavior: "smooth"});
+  });
+
+  btnBackToOrg.addEventListener("click", ()=>{
+    showStep("org");
+    toggleAcc("org", true);
+    window.scrollTo({top: 0, behavior: "smooth"});
+  });
+
+  btnReview.addEventListener("click", ()=>{
+    if(getSelectedOrganisms().length===0) return;
+    computeRecommendations();
+  });
+
+  // Init
+  renderCategoryPanels();
+  renderGenes();
+  updateTopSummary();
+  syncGeneAvailability();
+</script>
+<script src="recent.js?v=1776350000"></script>
+</body>
+</html>

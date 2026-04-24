@@ -8,49 +8,6 @@
     <link href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css?v=1776350000">
     <style>
-        /* ---- Filter chips ---- */
-        .filter-bar {
-            display: flex;
-            gap: 6px;
-            overflow-x: auto;
-            padding: 2px 0 14px;
-            margin: -4px -2px 4px;
-            scroll-snap-type: x proximity;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-        }
-        .filter-bar::-webkit-scrollbar { display: none; }
-
-        .chip {
-            flex-shrink: 0;
-            padding: 7px 12px;
-            font-size: 11.5px;
-            font-weight: 700;
-            letter-spacing: 0.3px;
-            color: var(--text-secondary);
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: 999px;
-            cursor: pointer;
-            transition: background 0.2s, border-color 0.2s, color 0.2s;
-            scroll-snap-align: start;
-        }
-        .chip:hover { border-color: color-mix(in srgb, var(--smc-blue) 30%, var(--border-subtle)); }
-        .chip.is-active {
-            background: var(--text-primary);
-            border-color: var(--text-primary);
-            color: #fff;
-        }
-        .chip__count {
-            display: inline-block;
-            margin-left: 6px;
-            font-size: 10.5px;
-            font-weight: 800;
-            color: var(--text-tertiary);
-            font-variant-numeric: tabular-nums;
-        }
-        .chip.is-active .chip__count { color: color-mix(in srgb, #fff 75%, transparent); }
-
         /* ---- Category group ---- */
         .proto-group {
             margin-bottom: 24px;
@@ -287,61 +244,104 @@
     <main class="main main--page">
         <!-- Summary -->
         <div class="summary">
-            <div class="summary__total">19<small>total</small></div>
+            <div class="summary__total">20<small><span data-lang="ko">전체</span><span data-lang="en">total</span></small></div>
             <div class="summary__breakdown">
-                <span class="ready"><b>2</b>Ready</span>
-                <span><b>1</b>Draft</span>
-                <span><b>16</b>Soon</span>
+                <span class="ready"><b>7</b><span data-lang="ko">이용 가능</span><span data-lang="en">Ready</span></span>
+                <span><b>13</b><span data-lang="ko">준비 중</span><span data-lang="en">Soon</span></span>
             </div>
         </div>
 
-        <!-- Filter chips -->
-        <div class="filter-bar" id="filterBar">
-            <button class="chip is-active" data-filter="all">All<span class="chip__count">19</span></button>
-            <button class="chip" data-filter="ready">Ready<span class="chip__count">2</span></button>
-            <button class="chip" data-filter="neurology">Neurology<span class="chip__count">3</span></button>
-            <button class="chip" data-filter="cardiology">Cardiology<span class="chip__count">4</span></button>
-            <button class="chip" data-filter="pulmonology">Pulmonology<span class="chip__count">6</span></button>
-            <button class="chip" data-filter="gi">GI &amp; Metab<span class="chip__count">2</span></button>
-            <button class="chip" data-filter="nephrology">Nephrology<span class="chip__count">1</span></button>
-            <button class="chip" data-filter="infection">Infection<span class="chip__count">1</span></button>
-            <button class="chip" data-filter="procedure">Procedure<span class="chip__count">2</span></button>
-        </div>
-
-        <!-- Neurology -->
-        <section class="proto-group neurology" data-cat="neurology">
+        <!-- Procedure -->
+        <section class="proto-group procedure" data-cat="procedure">
             <div class="proto-group__head">
                 <span class="proto-group__dot"></span>
-                <span class="proto-group__name">Neurology</span>
+                <span class="proto-group__name"><span data-lang="ko">술기</span><span data-lang="en">Procedure</span></span>
                 <div class="proto-group__rule"></div>
-                <span class="proto-group__tally">03</span>
+                <span class="proto-group__tally">02</span>
             </div>
             <div class="proto-list">
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                <div class="proto-card" data-status="ready" data-href="vap-toc.html">
+                <div class="proto-card" data-status="ready" data-cat="procedure" data-href="airway-toc.html">
                     <div class="proto-card__head">
                         <div class="proto-card__body">
-                            <div class="proto-card__title">Ventilator-Associated Pneumonia Prevention</div>
-                            <div class="proto-card__meta"><span class="proto-card__cat">Pulmonology</span><span class="dot"></span><span>4 sections</span><span class="dot"></span><span>Rev. 2026.03</span></div>
+                            <div class="proto-card__title"><span data-lang="ko">기도 관리</span><span data-lang="en">Airway Management</span></div>
+                            <div class="proto-card__meta"><span class="proto-card__cat"><span data-lang="ko">술기</span><span data-lang="en">Procedure</span></span><span class="dot"></span><span><span data-lang="ko">섹션 13개</span><span data-lang="en">13 sections</span></span><span class="dot"></span><span>Rev. 2026.04</span></div>
                         </div>
                         <div class="proto-card__arrow"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
                     </div>
                 </div>
-                <div class="proto-card" data-status="ready" data-href="ecmo-toc.html">
+                <div class="proto-card is-pending" data-status="soon" data-cat="procedure">
                     <div class="proto-card__head">
                         <div class="proto-card__body">
-                            <div class="proto-card__title">Veno-Venous ECMO (VV-ECMO)</div>
-                            <div class="proto-card__meta"><span class="proto-card__cat">Pulmonology</span><span class="dot"></span><span>Severe ARDS</span></div>
+                            <div class="proto-card__title"><span data-lang="ko">혈관 접근 관리</span><span data-lang="en">Vascular Access Management</span></div>
+                            <div class="proto-card__meta"><span class="proto-card__cat"><span data-lang="ko">술기</span><span data-lang="en">Procedure</span></span><span class="dot"></span><span data-lang="ko">준비 중</span><span data-lang="en">Planned</span></div>
+                        </div>
+                        <div class="proto-card__status proto-card__status--soon">SOON</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pulmonology -->
+        <section class="proto-group pulmonology" data-cat="pulmonology">
+            <div class="proto-group__head">
+                <span class="proto-group__dot"></span>
+                <span class="proto-group__name"><span data-lang="ko">호흡기</span><span data-lang="en">Pulmonology</span></span>
+                <div class="proto-group__rule"></div>
+                <span class="proto-group__tally">06</span>
+            </div>
+            <div class="proto-list">
+                <div class="proto-card" data-status="ready" data-cat="pulmonology" data-href="wean-toc.html">
+                    <div class="proto-card__head">
+                        <div class="proto-card__body">
+                            <div class="proto-card__title"><span data-lang="ko">기계환기 이탈</span><span data-lang="en">Mechanical Ventilation Weaning</span></div>
+                            <div class="proto-card__meta"><span class="proto-card__cat"><span data-lang="ko">호흡기</span><span data-lang="en">Pulmonology</span></span><span class="dot"></span><span><span data-lang="ko">섹션 7개</span><span data-lang="en">7 sections</span></span><span class="dot"></span><span>Rev. 2026.04</span></div>
                         </div>
                         <div class="proto-card__arrow"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+                    </div>
+                </div>
+                <div class="proto-card" data-status="ready" data-cat="pulmonology" data-href="ecmo-toc.html">
+                    <div class="proto-card__head">
+                        <div class="proto-card__body">
+                            <div class="proto-card__title"><span data-lang="ko">정맥-정맥 체외막산소화 (VV-ECMO)</span><span data-lang="en">Veno-Venous ECMO (VV-ECMO)</span></div>
+                            <div class="proto-card__meta"><span class="proto-card__cat"><span data-lang="ko">호흡기</span><span data-lang="en">Pulmonology</span></span><span class="dot"></span><span><span data-lang="ko">섹션 10개</span><span data-lang="en">10 sections</span></span><span class="dot"></span><span>Rev. 2026.04</span></div>
+                        </div>
+                        <div class="proto-card__arrow"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+                    </div>
+                </div>
+                <div class="proto-card" data-status="ready" data-cat="pulmonology" data-href="vap-toc.html">
+                    <div class="proto-card__head">
+                        <div class="proto-card__body">
+                            <div class="proto-card__title"><span data-lang="ko">인공호흡기 관련 폐렴 예방</span><span data-lang="en">VAP Prevention</span></div>
+                            <div class="proto-card__meta"><span class="proto-card__cat"><span data-lang="ko">호흡기</span><span data-lang="en">Pulmonology</span></span><span class="dot"></span><span><span data-lang="ko">섹션 4개</span><span data-lang="en">4 sections</span></span><span class="dot"></span><span>Rev. 2026.03</span></div>
+                        </div>
+                        <div class="proto-card__arrow"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+                    </div>
+                </div>
+                <div class="proto-card is-pending" data-status="soon" data-cat="pulmonology">
+                    <div class="proto-card__head">
+                        <div class="proto-card__body">
+                            <div class="proto-card__title"><span data-lang="ko">폐 보호 인공호흡</span><span data-lang="en">Lung-Protective Ventilation</span></div>
+                            <div class="proto-card__meta"><span class="proto-card__cat"><span data-lang="ko">호흡기</span><span data-lang="en">Pulmonology</span></span><span class="dot"></span><span data-lang="ko">준비 중</span><span data-lang="en">Planned</span></div>
+                        </div>
+                        <div class="proto-card__status proto-card__status--soon">SOON</div>
+                    </div>
+                </div>
+                <div class="proto-card is-pending" data-status="soon" data-cat="pulmonology">
+                    <div class="proto-card__head">
+                        <div class="proto-card__body">
+                            <div class="proto-card__title"><span data-lang="ko">비침습 양압환기 (NIV)</span><span data-lang="en">Noninvasive Ventilation (NIV)</span></div>
+                            <div class="proto-card__meta"><span class="proto-card__cat"><span data-lang="ko">호흡기</span><span data-lang="en">Pulmonology</span></span><span class="dot"></span><span data-lang="ko">준비 중</span><span data-lang="en">Planned</span></div>
+                        </div>
+                        <div class="proto-card__status proto-card__status--soon">SOON</div>
+                    </div>
+                </div>
+                <div class="proto-card is-pending" data-status="soon" data-cat="pulmonology">
+                    <div class="proto-card__head">
+                        <div class="proto-card__body">
+                            <div class="proto-card__title"><span data-lang="ko">ARDS에서의 복와위 (Prone Position)</span><span data-lang="en">Prone Position in ARDS</span></div>
+                            <div class="proto-card__meta"><span class="proto-card__cat"><span data-lang="ko">호흡기</span><span data-lang="en">Pulmonology</span></span><span class="dot"></span><span data-lang="ko">준비 중</span><span data-lang="en">Planned</span></div>
+                        </div>
+                        <div class="proto-card__status proto-card__status--soon">SOON</div>
                     </div>
                 </div>
             </div>
@@ -351,26 +351,144 @@
         <section class="proto-group gi" data-cat="gi">
             <div class="proto-group__head">
                 <span class="proto-group__dot"></span>
-                <span class="proto-group__name">GI &amp; Metabolism</span>
+                <span class="proto-group__name"><span data-lang="ko">소화기·대사</span><span data-lang="en">GI &amp; Metabolism</span></span>
                 <div class="proto-group__rule"></div>
                 <span class="proto-group__tally">02</span>
             </div>
-            <div class="proto-list"><div class="proto-card" data-status="ready" data-href="nutr-toc.html">
+            <div class="proto-list">
+                <div class="proto-card" data-status="ready" data-cat="gi" data-href="nutr-toc.html">
                     <div class="proto-card__head">
                         <div class="proto-card__body">
-                            <div class="proto-card__title">ICU Nutrition Protocol</div>
-                            <div class="proto-card__meta"><span class="proto-card__cat">GI &amp; Metab</span><span class="dot"></span><span>Enteral / parenteral</span></div>
+                            <div class="proto-card__title"><span data-lang="ko">중환자실 영양 프로토콜</span><span data-lang="en">ICU Nutrition Protocol</span></div>
+                            <div class="proto-card__meta"><span class="proto-card__cat"><span data-lang="ko">소화기·대사</span><span data-lang="en">GI &amp; Metab</span></span><span class="dot"></span><span><span data-lang="ko">섹션 15개</span><span data-lang="en">15 sections</span></span><span class="dot"></span><span>Rev. 2025.08</span></div>
                         </div>
                         <div class="proto-card__arrow"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
                     </div>
                 </div>
-                <div class="proto-card" data-status="ready" data-href="sup-toc.html">
+                <div class="proto-card" data-status="ready" data-cat="gi" data-href="sup-toc.html">
                     <div class="proto-card__head">
                         <div class="proto-card__body">
-                            <div class="proto-card__title">Stress Ulcer Prophylaxis</div>
-                            <div class="proto-card__meta"><span class="proto-card__cat">GI &amp; Metab</span><span class="dot"></span><span>SUP indication</span></div>
+                            <div class="proto-card__title"><span data-lang="ko">스트레스 궤양 예방</span><span data-lang="en">Stress Ulcer Prophylaxis</span></div>
+                            <div class="proto-card__meta"><span class="proto-card__cat"><span data-lang="ko">소화기·대사</span><span data-lang="en">GI &amp; Metab</span></span><span class="dot"></span><span><span data-lang="ko">섹션 4개</span><span data-lang="en">4 sections</span></span><span class="dot"></span><span>Rev. 2026.04</span></div>
                         </div>
                         <div class="proto-card__arrow"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Infection -->
+        <section class="proto-group infection" data-cat="infection">
+            <div class="proto-group__head">
+                <span class="proto-group__dot"></span>
+                <span class="proto-group__name"><span data-lang="ko">감염</span><span data-lang="en">Infection</span></span>
+                <div class="proto-group__rule"></div>
+                <span class="proto-group__tally">02</span>
+            </div>
+            <div class="proto-list">
+                <div class="proto-card" data-status="ready" data-cat="infection" data-href="bcid-guide.html">
+                    <div class="proto-card__head">
+                        <div class="proto-card__body">
+                            <div class="proto-card__title"><span data-lang="ko">BCID2 항생제 가이드</span><span data-lang="en">BCID2 Antibiotic Guide</span></div>
+                            <div class="proto-card__meta"><span class="proto-card__cat"><span data-lang="ko">감염</span><span data-lang="en">Infection</span></span><span class="dot"></span><span data-lang="ko">대화형 도구</span><span data-lang="en">Interactive tool</span><span class="dot"></span><span data-lang="ko">테스트 버전</span><span data-lang="en">Test</span></div>
+                        </div>
+                        <div class="proto-card__arrow"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+                    </div>
+                </div>
+                <div class="proto-card is-pending" data-status="soon" data-cat="infection">
+                    <div class="proto-card__head">
+                        <div class="proto-card__body">
+                            <div class="proto-card__title"><span data-lang="ko">중환자실 항생제 가이드라인</span><span data-lang="en">ICU Antibiotics Guideline</span></div>
+                            <div class="proto-card__meta"><span class="proto-card__cat"><span data-lang="ko">감염</span><span data-lang="en">Infection</span></span><span class="dot"></span><span data-lang="ko">준비 중</span><span data-lang="en">Planned</span></div>
+                        </div>
+                        <div class="proto-card__status proto-card__status--soon">SOON</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Neurology -->
+        <section class="proto-group neurology" data-cat="neurology">
+            <div class="proto-group__head">
+                <span class="proto-group__dot"></span>
+                <span class="proto-group__name"><span data-lang="ko">신경계</span><span data-lang="en">Neurology</span></span>
+                <div class="proto-group__rule"></div>
+                <span class="proto-group__tally">03</span>
+            </div>
+            <div class="proto-list">
+                <div class="proto-card is-pending" data-status="soon" data-cat="neurology">
+                    <div class="proto-card__head">
+                        <div class="proto-card__body">
+                            <div class="proto-card__title"><span data-lang="ko">통증·진정·섬망·수면 관리</span><span data-lang="en">Pain, Agitation, Sedation, Delirium &amp; Sleep</span></div>
+                            <div class="proto-card__meta"><span class="proto-card__cat"><span data-lang="ko">신경계</span><span data-lang="en">Neurology</span></span><span class="dot"></span><span data-lang="ko">준비 중</span><span data-lang="en">Planned</span></div>
+                        </div>
+                        <div class="proto-card__status proto-card__status--soon">SOON</div>
+                    </div>
+                </div>
+                <div class="proto-card is-pending" data-status="soon" data-cat="neurology">
+                    <div class="proto-card__head">
+                        <div class="proto-card__body">
+                            <div class="proto-card__title"><span data-lang="ko">고장·삼투 치료</span><span data-lang="en">Hypertonic &amp; Osmolar Therapy</span></div>
+                            <div class="proto-card__meta"><span class="proto-card__cat"><span data-lang="ko">신경계</span><span data-lang="en">Neurology</span></span><span class="dot"></span><span data-lang="ko">준비 중</span><span data-lang="en">Planned</span></div>
+                        </div>
+                        <div class="proto-card__status proto-card__status--soon">SOON</div>
+                    </div>
+                </div>
+                <div class="proto-card is-pending" data-status="soon" data-cat="neurology">
+                    <div class="proto-card__head">
+                        <div class="proto-card__body">
+                            <div class="proto-card__title"><span data-lang="ko">목표 체온 조절 (TTM)</span><span data-lang="en">Targeted Temperature Management (TTM)</span></div>
+                            <div class="proto-card__meta"><span class="proto-card__cat"><span data-lang="ko">신경계</span><span data-lang="en">Neurology</span></span><span class="dot"></span><span data-lang="ko">준비 중</span><span data-lang="en">Planned</span></div>
+                        </div>
+                        <div class="proto-card__status proto-card__status--soon">SOON</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cardiology -->
+        <section class="proto-group cardiology" data-cat="cardiology">
+            <div class="proto-group__head">
+                <span class="proto-group__dot"></span>
+                <span class="proto-group__name"><span data-lang="ko">심장</span><span data-lang="en">Cardiology</span></span>
+                <div class="proto-group__rule"></div>
+                <span class="proto-group__tally">04</span>
+            </div>
+            <div class="proto-list">
+                <div class="proto-card is-pending" data-status="soon" data-cat="cardiology">
+                    <div class="proto-card__head">
+                        <div class="proto-card__body">
+                            <div class="proto-card__title"><span data-lang="ko">동맥-정맥 체외막산소화 (VA-ECMO)</span><span data-lang="en">Veno-Arterial ECMO (VA-ECMO)</span></div>
+                            <div class="proto-card__meta"><span class="proto-card__cat"><span data-lang="ko">심장</span><span data-lang="en">Cardiology</span></span><span class="dot"></span><span data-lang="ko">준비 중</span><span data-lang="en">Planned</span></div>
+                        </div>
+                        <div class="proto-card__status proto-card__status--soon">SOON</div>
+                    </div>
+                </div>
+                <div class="proto-card is-pending" data-status="soon" data-cat="cardiology">
+                    <div class="proto-card__head">
+                        <div class="proto-card__body">
+                            <div class="proto-card__title"><span data-lang="ko">대량 수혈 프로토콜</span><span data-lang="en">Massive Transfusion Protocol</span></div>
+                            <div class="proto-card__meta"><span class="proto-card__cat"><span data-lang="ko">심장</span><span data-lang="en">Cardiology</span></span><span class="dot"></span><span data-lang="ko">준비 중</span><span data-lang="en">Planned</span></div>
+                        </div>
+                        <div class="proto-card__status proto-card__status--soon">SOON</div>
+                    </div>
+                </div>
+                <div class="proto-card is-pending" data-status="soon" data-cat="cardiology">
+                    <div class="proto-card__head">
+                        <div class="proto-card__body">
+                            <div class="proto-card__title"><span data-lang="ko">폐혈전색전증 치료</span><span data-lang="en">Pulmonary Thromboembolism Management</span></div>
+                            <div class="proto-card__meta"><span class="proto-card__cat"><span data-lang="ko">심장</span><span data-lang="en">Cardiology</span></span><span class="dot"></span><span data-lang="ko">준비 중</span><span data-lang="en">Planned</span></div>
+                        </div>
+                        <div class="proto-card__status proto-card__status--soon">SOON</div>
+                    </div>
+                </div>
+                <div class="proto-card is-pending" data-status="soon" data-cat="cardiology">
+                    <div class="proto-card__head">
+                        <div class="proto-card__body">
+                            <div class="proto-card__title"><span data-lang="ko">정맥혈전색전증 예방</span><span data-lang="en">Venous Thromboembolism Prophylaxis</span></div>
+                            <div class="proto-card__meta"><span class="proto-card__cat"><span data-lang="ko">심장</span><span data-lang="en">Cardiology</span></span><span class="dot"></span><span data-lang="ko">준비 중</span><span data-lang="en">Planned</span></div>
+                        </div>
+                        <div class="proto-card__status proto-card__status--soon">SOON</div>
                     </div>
                 </div>
             </div>
@@ -380,22 +498,26 @@
         <section class="proto-group nephrology" data-cat="nephrology">
             <div class="proto-group__head">
                 <span class="proto-group__dot"></span>
-                <span class="proto-group__name">Nephrology</span>
+                <span class="proto-group__name"><span data-lang="ko">신장</span><span data-lang="en">Nephrology</span></span>
                 <div class="proto-group__rule"></div>
                 <span class="proto-group__tally">01</span>
             </div>
-            <div class="proto-list"><div class="proto-card" data-status="ready" data-href="airway-toc.html">
+            <div class="proto-list">
+                <div class="proto-card is-pending" data-status="soon" data-cat="nephrology">
                     <div class="proto-card__head">
                         <div class="proto-card__body">
-                            <div class="proto-card__title">Airway Management Protocol</div>
-                            <div class="proto-card__meta"><span class="proto-card__cat">Procedure</span><span class="dot"></span><span>11 sections</span><span class="dot"></span><span>Rev. 2026.03</span></div>
+                            <div class="proto-card__title"><span data-lang="ko">지속적 신대체요법 (CRRT)</span><span data-lang="en">CRRT Protocol</span></div>
+                            <div class="proto-card__meta"><span class="proto-card__cat"><span data-lang="ko">신장</span><span data-lang="en">Nephrology</span></span><span class="dot"></span><span data-lang="ko">준비 중</span><span data-lang="en">Planned</span></div>
                         </div>
-                        <div class="proto-card__arrow"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+                        <div class="proto-card__status proto-card__status--soon">SOON</div>
                     </div>
                 </div>
             </div>
         </section>
+
     </main>
+
+    <div class="toast" id="toast">Coming soon</div>
 
     <nav class="bottom-nav">
         <div class="nav-item" onclick="window.location.href='index.html'"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg><span class="nav-item__label"><span data-lang="ko">홈</span><span data-lang="en">Home</span></span></div>
@@ -405,6 +527,40 @@
         <div class="nav-item" onclick="window.location.href='info.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg><span class="nav-item__label"><span data-lang="ko">정보</span><span data-lang="en">Information</span></span></div>
     </nav>
 </div>
+<script>
+(function(){
+  const toast = document.getElementById('toast');
+  let toastT;
+  function showToast(msg){
+    if(!toast) return;
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastT);
+    toastT = setTimeout(()=>toast.classList.remove('show'), 1800);
+  }
+
+  // Card navigation
+  document.querySelectorAll('.proto-card').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      const href = card.getAttribute('data-href');
+      if(href){ window.location.href = href; return; }
+      const lang = document.documentElement.getAttribute('data-lang') || 'ko';
+      showToast(lang === 'ko' ? '준비 중 — 곧 공개됩니다' : 'Coming soon');
+    });
+  });
+
+  // Bottom-nav toast for disabled items
+  document.querySelectorAll('.nav-item').forEach(i=>{
+    i.addEventListener('click', function(){
+      if(this.classList.contains('active')) return;
+      if(this.getAttribute('onclick')) return;
+      const lbl = this.querySelector('.nav-item__label');
+      showToast((lbl ? lbl.textContent : '') + ' — Coming soon');
+    });
+  });
+
+})();
+</script>
 <script src="recent.js?v=1776350000"></script>
 </body>
 </html>
