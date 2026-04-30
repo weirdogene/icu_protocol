@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECMO-CKRT Connection · Nephrology</title>
+    <script src="settings-init.js?v=1776350000"></script>
+<link href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=1776350000">
+<link rel="stylesheet" href="protocol.css?v=1776350000">
+<style>.container { --cat-color: var(--cat-nephrology); }</style>
+</head>
+<body>
+<div class="container">
+  <header class="header header--page">
+    <div class="header__top">
+      <button class="icon-btn" id="secToggle" aria-label="Sections">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div class="header__title">
+        <span class="header__eyebrow"><span data-lang="ko">CKRT · 섹션 6 / 7</span><span data-lang="en">CKRT · Section 6 / 7</span></span>
+        <div class="header__h1"><span data-lang="ko">ECMO-CKRT 연결</span><span data-lang="en">ECMO-CKRT Connection</span></div>
+      </div>
+      <button class="icon-btn icon-btn--bookmark" aria-label="Save" aria-pressed="false">
+        <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="main main--page">
+    <div class="sec-progress"><div class="sec-progress__bar" style="width:85.7%"></div></div>
+
+    <div class="p-sect__body"><div data-lang="ko"><div class="p-group"><h3 class="p-sub"><span class="p-num">1.</span>혈관 접근 (vascular access) </h3>
+<div class="p-item p-l2"><span class="p-num">(1)</span>ECMO 환자에서 CKRT vascular access는 <strong>ECMO 서킷을 기본으로 사용</strong></div>
+<div class="p-item p-l2"><span class="p-num">(2)</span>ECMO 서킷 내 압력</div>
+<div class="p-item p-l3"><span class="p-num">•</span>펌프 전방 구간: 높은 음압 상태 유지</div>
+<div class="p-item p-l3"><span class="p-num">•</span>펌프 후방 구간: 높은 양압 상태 유지</div>
+</div><!--/p-group-->
+<div class="p-group"><h3 class="p-sub"><span class="p-num">2.</span>연결 방법</h3>
+<div class="p-item p-l2"><span class="p-num">(1)</span>CKRT line연결</div>
+<p class="p-note p-note--l2">ECMO 펌프의 전·후 위치에 연결하되 <strong>산화기를 경유하지 않도록 주의</strong></p>
+<div class="p-item p-l3"><span class="p-num">①</span>CKRT venous line (파란색): <strong>펌프 앞</strong>쪽 캐뉼라에 연결</div>
+<div class="p-item p-l3"><span class="p-num">②</span>CKRT arterial line (빨간색): <strong>펌프와 산화기 사이</strong>(펌프 후방, 산화기 전방)의 캐뉼라에 연결</div>
+<div class="p-item p-l4"><span class="p-num">•</span>산화기 후방에 연결하는 경우 CKRT 장비 운용 자체에는 문제가 없으나, shunt가 형성되어 산화기를 통해 가스 교환이 이루어진 혈액이 ECMO의 배액 캐뉼라로 유입될 수 있음. 이에 따라 ECMO VBGA의 해석을 어렵게 하므로 산화기 후방에 연결하지 않도록 주의</div>
+<div class="p-item p-l2"><span class="p-num">(2)</span>Extra-line 연결</div>
+<div class="p-item p-l3"><span class="p-num">•</span>일반적인 vascular access와 달리 ECMO 펌프로 인해 높은 압력이 발생하므로 알람이 자주 울리고 CKRT 운영에 어려움이 있을 수 있음. 이에 <strong>감압을 위해 extra-line을 사용</strong>하여 길이를 연장하여 CKRT를 적용함</div>
+<div class="p-item p-l3"><span class="p-num">•</span>기본적으로 CKRT venous line과 CKRT arterial line 모두에 30 cm의 extra-line을 적용하여 저항을 만들어 줌</div>
+<div class="p-item p-l3"><span class="p-num">•</span>CKRT 기계의 알람 빈도, ECMO 혈류 속도/RPM에 따라 extra-line의 길이를 조절하여 압력을 조절할 수 있으며, 이는 ICU CKRT 전담팀과 상의하여 결정함</div>
+</div><!--/p-group-->
+<div class="p-figure"><img src="images/ckrt-ecmo-flowchart-ko.png" alt="ECMO-CKRT 연결 흐름도"></div></div><div data-lang="en"><div class="p-group"><h3 class="p-sub"><span class="p-num">1.</span>Vascular Access</h3>
+<div class="p-item p-l2"><span class="p-num">(1)</span>General principle</div>
+<div class="p-item p-l3"><span class="p-num">•</span>In patients receiving ECMO, <strong>the ECMO circuit is used as the basic CKRT vascular access</strong></div>
+<div class="p-item p-l2"><span class="p-num">(2)</span>Pressure characteristics within the ECMO circuit</div>
+<div class="p-item p-l3"><span class="p-num">•</span>Pre-pump segment: maintained under high negative pressure</div>
+<div class="p-item p-l3"><span class="p-num">•</span>Post-pump segment: maintained under high positive pressure</div>
+</div><!--/p-group-->
+<div class="p-group"><h3 class="p-sub"><span class="p-num">2.</span>Connection Method</h3>
+<div class="p-item p-l2"><span class="p-num">(1)</span>CKRT line connection</div>
+<p class="p-note p-note--l2">Connect the CKRT lines to the pre- and post-pump segments of the ECMO circuit, but <strong>not to the post-oxygenator segment</strong></p>
+<div class="p-item p-l3"><span class="p-num">①</span>CKRT venous line (blue): connect to the <strong>pre-pump</strong> cannula</div>
+<div class="p-item p-l3"><span class="p-num">②</span>CKRT arterial line (red): connect to the cannula <strong>between the pump and the oxygenator</strong> (post-pump, pre-oxygenator)</div>
+<div class="p-item p-l4"><span class="p-num">•</span>Connection to the post-oxygenator segment generally does not interfere with CKRT device operation. However, it may create a shunt, allowing oxygenated blood exiting the oxygenator to return directly to the ECMO drainage cannula. This may complicate interpretation of ECMO venous blood gas analysis (pre-oxygenator VBGA); therefore, post-oxygenator connection should be avoided</div>
+<div class="p-item p-l2"><span class="p-num">(2)</span>Extra-line connection</div>
+<div class="p-item p-l3"><span class="p-num">•</span>Unlike conventional vascular access, the ECMO pump generates high pressures that frequently trigger alarms and make CKRT operation difficult. Therefore, <strong>extension lines (extra-lines) are used to lengthen the path and reduce pressure when applying CKRT</strong></div>
+<div class="p-item p-l3"><span class="p-num">•</span>In general, apply 30 cm extra-lines to both the CKRT venous line and CKRT arterial line to create additional resistance</div>
+<div class="p-item p-l3"><span class="p-num">•</span>The length of the extra-line can be adjusted to control pressure based on CKRT alarm frequency and ECMO blood flow rate / RPM. This should be determined in consultation with the ICU CKRT team.</div>
+</div><!--/p-group-->
+<div class="p-figure"><img src="images/ckrt-ecmo-flowchart-en.png" alt="ECMO-CKRT connection flowchart"></div></div></div>
+
+    <div class="p-pager">
+      <a class="pn-btn pn-btn--prev" href="ckrt-s5.html"><span class="pn-lbl"><span data-lang="ko">이전</span><span data-lang="en">Previous</span></span><span class="pn-ttl"><span data-lang="ko">CKRT 항응고요법</span><span data-lang="en">Anticoagulation for CKRT</span></span></a>
+      <a class="pn-btn pn-btn--next" href="ckrt-s7.html"><span class="pn-lbl"><span data-lang="ko">다음</span><span data-lang="en">Next</span></span><span class="pn-ttl"><span data-lang="ko">참고문헌</span><span data-lang="en">References</span></span></a>
+    </div>
+
+    <a class="p-toc-btn" href="ckrt-toc.html">
+      <svg viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      <span data-lang="ko">목차로 돌아가기</span><span data-lang="en">Back to Contents</span>
+    </a>
+  </main>
+
+  <div class="toast" id="toast">Saved</div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="window.location.href='index.html'"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg><span class="nav-item__label"><span data-lang="ko">홈</span><span data-lang="en">Home</span></span></div>
+    <div class="nav-item active" onclick="window.location.href='protocols.html'"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8m8 4H8"/></svg><span class="nav-item__label"><span data-lang="ko">프로토콜</span><span data-lang="en">Protocols</span></span></div>
+    <div class="nav-item" onclick="window.location.href='calculator.html'"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h.01M8 14h2M12 14h2M16 14h.01M8 18h8"/></svg><span class="nav-item__label"><span data-lang="ko">계산기</span><span data-lang="en">Calculator</span></span></div>
+    <div class="nav-item" onclick="window.location.href='saved.html'"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg><span class="nav-item__label"><span data-lang="ko">즐겨찾기</span><span data-lang="en">Saved</span></span></div>
+    <div class="nav-item" onclick="window.location.href='info.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg><span class="nav-item__label"><span data-lang="ko">정보</span><span data-lang="en">Information</span></span></div>
+  </nav>
+<div class="sec-dd" id="secDD" aria-hidden="true">
+  <div class="sec-dd__scrim" data-dd-close></div>
+  <div class="sec-dd__panel" role="dialog" aria-label="Section list">
+    <div class="sec-dd__head">
+      <span class="sec-dd__eyebrow">CKRT</span>
+      <button class="sec-dd__close" data-dd-close aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <nav class="sec-dd__list">
+      <a class="sec-dd__item" href="ckrt-s1.html">
+        <span class="sec-dd__num">01</span>
+        <span class="sec-dd__title"><span data-lang="ko">지속적 신대체요법 (CKRT)의 시작</span><span data-lang="en">Initiation of CKRT</span></span>
+      </a>
+      <a class="sec-dd__item" href="ckrt-s2.html">
+        <span class="sec-dd__num">02</span>
+        <span class="sec-dd__title"><span data-lang="ko">처방</span><span data-lang="en">Prescription</span></span>
+      </a>
+      <a class="sec-dd__item" href="ckrt-s3.html">
+        <span class="sec-dd__num">03</span>
+        <span class="sec-dd__title"><span data-lang="ko">전해질 및 산-염기 불균형 교정</span><span data-lang="en">Electrolyte and Acid-Base Imbalance Correction</span></span>
+      </a>
+      <a class="sec-dd__item" href="ckrt-s4.html">
+        <span class="sec-dd__num">04</span>
+        <span class="sec-dd__title"><span data-lang="ko">CKRT 중단</span><span data-lang="en">CKRT Discontinuation</span></span>
+      </a>
+      <a class="sec-dd__item" href="ckrt-s5.html">
+        <span class="sec-dd__num">05</span>
+        <span class="sec-dd__title"><span data-lang="ko">CKRT 항응고요법</span><span data-lang="en">Anticoagulation for CKRT</span></span>
+      </a>
+      <a class="sec-dd__item is-current" href="ckrt-s6.html">
+        <span class="sec-dd__num">06</span>
+        <span class="sec-dd__title"><span data-lang="ko">ECMO-CKRT 연결</span><span data-lang="en">ECMO-CKRT Connection</span></span>
+      </a>
+      <a class="sec-dd__item" href="ckrt-s7.html">
+        <span class="sec-dd__num">07</span>
+        <span class="sec-dd__title"><span data-lang="ko">참고문헌</span><span data-lang="en">References</span></span>
+      </a>
+    </nav>
+  </div>
+</div>
+</div>
+<div class="p-lightbox" id="pLightbox" aria-hidden="true">
+  <div class="p-lightbox__stage" id="pLightboxStage">
+    <img class="p-lightbox__img" id="pLightboxImg" alt="">
+  </div>
+  <button class="p-lightbox__close" id="pLightboxClose" aria-label="Close">
+    <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+  </button>
+  <div class="p-lightbox__hint" id="pLightboxHint"><span data-lang="ko">두 번 탭하여 확대 · 드래그로 이동</span><span data-lang="en">Double-tap to zoom · drag to pan</span></div>
+</div>
+<script>
+const toast=document.getElementById('toast');let t;
+function showToast(m){toast.textContent=m;toast.classList.add('show');clearTimeout(t);t=setTimeout(()=>toast.classList.remove('show'),1600);}
+document.querySelectorAll('.nav-item').forEach(i=>i.addEventListener('click',function(){if(this.classList.contains('active'))return;if(this.getAttribute('onclick'))return;showToast(this.querySelector('.nav-item__label').textContent+' — Coming soon');}));
+
+const dd=document.getElementById('secDD');
+const tog=document.getElementById('secToggle');
+if(dd&&tog){
+  function openDD(){dd.classList.add('is-open');dd.setAttribute('aria-hidden','false');}
+  function closeDD(){dd.classList.remove('is-open');dd.setAttribute('aria-hidden','true');}
+  tog.addEventListener('click',e=>{e.stopPropagation();dd.classList.contains('is-open')?closeDD():openDD();});
+  dd.querySelectorAll('[data-dd-close]').forEach(el=>el.addEventListener('click',closeDD));
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDD();});
+}
+
+(function(){
+  const btn=document.querySelector('.icon-btn--bookmark');
+  if(!btn) return;
+  const key='smc-bookmark:'+(location.pathname.split('/').pop()||'index');
+  let saved=false;
+  try{ saved=localStorage.getItem(key)==='1'; }catch(e){}
+  if(saved){ btn.classList.add('is-saved'); btn.setAttribute('aria-pressed','true'); }
+  btn.addEventListener('click',function(ev){
+    ev.stopPropagation(); saved=!saved;
+    btn.classList.toggle('is-saved',saved); btn.setAttribute('aria-pressed',saved?'true':'false');
+    btn.classList.remove('is-animating'); void btn.offsetWidth; btn.classList.add('is-animating');
+    setTimeout(()=>btn.classList.remove('is-animating'),650);
+    try{ saved?localStorage.setItem(key,'1'):localStorage.removeItem(key); }catch(e){}
+    if(typeof showToast==='function') showToast(saved?'Saved':'Removed from saved');
+  });
+})();
+(function(){
+  const lb=document.getElementById('pLightbox'); if(!lb) return;
+  const stage=document.getElementById('pLightboxStage');
+  const img=document.getElementById('pLightboxImg');
+  const closeBtn=document.getElementById('pLightboxClose');
+  const hint=document.getElementById('pLightboxHint');
+  let baseScale=1, scale=1, tx=0, ty=0, iw=0, ih=0, sw=0, sh=0;
+  const MIN=1, MAX=6;
+  function apply(){ const s=baseScale*scale; img.style.transform=`translate(${tx}px, ${ty}px) scale(${s})`; stage.classList.toggle('is-zoomed', scale>1.01); }
+  function clampPan(){ const s=baseScale*scale; const dw=iw*s, dh=ih*s; if(dw<=sw) tx=(sw-dw)/2; else tx=Math.max(sw-dw, Math.min(0, tx)); if(dh<=sh) ty=(sh-dh)/2; else ty=Math.max(sh-dh, Math.min(0, ty)); }
+  function fit(){ sw=stage.clientWidth; sh=stage.clientHeight; if(!iw||!ih) return; baseScale=Math.min(sw/iw, sh/ih); scale=1; const dw=iw*baseScale, dh=ih*baseScale; tx=(sw-dw)/2; ty=(sh-dh)/2; apply(); }
+  function zoomAt(cx, cy, newScale){ newScale=Math.max(MIN, Math.min(MAX, newScale)); const s0=baseScale*scale, s1=baseScale*newScale; tx=cx-(cx-tx)*(s1/s0); ty=cy-(cy-ty)*(s1/s0); scale=newScale; clampPan(); apply(); }
+  function openLB(src,alt){ img.src=src; img.alt=alt||''; lb.classList.add('is-open'); lb.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; img.onload=()=>{ iw=img.naturalWidth; ih=img.naturalHeight; img.style.width=iw+'px'; img.style.height=ih+'px'; fit(); }; hint.classList.remove('is-fading'); setTimeout(()=>hint.classList.add('is-fading'), 2600); }
+  function closeLB(){ lb.classList.remove('is-open'); lb.setAttribute('aria-hidden','true'); document.body.style.overflow=''; img.src=''; scale=1; tx=0; ty=0; }
+  document.querySelectorAll('.p-figure').forEach(fig=>{ fig.addEventListener('click',()=>{ const visible=[...fig.querySelectorAll('img')].find(i=>i.offsetParent!==null) || fig.querySelector('img'); if(visible) openLB(visible.src, visible.alt); }); });
+  closeBtn.addEventListener('click',closeLB);
+  document.addEventListener('keydown',e=>{ if(!lb.classList.contains('is-open')) return; if(e.key==='Escape') closeLB(); if(e.key==='0') fit(); });
+  window.addEventListener('resize',()=>{ if(lb.classList.contains('is-open')) fit(); });
+  let lastTap=0; stage.addEventListener('click',e=>{ const now=Date.now(); if(now-lastTap<300){ const r=stage.getBoundingClientRect(); const cx=e.clientX-r.left, cy=e.clientY-r.top; if(scale>1.5) fit(); else zoomAt(cx,cy,2.5); lastTap=0; } else lastTap=now; });
+  stage.addEventListener('wheel',e=>{ e.preventDefault(); const r=stage.getBoundingClientRect(); const cx=e.clientX-r.left, cy=e.clientY-r.top; const factor=e.deltaY<0?1.15:1/1.15; zoomAt(cx,cy,scale*factor); },{passive:false});
+  const pointers=new Map(); let pinchStart=null;
+  stage.addEventListener('pointerdown',e=>{ stage.setPointerCapture(e.pointerId); pointers.set(e.pointerId,{x:e.clientX,y:e.clientY}); if(pointers.size===2){ const pts=[...pointers.values()]; const dx=pts[0].x-pts[1].x, dy=pts[0].y-pts[1].y; pinchStart={dist:Math.hypot(dx,dy), scale:scale, cx:(pts[0].x+pts[1].x)/2, cy:(pts[0].y+pts[1].y)/2}; } else stage.classList.add('is-panning'); });
+  stage.addEventListener('pointermove',e=>{ if(!pointers.has(e.pointerId)) return; const prev=pointers.get(e.pointerId); const dx=e.clientX-prev.x, dy=e.clientY-prev.y; pointers.set(e.pointerId,{x:e.clientX,y:e.clientY}); if(pointers.size===2 && pinchStart){ const pts=[...pointers.values()]; const ndx=pts[0].x-pts[1].x, ndy=pts[0].y-pts[1].y; const dist=Math.hypot(ndx,ndy); const r=stage.getBoundingClientRect(); const cx=pinchStart.cx-r.left, cy=pinchStart.cy-r.top; zoomAt(cx,cy, pinchStart.scale*(dist/pinchStart.dist)); } else if(pointers.size===1){ tx+=dx; ty+=dy; clampPan(); apply(); } });
+  function endPointer(e){ pointers.delete(e.pointerId); if(pointers.size<2) pinchStart=null; if(pointers.size===0) stage.classList.remove('is-panning'); }
+  stage.addEventListener('pointerup',endPointer); stage.addEventListener('pointercancel',endPointer); stage.addEventListener('pointerleave',endPointer);
+})();
+</script>
+<script src="recent.js?v=1776350000"></script>
+</body>
+</html>

@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Drug Dosing · ICU Antibiotics</title>
+    <script src="settings-init.js?v=1776350000"></script>
+<link href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=1776350000">
+<link rel="stylesheet" href="protocol.css?v=1776350000">
+<style>
+.container { --cat-color: var(--cat-infection); }
+
+/* Search bar */
+.abx-search {
+    position: relative;
+    margin: 10px 0 12px;
+}
+.abx-search__input {
+    width: 100%;
+    padding: 11px 14px 11px 40px;
+    font-size: 14px;
+    font-family: inherit;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--r-md);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    box-shadow: 0 1px 2px rgba(20, 40, 160, 0.03);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+.abx-search__input:focus {
+    border-color: var(--cat-color);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--cat-color) 15%, transparent);
+}
+.abx-search__icon {
+    position: absolute;
+    left: 14px; top: 50%;
+    transform: translateY(-50%);
+    width: 16px; height: 16px;
+    color: var(--text-tertiary);
+    pointer-events: none;
+}
+
+/* Class filter chips */
+.abx-filters {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin: 0 0 14px;
+}
+.abx-chip {
+    flex: 1 1 calc(25% - 6px);
+    min-width: 0;
+    padding: 8px 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.abx-chip:hover { border-color: color-mix(in srgb, var(--cat-color) 40%, var(--border-subtle)); }
+.abx-chip.is-active {
+    background: var(--cat-color);
+    border-color: var(--cat-color);
+    color: #fff;
+}
+.abx-chip__count {
+    margin-left: 4px;
+    font-weight: 600;
+    opacity: 0.7;
+    font-size: 11px;
+}
+.abx-chip.is-active .abx-chip__count { opacity: 0.85; color: #fff; }
+
+/* Empty state */
+.abx-empty {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+/* Drug card (collapsible) */
+.abx-card {
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-card);
+    border-radius: var(--r-md);
+    margin: 6px 0;
+    overflow: hidden;
+    transition: border-color 0.15s;
+}
+.abx-card:hover { border-color: color-mix(in srgb, var(--cat-color) 25%, var(--border-subtle)); }
+.abx-card.is-open { border-color: color-mix(in srgb, var(--cat-color) 35%, var(--border-subtle)); }
+.abx-card__head {
+    width: 100%;
+    display: block;
+    padding: 11px 14px;
+    background: transparent;
+    border: 0;
+    color: var(--text-primary);
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+}
+.abx-card__top {
+    display: flex; align-items: flex-start;
+    gap: 10px;
+}
+.abx-card__name-wrap { flex: 1; min-width: 0; }
+.abx-card__name {
+    font-weight: 700;
+    font-size: 13.5px;
+    color: var(--text-primary);
+    line-height: 1.3;
+    letter-spacing: -0.1px;
+}
+.abx-card__sub {
+    margin-top: 2px;
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    line-height: 1.3;
+}
+.abx-card__tag {
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    min-width: 80px;
+    text-align: center;
+    box-sizing: border-box;
+}
+.abx-card__tag--bact { background: color-mix(in srgb, var(--smc-green) 16%, transparent); color: #1e7c3a; }
+.abx-card__tag--fung { background: color-mix(in srgb, var(--smc-red) 18%, transparent); color: #d62828; }
+.abx-card__tag--viral { background: color-mix(in srgb, var(--smc-yellow) 22%, transparent); color: #8a6700; }
+.abx-card__chev {
+    width: 18px; height: 18px;
+    color: var(--text-tertiary);
+    flex-shrink: 0;
+    transition: transform 0.2s;
+}
+.abx-card.is-open .abx-card__chev { transform: rotate(180deg); }
+
+.abx-card__body {
+    display: none;
+    padding: 0 14px 12px;
+    border-top: 1px dashed var(--border-subtle);
+}
+.abx-card.is-open .abx-card__body { display: block; padding-top: 10px; }
+
+/* Dose grid inside card */
+.abx-dose {
+    display: grid;
+    grid-template-columns: 78px 1fr;
+    column-gap: 12px;
+    row-gap: 4px;
+    font-size: 12px;
+    line-height: 1.4;
+    margin: 4px 0 0;
+}
+.abx-dose__gh,
+.abx-dose__vh {
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    padding: 0 0 4px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+.abx-dose__g {
+    font-weight: 700;
+    color: var(--cat-color);
+    font-variant-numeric: tabular-nums;
+    padding: 4px 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--border-subtle) 60%, transparent);
+}
+.abx-dose__v {
+    color: var(--text-primary);
+    font-weight: 500;
+    padding: 4px 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--border-subtle) 60%, transparent);
+}
+.abx-dose__row:last-of-type .abx-dose__g,
+.abx-dose__row:last-of-type .abx-dose__v { border-bottom: none; }
+
+/* Notes inside card */
+.abx-notes {
+    margin: 8px 0 0;
+    padding: 8px 10px;
+    background: var(--bg-subtle);
+    border-radius: 8px;
+    font-size: 11.5px;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+.abx-notes__line + .abx-notes__line { margin-top: 4px; }
+.abx-notes strong { color: var(--text-primary); font-weight: 700; }
+
+/* Cross-reference link (e.g. See Section 2) */
+.abx-xref {
+    display: block;
+    margin: 4px 0 0;
+    padding: 6px 10px;
+    background: color-mix(in srgb, var(--cat-color) 6%, var(--bg-subtle));
+    border-left: 2px solid var(--cat-color);
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+a.abx-xref--link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+a.abx-xref--link .abx-xref__text {
+    flex: 1;
+    color: var(--cat-color);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--cat-color) 40%, transparent);
+    text-underline-offset: 2px;
+}
+a.abx-xref--link .abx-xref__arrow {
+    flex-shrink: 0;
+    width: 14px; height: 14px;
+    color: var(--cat-color);
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 0.15s ease;
+}
+a.abx-xref--link:hover {
+    background: color-mix(in srgb, var(--cat-color) 14%, var(--bg-subtle));
+}
+a.abx-xref--link:hover .abx-xref__arrow {
+    transform: translateX(2px);
+}
+a.abx-xref--link:active {
+    background: color-mix(in srgb, var(--cat-color) 20%, var(--bg-subtle));
+}
+
+/* Patient parameter panel */
+.abx-pt {
+    background: color-mix(in srgb, var(--cat-color) 5%, var(--bg-card));
+    border: 1px solid color-mix(in srgb, var(--cat-color) 22%, var(--border-subtle));
+    border-radius: var(--r-md);
+    padding: 10px 12px 12px;
+    margin: 0 0 12px;
+}
+.abx-pt__label {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--cat-color);
+    margin: 0 0 8px;
+}
+.abx-pt__label::before {
+    content: '';
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--cat-color);
+}
+.abx-pt__row { display: flex; gap: 8px; align-items: stretch; }
+.abx-pt__row + .abx-pt__row { margin-top: 8px; }
+.abx-pt__field {
+    flex: 1; min-width: 0;
+    display: flex; flex-direction: column; gap: 3px;
+}
+.abx-pt__field-lbl {
+    font-size: 10.5px; font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 0.2px;
+}
+.abx-pt__input {
+    padding: 8px 10px;
+    font-size: 13px;
+    font-family: inherit;
+    font-variant-numeric: tabular-nums;
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+.abx-pt__input::-webkit-outer-spin-button,
+.abx-pt__input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.abx-pt__input:focus {
+    border-color: var(--cat-color);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--cat-color) 15%, transparent);
+}
+.abx-pt__modes { display: flex; gap: 6px; flex: 1; }
+.abx-pt__mode {
+    flex: 1; padding: 8px 6px;
+    font-size: 11.5px; font-weight: 700;
+    color: var(--text-primary);
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: center;
+    white-space: nowrap;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.abx-pt__mode:hover { border-color: color-mix(in srgb, var(--cat-color) 40%, var(--border-subtle)); }
+.abx-pt__mode.is-active {
+    background: var(--cat-color);
+    border-color: var(--cat-color);
+    color: #fff;
+}
+.abx-pt__clear {
+    background: transparent;
+    border: 0;
+    color: var(--text-tertiary);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 4px 6px;
+    margin-top: 6px;
+    text-decoration: underline;
+}
+.abx-pt__clear:hover { color: var(--cat-color); }
+
+/* Matched dose callout inside card head */
+.abx-card__matched {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: color-mix(in srgb, var(--cat-color) 8%, transparent);
+    border-radius: 8px;
+    line-height: 1.4;
+}
+.abx-card__matched-line { display: block; }
+.abx-card__matched-line + .abx-card__matched-line {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px dashed color-mix(in srgb, var(--cat-color) 22%, transparent);
+}
+.abx-card__matched-lbl {
+    display: block;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--cat-color);
+    margin-bottom: 3px;
+    opacity: 0.85;
+}
+.abx-card__matched-primary {
+    display: inline-block;
+    font-size: 13.5px;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.1px;
+    margin-right: 8px;
+}
+.abx-card__matched-formula {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+.abx-card__matched-formula::before {
+    content: '(';
+    margin-right: 1px;
+}
+.abx-card__matched-formula::after {
+    content: ')';
+    margin-left: 1px;
+}
+/* Highlighted matched row in expanded card body */
+.abx-dose__row.is-match .abx-dose__g,
+.abx-dose__row.is-match .abx-dose__v {
+    background: color-mix(in srgb, var(--cat-color) 10%, transparent);
+}
+
+html[data-theme="dark"] .abx-search__input { background: #161b22; border-color: #2a3140; color: #d0d7e0; }
+html[data-theme="dark"] .abx-chip { background: #161b22; border-color: #2a3140; color: #d0d7e0; }
+html[data-theme="dark"] .abx-card { background: #161b22; border-color: #2a3140; }
+html[data-theme="dark"] .abx-notes { background: #1a2230; color: #a8b5c4; }
+html[data-theme="dark"] .abx-pt { background: color-mix(in srgb, var(--cat-color) 8%, #161b22); border-color: color-mix(in srgb, var(--cat-color) 28%, #2a3140); }
+html[data-theme="dark"] .abx-pt__input { background: #161b22; border-color: #2a3140; color: #d0d7e0; }
+html[data-theme="dark"] .abx-pt__mode { background: #161b22; border-color: #2a3140; color: #d0d7e0; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="header header--page">
+    <div class="header__top">
+      <button class="icon-btn" id="secToggle" aria-label="Sections">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div class="header__title">
+        <span class="header__eyebrow"><span data-lang="ko">ICU 항생제 가이드 · 섹션 1 / 5</span><span data-lang="en">ICU Antibiotics · Section 1 / 5</span></span>
+        <div class="header__h1"><span data-lang="ko">약물 용량 (체크리스트)</span><span data-lang="en">Drug Dosing</span></div>
+      </div>
+      <button class="icon-btn icon-btn--bookmark" aria-label="Save" aria-pressed="false">
+        <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="main main--page">
+    <p class="p-intro"><span data-lang="ko">환자 정보를 입력하면 각 약물의 매칭 용량이 카드 상단에 표시됩니다. 카드를 탭하면 전체 GFR/HD/CRRT 용량 매트릭스가 펼쳐집니다.</span><span data-lang="en">Enter patient parameters to see matched dose at the top of each card. Tap a card to expand the full GFR/HD/CRRT matrix.</span></p>
+
+    <div class="abx-pt">
+      <div class="abx-pt__label"><span data-lang="ko">환자 정보</span><span data-lang="en">Patient parameters</span></div>
+      <div class="abx-pt__row">
+        <div class="abx-pt__field">
+          <span class="abx-pt__field-lbl"><span data-lang="ko">체중 (kg)</span><span data-lang="en">Weight (kg)</span></span>
+          <input class="abx-pt__input" type="number" id="ptBW" inputmode="decimal" placeholder="—" step="0.1" min="0">
+        </div>
+        <div class="abx-pt__field">
+          <span class="abx-pt__field-lbl"><span data-lang="ko">GFR (mL/min)</span><span data-lang="en">GFR (mL/min)</span></span>
+          <input class="abx-pt__input" type="number" id="ptGFR" inputmode="decimal" placeholder="—" step="1" min="0">
+        </div>
+      </div>
+      <div class="abx-pt__row">
+        <div class="abx-pt__modes" id="ptModes">
+          <button type="button" class="abx-pt__mode is-active" data-mode="gfr"><span data-lang="ko">GFR 기준</span><span data-lang="en">By GFR</span></button>
+          <button type="button" class="abx-pt__mode" data-mode="hd">HD</button>
+          <button type="button" class="abx-pt__mode" data-mode="crrt">CRRT</button>
+        </div>
+      </div>
+      <button type="button" class="abx-pt__clear" id="ptClear"><span data-lang="ko">초기화</span><span data-lang="en">Clear</span></button>
+    </div>
+
+    <div class="abx-search">
+      <svg class="abx-search__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input class="abx-search__input" type="search" id="abxSearch" placeholder="Search drug name…" autocomplete="off">
+    </div>
+
+    <div class="abx-filters" id="abxFilters">
+      <button type="button" class="abx-chip is-active" data-cls="all"><span data-lang="ko">전체</span><span data-lang="en">All</span><span class="abx-chip__count" data-count></span></button>
+      <button type="button" class="abx-chip" data-cls="bact"><span data-lang="ko">항균제</span><span data-lang="en">Antibact.</span><span class="abx-chip__count" data-count></span></button>
+      <button type="button" class="abx-chip" data-cls="fung"><span data-lang="ko">항진균제</span><span data-lang="en">Antifung.</span><span class="abx-chip__count" data-count></span></button>
+      <button type="button" class="abx-chip" data-cls="viral"><span data-lang="ko">항바이러스제</span><span data-lang="en">Antiviral</span><span class="abx-chip__count" data-count></span></button>
+    </div>
+
+    <div id="abxList"></div>
+    <div class="abx-empty" id="abxEmpty" style="display:none;"><span data-lang="ko">일치하는 약물이 없습니다.</span><span data-lang="en">No matching drugs.</span></div>
+
+    <div class="p-pager">
+      <div class="pn-btn pn-btn--disabled"><span class="pn-lbl"><span data-lang="ko">시작</span><span data-lang="en">Start</span></span></div>
+      <a class="pn-btn pn-btn--next" href="abx-s2.html"><span class="pn-lbl"><span data-lang="ko">다음</span><span data-lang="en">Next</span></span><span class="pn-ttl"><span data-lang="ko">아미노글리코사이드</span><span data-lang="en">Aminoglycosides</span></span></a>
+    </div>
+
+    <a class="p-toc-btn" href="abx-toc.html">
+      <svg viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      <span data-lang="ko">목차로 돌아가기</span><span data-lang="en">Back to Contents</span>
+    </a>
+  </main>
+
+  <div class="toast" id="toast">Saved</div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="window.location.href='index.html'"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg><span class="nav-item__label"><span data-lang="ko">홈</span><span data-lang="en">Home</span></span></div>
+    <div class="nav-item active" onclick="window.location.href='protocols.html'"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8m8 4H8"/></svg><span class="nav-item__label"><span data-lang="ko">프로토콜</span><span data-lang="en">Protocols</span></span></div>
+    <div class="nav-item" onclick="window.location.href='calculator.html'"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h.01M8 14h2M12 14h2M16 14h.01M8 18h8"/></svg><span class="nav-item__label"><span data-lang="ko">계산기</span><span data-lang="en">Calculator</span></span></div>
+    <div class="nav-item" onclick="window.location.href='saved.html'"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg><span class="nav-item__label"><span data-lang="ko">즐겨찾기</span><span data-lang="en">Saved</span></span></div>
+    <div class="nav-item" onclick="window.location.href='info.html'"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg><span class="nav-item__label"><span data-lang="ko">정보</span><span data-lang="en">Information</span></span></div>
+  </nav>
+<div class="sec-dd" id="secDD" aria-hidden="true">
+  <div class="sec-dd__scrim" data-dd-close></div>
+  <div class="sec-dd__panel" role="dialog" aria-label="Section list">
+    <div class="sec-dd__head">
+      <span class="sec-dd__eyebrow">ICU Antibiotics</span>
+      <button class="sec-dd__close" data-dd-close aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <nav class="sec-dd__list">
+      <a class="sec-dd__item is-current" href="abx-s1.html">
+        <span class="sec-dd__num">01</span>
+        <span class="sec-dd__title"><span data-lang="ko">약물 용량</span><span data-lang="en">Drug Dosing</span></span>
+      </a>
+      <a class="sec-dd__item" href="abx-s2.html">
+        <span class="sec-dd__num">02</span>
+        <span class="sec-dd__title"><span data-lang="ko">아미노글리코사이드</span><span data-lang="en">Aminoglycosides</span></span>
+      </a>
+      <a class="sec-dd__item" href="abx-s3.html">
+        <span class="sec-dd__num">03</span>
+        <span class="sec-dd__title"><span data-lang="ko">항생제 잠금 요법</span><span data-lang="en">Antibiotic Lock Therapy</span></span>
+      </a>
+      <a class="sec-dd__item" href="abx-s4.html">
+        <span class="sec-dd__num">04</span>
+        <span class="sec-dd__title"><span data-lang="ko">척수강내 투여</span><span data-lang="en">Intrathecal Administration</span></span>
+      </a>
+      <a class="sec-dd__item" href="abx-s5.html">
+        <span class="sec-dd__num">05</span>
+        <span class="sec-dd__title"><span data-lang="ko">참고문헌</span><span data-lang="en">References</span></span>
+      </a>
+    </nav>
+  </div>
+</div>
+</div>
+<script>
+const toast=document.getElementById('toast');let t;
+function showToast(m){toast.textContent=m;toast.classList.add('show');clearTimeout(t);t=setTimeout(()=>toast.classList.remove('show'),1600);}
+document.querySelectorAll('.nav-item').forEach(i=>i.addEventListener('click',function(){if(this.classList.contains('active'))return;if(this.getAttribute('onclick'))return;showToast(this.querySelector('.nav-item__label').textContent+' — Coming soon');}));
+
+const dd=document.getElementById('secDD');
+const tog=document.getElementById('secToggle');
+if(dd&&tog){
+  function openDD(){dd.classList.add('is-open');dd.setAttribute('aria-hidden','false');}
+  function closeDD(){dd.classList.remove('is-open');dd.setAttribute('aria-hidden','true');}
+  tog.addEventListener('click',e=>{e.stopPropagation();dd.classList.contains('is-open')?closeDD():openDD();});
+  dd.querySelectorAll('[data-dd-close]').forEach(el=>el.addEventListener('click',closeDD));
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDD();});
+}
+
+(function(){
+  const btn=document.querySelector('.icon-btn--bookmark');
+  if(!btn) return;
+  const key='smc-bookmark:'+(location.pathname.split('/').pop()||'index');
+  let saved=false;
+  try{ saved=localStorage.getItem(key)==='1'; }catch(e){}
+  if(saved){ btn.classList.add('is-saved'); btn.setAttribute('aria-pressed','true'); }
+  btn.addEventListener('click',function(ev){
+    ev.stopPropagation(); saved=!saved;
+    btn.classList.toggle('is-saved',saved); btn.setAttribute('aria-pressed',saved?'true':'false');
+    btn.classList.remove('is-animating'); void btn.offsetWidth; btn.classList.add('is-animating');
+    setTimeout(()=>btn.classList.remove('is-animating'),650);
+    try{ saved?localStorage.setItem(key,'1'):localStorage.removeItem(key); }catch(e){}
+    if(typeof showToast==='function') showToast(saved?'Saved':'Removed from saved');
+  });
+})();
+
+// =================== Drug data ===================
+// Fields: n=name, sub=indication/qualifier, c=class (bact/fung/viral),
+//         d=GFR doses [{g:label, v:value}], notes=string array (HTML allowed for <strong>)
+//         xref=cross-ref text (e.g. "See Section A — Aminoglycosides")
+const ABX = [
+  {n:'Acyclovir', sub:'HSV encephalitis or VZV', c:'viral', d:[
+    {g:'> 50', v:'10 mg/kg q8hr'},
+    {g:'10–50', v:'10 mg/kg q12–24hr'},
+    {g:'< 10', v:'5 mg/kg q24hr'},
+    {g:'HD', v:'5 mg/kg q24hr (dose AD)'},
+    {g:'CRRT', v:'10 mg/kg q24hr'}
+  ]},
+  {n:'Amikacin', c:'bact', xref:'See Section 2 — Aminoglycosides', xrefKo:'섹션 2 — 아미노글리코사이드 참조', xrefHref:'abx-s2.html'},
+  {n:'Amphotericin B', sub:'deoxycholate', c:'fung', d:[
+    {g:'Aspergillosis / mucormycosis', v:'1.0–1.5 mg/kg q24hr'},
+    {g:'Candidemia / invasive candidiasis', v:'0.7–1.0 mg/kg q24hr'},
+    {g:'Cryptococcal meningitis', v:'0.7–1.0 mg/kg IV q24hr'}
+  ], notes:[
+    '<strong>Pre-hydration:</strong> 500 mL 0.9% NS over 1 hr',
+    '<strong>Premedication</strong> (30–60 min before): acetaminophen 650 mg PO, chlorpheniramine 1A IV, hydrocortisone 25–50 mg IV',
+    'Symptom control during infusion: antipyretics for fever, pethidine for severe rigor',
+    '<strong>Post-hydration:</strong> 500 mL 0.9% NS over 1 hr',
+    'Pre/post hydration may be omitted if volume overload risk outweighs benefit',
+    'Check serum electrolytes, Mg, iCa, P after infusion and replace accordingly'
+  ]},
+  {n:'Amphotericin B', sub:'liposomal', c:'fung', d:[
+    {g:'All', v:'3–5 mg/kg q24hr (no adjustment required)'}
+  ], notes:['No premedication or monitoring required']},
+  {n:'Amphotericin B (aerosolized)', sub:'deoxycholate', c:'fung', d:[
+    {g:'Standard', v:'10 mg in sterile water 4 mL q12hr'},
+    {g:'If intolerable', v:'10 mg q24hr'}
+  ], notes:[
+    '<span data-lang="ko"><strong>적응증:</strong> Tracheobronchial aspergillosis 보조 요법 (전신 항진균제와 병용); airway ischemia가 동반된 폐이식 환자에서 특히 고려</span><span data-lang="en"><strong>Indication:</strong> Adjuvant for tracheobronchial aspergillosis (in addition to systemic antifungal); especially in lung transplant patients with airway ischemia</span>',
+    '<span data-lang="ko"><strong>전처치:</strong> 흡입 전 short-acting β2 작용제 (예: salbutamol) 투여 → bronchospasm 예방</span><span data-lang="en"><strong>Premedication:</strong> short-acting β2-adrenergic agonist (e.g., salbutamol) before inhalation to prevent bronchospasm</span>'
+  ]},
+  {n:'Amphotericin B (aerosolized)', sub:'liposomal', c:'fung', d:[
+    {g:'Standard', v:'50 mg in sterile water 4 mL q12hr'}
+  ], notes:[
+    '<span data-lang="ko"><strong>적응증:</strong> Tracheobronchial aspergillosis 보조 요법 (전신 항진균제와 병용); airway ischemia가 동반된 폐이식 환자에서 특히 고려</span><span data-lang="en"><strong>Indication:</strong> Adjuvant for tracheobronchial aspergillosis (in addition to systemic antifungal); especially in lung transplant patients with airway ischemia</span>',
+    '<span data-lang="ko"><strong>전처치:</strong> 흡입 전 short-acting β2 작용제 (예: salbutamol) 투여 → bronchospasm 예방</span><span data-lang="en"><strong>Premedication:</strong> short-acting β2-adrenergic agonist (e.g., salbutamol) before inhalation to prevent bronchospasm</span>'
+  ]},
+  {n:'Ampicillin', c:'bact', d:[
+    {g:'> 50', v:'1–2 g q4–6hr'},
+    {g:'30–50', v:'1–2 g q6–8hr'},
+    {g:'10–30', v:'1–2 g q8–12hr'},
+    {g:'< 10', v:'1–2 g q12hr'},
+    {g:'HD', v:'1–2 g q12hr (one dose AD)'},
+    {g:'CRRT', v:'1–2 g q8–12hr'}
+  ]},
+  {n:'Ampicillin/sulbactam', c:'bact', d:[
+    {g:'> 50', v:'3 g q6hr'},
+    {g:'30–50', v:'3 g q8hr'},
+    {g:'10–30', v:'3 g q12hr'},
+    {g:'< 10', v:'3 g q24hr'},
+    {g:'HD', v:'3 g q24hr (dose AD)'},
+    {g:'CRRT', v:'3 g q12hr'}
+  ]},
+  {n:'Anidulafungin', c:'fung', d:[
+    {g:'All', v:'200 mg once, then 100 mg q24hr (no adjustment required)'}
+  ]},
+  {n:'Aztreonam', c:'bact', d:[
+    {g:'> 50', v:'2 g q8hr'},
+    {g:'30–50', v:'1.5 g q8hr'},
+    {g:'10–30', v:'2 g once, then 1 g q8hr'},
+    {g:'< 10', v:'2 g q24hr'},
+    {g:'HD', v:'2 g q24hr (AD)'},
+    {g:'CRRT', v:'1.5 g q8hr'}
+  ]},
+  {n:'Caspofungin', c:'fung', d:[
+    {g:'All', v:'70 mg once, then 50 mg q24hr (no adjustment required)'},
+    {g:'Moderate hepatic insuff.', v:'70 mg once, then 35 mg q24hr; consider alternative echinocandins'}
+  ]},
+  {n:'Cefazolin', c:'bact', d:[
+    {g:'> 30', v:'2 g q8hr'},
+    {g:'10–30', v:'2 g q12hr'},
+    {g:'< 10', v:'2 g q24hr'},
+    {g:'HD', v:'2 g q24hr'},
+    {g:'CRRT', v:'2 g q12hr'}
+  ]},
+  {n:'Cefepime', c:'bact', d:[
+    {g:'> 60', v:'2 g q8hr'},
+    {g:'30–60', v:'2 g q12hr'},
+    {g:'11–29', v:'2 g q24hr'},
+    {g:'< 11', v:'1 g q24hr'},
+    {g:'HD', v:'1 g q24hr (AD)'},
+    {g:'CRRT', v:'2 g q12hr'}
+  ], notes:[
+    'Administer over 4 hr',
+    '<strong>Consider weight-based dosing</strong> when unresponsive to conventional regimen'
+  ]},
+  {n:'Cefepime', sub:'continuous infusion', c:'bact', d:[
+    {g:'Loading', v:'1 g over 30 min'},
+    {g:'> 60', v:'2 g q8hr'},
+    {g:'30–60', v:'2 g q12hr'},
+    {g:'10–29', v:'2 g q24hr'},
+    {g:'< 10 or HD', v:'1 g q24hr (0.75 g AD over 30 min)'},
+    {g:'CRRT', v:'2 g q12hr'}
+  ], notes:[
+    '<span data-lang="ko"><strong>지속 주입</strong> (over 24 hr): 한 백의 주입 시간 = 백 교체 간격 (예: 2 g q8hr = 2 g를 8시간에 걸쳐 주입 후 q8hr 교체)</span><span data-lang="en"><strong>Continuous infusion</strong> (over 24 hr): infusion duration equals the interval between bag changes (e.g., 2 g q8hr means 2 g over 8 hr, then change q8hr)</span>'
+  ]},
+  {n:'Ceftazidime', c:'bact', d:[
+    {g:'> 50', v:'2 g q8hr'},
+    {g:'30–50', v:'2 g q12hr'},
+    {g:'10–30', v:'2 g q24hr'},
+    {g:'< 10', v:'2 g q24hr'},
+    {g:'HD', v:'1 g q24hr (AD)'},
+    {g:'CRRT', v:'2 g q8hr'}
+  ], notes:['Administer over 4 hr']},
+  {n:'Ceftazidime', sub:'continuous infusion', c:'bact', d:[
+    {g:'Loading', v:'1 g over 30 min'},
+    {g:'> 50', v:'1.5 g q6hr'},
+    {g:'31–50', v:'1 g q6hr'},
+    {g:'10–30', v:'0.5 g q6hr'},
+    {g:'< 10 or HD', v:'0.25 g q6hr'},
+    {g:'CRRT', v:'1 g q6hr'}
+  ], notes:[
+    '<span data-lang="ko"><strong>지속 주입</strong> (over 24 hr): 한 백의 주입 시간 = 백 교체 간격 (예: 1 g q6hr = 1 g를 6시간에 걸쳐 주입 후 q6hr 교체)</span><span data-lang="en"><strong>Continuous infusion</strong> (over 24 hr): infusion duration equals the interval between bag changes (e.g., 1 g q6hr means 1 g over 6 hr, then change q6hr)</span>'
+  ]},
+  {n:'Ceftolozane/tazobactam', sub:'general', c:'bact', d:[
+    {g:'> 50', v:'1.5 g q8hr'},
+    {g:'30–50', v:'0.75 g q8hr'},
+    {g:'15–30', v:'0.375 g q8hr'},
+    {g:'< 15', v:'0.75 g once, then 0.15 g q8hr'},
+    {g:'HD', v:'0.75 g once, then 0.15 g q8hr (AD)'},
+    {g:'CRRT', v:'LD 3.0 g (or 1.5 g q8h × 24h), then 0.75 g q8hr'}
+  ]},
+  {n:'Ceftolozane/tazobactam', sub:'pneumonia', c:'bact', d:[
+    {g:'> 50', v:'3 g q8hr'},
+    {g:'30–50', v:'1.5 g q8hr'},
+    {g:'15–30', v:'0.75 g q8hr'},
+    {g:'< 15', v:'2.25 g once, then 0.45 g q8hr'},
+    {g:'HD', v:'2.25 g once, then 0.45 g q8hr'},
+    {g:'CRRT', v:'LD 3 g, then 1.5 g q8hr'}
+  ]},
+  {n:'Ceftriaxone', c:'bact', d:[
+    {g:'All', v:'2 g q24hr (no adjustment required)'},
+    {g:'CNS infection', v:'2 g q12hr'}
+  ]},
+  {n:'Cidofovir', c:'viral', d:[
+    {g:'> 55', v:'5 mg/kg once weekly × 2, then every other week'},
+    {g:'< 55', v:'Contraindicated; also if Cr > 1.5 mg/dL or urine protein ≥ 100 mg/dL'}
+  ], notes:[
+    '<strong>IV hydration:</strong> 1 L NS before and after infusion',
+    '<strong>Probenecid:</strong> 2 g PO 3 hr before infusion, then 1 g at 2 hr and 8 hr after',
+    'Reduce to 3 mg/kg when Cr increment = 0.3–0.4 mg/dL',
+    '<strong>Discontinue</strong> when Cr increment ≥ 0.5 mg/dL or 3+ proteinuria develops',
+    'Probenecid acquisition: Korea Orphan & Essential Drug Center (kodc.or.kr)'
+  ]},
+  {n:'Ciprofloxacin', sub:'general', c:'bact', d:[
+    {g:'> 50', v:'400 mg q12hr'},
+    {g:'30–50', v:'400 mg q12hr'},
+    {g:'10–30', v:'400 mg q24hr'},
+    {g:'< 10', v:'400 mg q24hr'},
+    {g:'HD', v:'400 mg q24hr (dose AD)'},
+    {g:'CRRT', v:'400 mg q12hr'}
+  ]},
+  {n:'Ciprofloxacin', sub:'Pseudomonas', c:'bact', d:[
+    {g:'> 50', v:'400 mg q8hr'},
+    {g:'30–50', v:'400 mg q8hr'},
+    {g:'10–30', v:'400 mg q12hr'},
+    {g:'< 10', v:'400 mg q24hr'}
+  ]},
+  {n:'Clindamycin', c:'bact', d:[
+    {g:'All', v:'600–900 mg q8hr (no adjustment required)'},
+    {g:'TSS w/ necrotizing fasciitis', v:'Consider 900 mg q6hr'}
+  ]},
+  {n:'Colistin', c:'bact', d:[
+    {g:'Loading dose', v:'300 mg × 1 (over 1 hr; first maintenance 12 hr later)'},
+    {g:'≥ 90', v:'150 mg q12h'},
+    {g:'80–<90', v:'150 mg q12h'},
+    {g:'70–<80', v:'130 mg q12h'},
+    {g:'60–<70', v:'130 mg q12h'},
+    {g:'50–<60', v:'100 mg q12h'},
+    {g:'40–<50', v:'100 mg q12h'},
+    {g:'30–<40', v:'80 mg q12h'},
+    {g:'20–<30', v:'80 mg q12h'},
+    {g:'10–<20', v:'65 mg q12h'},
+    {g:'< 10', v:'65 mg q12h + 50 mg after HD'},
+    {g:'HD (4 h)', v:'65 mg q12h + 50 mg after HD'},
+    {g:'CRRT', v:'150 mg q8h'}
+  ], notes:['Reference: International Consensus Guidelines for the Optimal Use of the Polymyxins. <em>Pharmacotherapy</em> 2019;39(1):10–39']},
+  {n:'Colistin (nebulized)', c:'bact', d:[
+    {g:'All', v:'150 mg in 10 mL NS or sterile water over 1 hr q8hr'}
+  ], notes:['<strong>Always contact CCM, IM7, or IM3 fellow</strong> for the first order']},
+  {n:'Daptomycin', c:'bact', d:[
+    {g:'> 30', v:'6–10 mg/kg q24hr'},
+    {g:'< 30', v:'6–10 mg/kg q48hr'},
+    {g:'HD', v:'6–10 mg/kg q48hr (AD)'},
+    {g:'CRRT', v:'6–10 mg/kg q24hr'}
+  ], notes:['If next planned dialysis is 72 hr away, increase dose by 50%']},
+  {n:'Ertapenem', c:'bact', d:[
+    {g:'> 30', v:'1 g q24hr'},
+    {g:'< 30', v:'0.5 g q24hr'},
+    {g:'HD', v:'0.5 g q24hr (dose AD)'},
+    {g:'CRRT', v:'1 g q24hr'}
+  ]},
+  {n:'Fluconazole', c:'fung', d:[
+    {g:'> 50', v:'400 mg q24hr'},
+    {g:'< 50', v:'200 mg q24hr'},
+    {g:'HD (non-HD day)', v:'200 mg q24hr'},
+    {g:'HD (HD day)', v:'400 mg q24hr (AD)'},
+    {g:'CRRT', v:'400 mg q24hr'}
+  ], notes:[
+    'Load 800 mg for candidemia',
+    'Double dose for certain indications (e.g., CNS infections)',
+    'For CNS / <em>C. glabrata</em> infections and some CRRT pts: higher doses (600 mg/d for normal kidney function and 800 mg/d for CRRT)'
+  ]},
+  {n:'Foscarnet', c:'viral', d:[
+    {g:'GFR/kg > 1.4', v:'Induction 60 mg/kg q8hr · Maint. 90–120 mg/kg q24hr'},
+    {g:'1.0–1.4', v:'Induction 45 mg/kg q8hr · Maint. 70–90 mg/kg q24hr'},
+    {g:'0.8–1.0', v:'Induction 50 mg/kg q12hr · Maint. 50–65 mg/kg q24hr'},
+    {g:'0.6–0.8', v:'Induction 40 mg/kg q12hr · Maint. 80–105 mg/kg q48hr'},
+    {g:'0.5–0.6', v:'Induction 60 mg/kg q24hr · Maint. 60–80 mg/kg q48hr'},
+    {g:'0.4–0.5', v:'Induction 50 mg/kg q24hr · Maint. 50–65 mg/kg q48hr'},
+    {g:'< 0.4', v:'Do not use'}
+  ], notes:['GFR/kg = mL/min/kg of body weight']},
+  {n:'Ganciclovir', c:'viral', d:[
+    {g:'GFR > 70', v:'Induction 5 mg/kg q12hr · Maint. 5 mg/kg q24hr'},
+    {g:'50–70', v:'Induction 2.5 mg/kg q12hr · Maint. 2.5 mg/kg q24hr'},
+    {g:'25–50', v:'Induction 2.5 mg/kg q24hr · Maint. 1.25 mg/kg q24hr'},
+    {g:'10–25', v:'Induction 1.25 mg/kg q24hr · Maint. 0.625 mg/kg q24hr'},
+    {g:'< 10', v:'Induction 1.25 mg/kg 3×/wk · Maint. 0.625 mg/kg 3×/wk'},
+    {g:'HD', v:'Induction 1.25 mg/kg 3×/wk · Maint. 0.625 mg/kg 3×/wk (dose AD)'},
+    {g:'CRRT', v:'Induction 2.5 mg/kg q24hr · Maint. 1.25 mg/kg q24hr'}
+  ]},
+  {n:'Gentamicin', c:'bact', xref:'See Section 2 — Aminoglycosides', xrefKo:'섹션 2 — 아미노글리코사이드 참조', xrefHref:'abx-s2.html'},
+  {n:'Imipenem/cilastatin', sub:'standard', c:'bact', d:[
+    {g:'> 60', v:'500 mg q6hr'},
+    {g:'30–60', v:'250 mg q6hr'},
+    {g:'15–30', v:'250 mg q8hr'},
+    {g:'< 15', v:'250 mg q12hr'},
+    {g:'HD', v:'250 mg q12hr'},
+    {g:'CRRT', v:'1 g q12hr or 1 g then 0.5 g q6hr'}
+  ], notes:[
+    'Consider higher dose (below) when isolate MIC ≥ 4 mcg/mL',
+    '<strong>ECMO dose:</strong> 750–1000 mg q6hr',
+    '<strong>Do not use if CCr &lt; 15 mL/min</strong> unless HD is planned within 48 hours'
+  ]},
+  {n:'Imipenem/cilastatin', sub:'high-dose (MIC ≥ 4 mcg/mL)', c:'bact', d:[
+    {g:'> 60', v:'1 g q6hr'},
+    {g:'30–60', v:'500 mg q6hr'},
+    {g:'15–30', v:'250 mg q6hr'},
+    {g:'< 15', v:'500 mg q12hr (AD)'},
+    {g:'HD', v:'500 mg q12hr (AD)'},
+    {g:'CRRT', v:'1 g then 0.5 g q6hr'}
+  ], notes:[
+    '<strong>ECMO dose:</strong> 750–1000 mg q6hr',
+    '<strong>Do not use if CCr &lt; 15 mL/min</strong> unless HD is planned within 48 hours'
+  ]},
+  {n:'Levofloxacin', c:'bact', d:[
+    {g:'> 50', v:'750 mg q24hr'},
+    {g:'20–50', v:'750 mg q48hr'},
+    {g:'< 20', v:'750 mg once, then 500 mg q48hr'},
+    {g:'HD', v:'750 mg once, then 500 mg q48hr (dose AD)'},
+    {g:'CRRT', v:'750 mg once, then 500 mg q24hr'}
+  ]},
+  {n:'Linezolid', c:'bact', d:[
+    {g:'All', v:'600 mg q12hr (no adjustment required)'}
+  ]},
+  {n:'Meropenem', c:'bact', d:[
+    {g:'> 50', v:'1 g q8hr'},
+    {g:'25–50', v:'1 g q12hr'},
+    {g:'10–25', v:'0.5 g q12hr'},
+    {g:'< 10', v:'0.5 g q24hr'},
+    {g:'HD', v:'0.5 g q24hr (dose AD)'},
+    {g:'CRRT', v:'1 g q12hr'}
+  ], notes:[
+    'Administer over 4 hr',
+    'Double dose for CNS infection or higher MIC',
+    'ECMO dose: 750–1000 mg q6hr (also for Imipenem/cilastatin context)'
+  ]},
+  {n:'Metronidazole', c:'bact', d:[
+    {g:'All', v:'500 mg q8hr (no adjustment required)'}
+  ]},
+  {n:'Micafungin', c:'fung', d:[
+    {g:'All', v:'100–150 mg q24hr (no adjustment required)'}
+  ]},
+  {n:'Minocycline', c:'bact', d:[
+    {g:'All', v:'200 mg once, then 100 mg q12hr (no adjustment required)'}
+  ]},
+  {n:'Moxifloxacin', c:'bact', d:[
+    {g:'All', v:'400 mg q24hr (no adjustment required)'}
+  ]},
+  {n:'Nafcillin', c:'bact', d:[
+    {g:'All', v:'1–2 g q4hr (no adjustment required)'}
+  ]},
+  {n:'Oseltamivir', sub:'treatment', c:'viral', d:[
+    {g:'> 60', v:'75 mg bid'},
+    {g:'30–60', v:'30 mg bid'},
+    {g:'10–30', v:'30 mg qd'},
+    {g:'< 10', v:'No data; consider 30 mg EOD'},
+    {g:'HD', v:'30 mg once, then 30 mg AD only'},
+    {g:'CRRT', v:'No data; consider 75 mg qd'}
+  ]},
+  {n:'Penicillin G', c:'bact', d:[
+    {g:'> 50', v:'4 MU q4hr'},
+    {g:'10–50', v:'4 MU q8hr'},
+    {g:'< 10', v:'4 MU q12hr'},
+    {g:'HD', v:'4 MU q12hr (one dose AD)'},
+    {g:'CRRT', v:'4 MU q6hr'}
+  ]},
+  {n:'Peramivir', sub:'severe influenza', c:'viral', d:[
+    {g:'> 50', v:'600 mg q24hr'},
+    {g:'30–50', v:'200 mg q24hr'},
+    {g:'10–30', v:'100 mg q24hr'},
+    {g:'< 10', v:'100 mg once, then 100 mg 2 hr AD'},
+    {g:'HD', v:'100 mg once, then 100 mg 2 hr AD'},
+    {g:'CRRT', v:'No data'}
+  ]},
+  {n:'Piperacillin/tazobactam', sub:'anti-pseudomonal', c:'bact', d:[
+    {g:'> 40', v:'4.5 g q6hr'},
+    {g:'20–40', v:'4.5 g q8hr'},
+    {g:'< 20', v:'2.25 g q6hr'},
+    {g:'HD', v:'2.25 g q8hr (0.75 g AD)'},
+    {g:'CRRT', v:'4.5 g q8hr'}
+  ], notes:['Administer over 4 hr']},
+  {n:'Piperacillin/tazobactam', sub:'continuous infusion', c:'bact', d:[
+    {g:'Loading', v:'4.5 g over 30 min'},
+    {g:'> 40', v:'4.5 g q6hr'},
+    {g:'20–40', v:'4.5 g q8hr'},
+    {g:'< 20', v:'2.25 g q6hr'},
+    {g:'HD', v:'2.25 g q8hr (0.75 g AD over 30 min)'},
+    {g:'CRRT', v:'4.5 g q8hr'}
+  ], notes:[
+    '<span data-lang="ko"><strong>지속 주입</strong> (over 24 hr): 한 백의 주입 시간 = 백 교체 간격 (예: 4.5 g q6hr = 4.5 g를 6시간에 걸쳐 주입 후 q6hr 교체)</span><span data-lang="en"><strong>Continuous infusion</strong> (over 24 hr): infusion duration equals the interval between bag changes (e.g., 4.5 g q6hr means 4.5 g over 6 hr, then change q6hr)</span>'
+  ]},
+  {n:'Teicoplanin', c:'bact', d:[
+    {g:'Loading (non-CRRT)', v:'12 mg/kg q12hr × 3'},
+    {g:'> 50', v:'12 mg/kg q24hr'},
+    {g:'10–50', v:'12 mg/kg q48hr'},
+    {g:'< 10', v:'12 mg/kg q72hr'},
+    {g:'HD', v:'12 mg/kg q72hr (dose AD)'},
+    {g:'CRRT', v:'12 mg/kg q48hr (loading + maintenance)'}
+  ], notes:[
+    'Draw a trough before the 3rd maintenance dose',
+    '<strong>Target trough:</strong> 20–30 mcg/mL',
+    'Target trough for endocarditis: 30–40 mcg/mL'
+  ]},
+  {n:'Tigecycline', c:'bact', d:[
+    {g:'All', v:'100 mg once, then 50 mg q12hr'},
+    {g:'Severe hepatic insuff. (Child-Pugh C)', v:'100 mg, then 25 mg q12hr'}
+  ]},
+  {n:'Trimethoprim/sulfamethoxazole', sub:'PCP or Stenotrophomonas', c:'bact', calcType:'tmp-smx', d:[
+    {g:'> 30', v:'15–20 mg/kg/d TMP divided q6–8hr'},
+    {g:'10–30', v:'7.5–10 mg/kg/d TMP divided q12hr'},
+    {g:'< 10', v:'Not recommended; 5–10 mg/kg/d TMP q24hr'},
+    {g:'HD', v:'Not recommended; 5–10 mg/kg/d TMP q24hr (dose AD)'},
+    {g:'CRRT', v:'5 mg/kg TMP q8hr'}
+  ], notes:[
+    '<span data-lang="ko"><strong>SMC 제제:</strong> TMP/SMX IV 1 ampule (5 mL) = TMP 80 mg + SMX 400 mg</span><span data-lang="en"><strong>SMC formulation:</strong> TMP/SMX IV 1 ampule (5 mL) = TMP 80 mg + SMX 400 mg</span>',
+    '<span data-lang="ko"><strong>희석:</strong> ampule 5 mL당 5DW 125 mL에 혼합 → 1 ampule 최종 130 mL</span><span data-lang="en"><strong>Dilution:</strong> Each 5 mL ampule mixed in 125 mL of 5DW → 130 mL final per ampule</span>'
+  ]},
+  {n:'Vancomycin', c:'bact', d:[
+    {g:'Loading dose', v:'25 mg/kg based on actual body weight'},
+    {g:'≥ 50', v:'15–20 mg/kg q12hr'},
+    {g:'< 50', v:'Consult pharmacist after measuring trough 12 hr after loading dose'},
+    {g:'HD', v:'10 mg/kg AD'},
+    {g:'CRRT', v:'500–750 mg q12hr (effluent rate 20–25 mL/kg/h)'}
+  ], notes:[
+    '<strong>Continuous infusion</strong> may be considered (lower nephrotoxicity risk): LD 15–20 mg/kg, MD 30–40 mg/kg over 24 h',
+    '<strong>TDM:</strong> Draw peak (1 h after end of infusion) and trough (just before administration) at 3rd dose after initiation or dosing change',
+    'Target trough (serious MRSA): 15–20 mcg/mL · Target AUC/MIC: 400–600',
+    'For continuous infusion, target Css: 20–25 mcg/mL · For HD, pre-HD: 15–20 mcg/mL'
+  ]},
+  {n:'Vancomycin PO', sub:'C. difficile', c:'bact', d:[
+    {g:'Mild/moderate', v:'125 mg PO q6hr'},
+    {g:'Severe complicated (shock, ileus, toxic megacolon)', v:'500 mg PO q6hr (+ metronidazole IV)'}
+  ]},
+  {n:'Vancomycin enema', sub:'C. difficile with ileus', c:'bact', d:[
+    {g:'All', v:'500 mg vancomycin in 100 mL NS per rectum q6hr (retention enema)'}
+  ]},
+  {n:'Voriconazole IV', c:'fung', d:[
+    {g:'> 50', v:'6 mg/kg q12hr × 2, then 4 mg/kg q12hr'},
+    {g:'< 50', v:'Avoid IV; use oral (cyclodextran accumulation in IV formulation)'}
+  ], notes:[
+    'Draw a trough 4–7 d after new dose',
+    '<strong>Target trough:</strong> 1–5.5 mcg/mL'
+  ]},
+  {n:'Voriconazole PO', c:'fung', d:[
+    {g:'All', v:'400 mg PO q12hr × 2, then 200 mg PO q12hr'}
+  ], notes:[
+    'IV ↔ PO conversion 1:1 (round to nearest tablet size)',
+    'Draw a trough 4–7 d after new dose',
+    '<strong>Target trough:</strong> 1–5.5 mcg/mL'
+  ]}
+];
+
+// Class label map
+const CLS_LABEL = { bact: { ko:'항균', en:'Antibact.' }, fung: { ko:'항진균', en:'Antifung.' }, viral: { ko:'항바이러스', en:'Antiviral' } };
+
+// =================== Patient state & matching ===================
+const patient = { bw: null, gfr: null, mode: 'gfr' /* gfr | hd | crrt */ };
+
+// Parse a GFR-band label into {min, max} or null if not numeric
+function parseRange(label){
+  if (!label) return null;
+  let s = label.trim();
+  // Don't auto-match GFR/kg labels (Foscarnet uses mL/min/kg, not absolute GFR)
+  if (/^GFR\/kg/i.test(s)) return null;
+  // Strip "GFR " prefix (e.g. Ganciclovir uses "GFR > 70")
+  s = s.replace(/^GFR\s*/i, '').trim();
+  // Normalize Unicode comparators
+  s = s.replace(/≥/g, '>=').replace(/≤/g, '<=');
+  let m;
+  if ((m = s.match(/^>=\s*(\d+(?:\.\d+)?)\s*$/))) return { min: +m[1], max: Infinity };
+  if ((m = s.match(/^>\s*(\d+(?:\.\d+)?)\s*$/)))  return { min: +m[1] + 0.0001, max: Infinity };
+  if ((m = s.match(/^<=\s*(\d+(?:\.\d+)?)\s*$/))) return { min: 0, max: +m[1] + 0.0001 };
+  if ((m = s.match(/^<\s*(\d+(?:\.\d+)?)\s*$/)))  return { min: 0, max: +m[1] };
+  if ((m = s.match(/^(\d+(?:\.\d+)?)\s*[-–]\s*<\s*(\d+(?:\.\d+)?)\s*$/))) return { min: +m[1], max: +m[2] };
+  if ((m = s.match(/^(\d+(?:\.\d+)?)\s*[-–]\s*(\d+(?:\.\d+)?)\s*$/))) return { min: +m[1], max: +m[2] + 0.0001 };
+  return null;
+}
+
+// Find matched dose row index for a drug given patient state. Returns -1 if no match.
+function matchIdx(drug){
+  if (!drug.d) return -1;
+  if (patient.mode === 'hd') {
+    const i = drug.d.findIndex(r => /\bHD\b/i.test(r.g) && !/^Loading/i.test(r.g.trim()));
+    return i >= 0 ? i : drug.d.findIndex(r => /^All$/i.test(r.g.trim()));
+  }
+  if (patient.mode === 'crrt') {
+    const i = drug.d.findIndex(r => /\bCRRT\b/i.test(r.g) && !/^Loading/i.test(r.g.trim()));
+    return i >= 0 ? i : drug.d.findIndex(r => /^All$/i.test(r.g.trim()));
+  }
+  // GFR mode: need GFR value
+  if (patient.gfr == null || isNaN(patient.gfr)) return -1;
+  for (let i = 0; i < drug.d.length; i++) {
+    // Skip HD/CRRT/Loading rows when matching by GFR
+    const g = drug.d[i].g;
+    if (/^(HD|CRRT|Loading)/i.test(g.trim())) continue;
+    const r = parseRange(g);
+    if (r && patient.gfr >= r.min && patient.gfr < r.max) return i;
+  }
+  // Fallback: drugs with no renal adjustment list a single "All" row
+  return drug.d.findIndex(r => /^All$/i.test(r.g.trim()));
+}
+
+// Find applicable loading-dose row index for current patient (returns -1 if none)
+function loadingIdx(drug){
+  if (!drug.d) return -1;
+  for (let i = 0; i < drug.d.length; i++) {
+    const g = drug.d[i].g.trim();
+    if (!/^Loading/i.test(g)) continue;
+    // Parse parenthetical qualifier like "Loading (non-CRRT)"
+    const qm = g.match(/Loading[^(]*\(([^)]+)\)/i);
+    const q = qm ? qm[1].toLowerCase() : '';
+    if (q) {
+      // "non-CRRT" — exclude CRRT
+      if (/non-?crrt/.test(q) && patient.mode === 'crrt') continue;
+      // "non-HD"
+      if (/non-?hd/.test(q) && patient.mode === 'hd') continue;
+      // "GFR > N" or numeric range — apply only in GFR mode within range
+      const gfrM = q.match(/gfr\s*>\s*(\d+)/);
+      if (gfrM) {
+        if (patient.mode !== 'gfr') continue;
+        if (patient.gfr == null || patient.gfr <= +gfrM[1]) continue;
+      }
+    }
+    return i;
+  }
+  return -1;
+}
+
+// Apply BW conversion to "X mg/kg" patterns within a string
+function applyBW(text){
+  if (!patient.bw || isNaN(patient.bw)) return null;
+  const bw = +patient.bw;
+  let any = false;
+  const conv = text.replace(/(\d+(?:\.\d+)?)(?:\s*[-–]\s*(\d+(?:\.\d+)?))?\s*mg\/kg/g, (m, lo, hi) => {
+    any = true;
+    const fmt = n => (n >= 100 ? Math.round(n).toString() : (Math.round(n * 10) / 10).toString());
+    if (hi) return `${fmt(+lo * bw)}–${fmt(+hi * bw)} mg`;
+    return `${fmt(+lo * bw)} mg`;
+  });
+  return any ? conv : null;
+}
+
+// TMP/SMX prescription calculator — converts mg/kg dose row to mg total + ampule count
+// SMC formulation: 1 ampule (5 mL) = TMP 80 mg + SMX 400 mg
+function calcTmpSmx(row){
+  if (!patient.bw || isNaN(patient.bw)) return null;
+  const bw = +patient.bw;
+  const v = row.v;
+  const fmtAmp = n => n.toFixed(1);
+  const fmtMg  = n => Math.round(n).toString();
+
+  // Daily-divided pattern: "X mg/kg/d ... q??hr" (range possible for both)
+  let m = v.match(/(\d+(?:\.\d+)?)(?:\s*[-–]\s*(\d+(?:\.\d+)?))?\s*mg\/kg\/d.*?q\s*(\d+)(?:\s*[-–]\s*(\d+))?\s*hr/i);
+  if (m) {
+    const lo = +m[1], hi = m[2] ? +m[2] : lo;
+    const intLo = +m[3], intHi = m[4] ? +m[4] : intLo;
+    const mgRange  = lo === hi ? `${fmtMg(lo*bw)} mg` : `${fmtMg(lo*bw)}–${fmtMg(hi*bw)} mg`;
+    const ampRange = lo === hi ? `${fmtAmp(hi*bw/80)}` : `${fmtAmp(lo*bw/80)}–${fmtAmp(hi*bw/80)}`;
+    const intStr  = intLo === intHi ? `q${intLo}hr` : `q${intLo}–${intHi}hr`;
+    return {
+      primary: `${mgRange}/d TMP divided ${intStr}<br>= SMX/TMP ${ampRange} ampule/d divided ${intStr}`
+    };
+  }
+
+  // Per-dose pattern (no "/d"): "X mg/kg TMP q??hr"
+  m = v.match(/(\d+(?:\.\d+)?)(?:\s*[-–]\s*(\d+(?:\.\d+)?))?\s*mg\/kg(?!\/d).*?q\s*(\d+)\s*hr/i);
+  if (m) {
+    const lo = +m[1], hi = m[2] ? +m[2] : lo;
+    const interval = +m[3];
+    const mgRange  = lo === hi ? `${fmtMg(lo*bw)} mg` : `${fmtMg(lo*bw)}–${fmtMg(hi*bw)} mg`;
+    const ampRange = lo === hi ? `${fmtAmp(hi*bw/80)}` : `${fmtAmp(lo*bw/80)}–${fmtAmp(hi*bw/80)}`;
+    return {
+      primary: `${mgRange} TMP q${interval}hr<br>= SMX/TMP ${ampRange} ampule q${interval}hr`
+    };
+  }
+  return null;
+}
+
+// =================== Render ===================
+function renderList(){
+  const list = document.getElementById('abxList');
+  const html = ABX.map((d,i) => {
+    const cls = d.c;
+    const tagEn = cls === 'bact' ? 'Bacterial' : cls === 'fung' ? 'Fungal' : 'Viral';
+    const tagKo = cls === 'bact' ? '세균' : cls === 'fung' ? '진균' : '바이러스';
+    const tagShort = `<span data-lang="ko">${tagKo}</span><span data-lang="en">${tagEn}</span>`;
+    const subHtml = d.sub ? `<div class="abx-card__sub">${d.sub}</div>` : '';
+    let bodyInner = '';
+    if (d.xref) {
+      const xrefLabel = d.xrefKo
+        ? `<span data-lang="ko">${d.xrefKo}</span><span data-lang="en">${d.xref}</span>`
+        : d.xref;
+      bodyInner += d.xrefHref
+        ? `<a class="abx-xref abx-xref--link" href="${d.xrefHref}"><span class="abx-xref__text">${xrefLabel}</span><svg class="abx-xref__arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></a>`
+        : `<div class="abx-xref">${xrefLabel}</div>`;
+    } else if (d.d) {
+      const numericRows = d.d.filter(r => parseRange(r.g) !== null && !/GFR\/kg/i.test(r.g)).length;
+      const isGFR = numericRows >= Math.max(1, Math.floor(d.d.length / 2));
+      const head = isGFR ? 'GFR (mL/min)' : 'Condition';
+      bodyInner += `<div class="abx-dose">
+        <div style="display:contents;"><div class="abx-dose__gh">${head}</div><div class="abx-dose__vh">Dose</div></div>
+        ${d.d.map((r, idx) => `<div class="abx-dose__row" data-idx="${idx}" style="display:contents;"><div class="abx-dose__g">${r.g}</div><div class="abx-dose__v">${r.v}</div></div>`).join('')}
+      </div>`;
+    }
+    if (d.notes) {
+      bodyInner += `<div class="abx-notes">${d.notes.map(n => `<div class="abx-notes__line">• ${n}</div>`).join('')}</div>`;
+    }
+    return `<div class="abx-card" data-idx="${i}" data-cls="${cls}" data-name="${(d.n + ' ' + (d.sub||'')).toLowerCase()}">
+      <button type="button" class="abx-card__head" onclick="this.parentElement.classList.toggle('is-open')">
+        <div class="abx-card__top">
+          <div class="abx-card__name-wrap">
+            <div class="abx-card__name">${d.n}</div>
+            ${subHtml}
+          </div>
+          <span class="abx-card__tag abx-card__tag--${cls === 'bact' ? 'bact' : cls === 'fung' ? 'fung' : 'viral'}">${tagShort}</span>
+          <svg class="abx-card__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="abx-card__matched" data-matched style="display:none;"></div>
+      </button>
+      <div class="abx-card__body">${bodyInner}</div>
+    </div>`;
+  }).join('');
+  list.innerHTML = html;
+}
+
+// Build a single matched-dose line (label + primary + optional formula).
+function renderMatchedLine(drug, row, kind, hasBoth){
+  let primary, formulaHtml;
+  if (drug.calcType === 'tmp-smx') {
+    const c = calcTmpSmx(row);
+    if (c) {
+      primary = c.primary;
+      formulaHtml = `<span class="abx-card__matched-formula"><span data-lang="ko">${row.v} 기준</span><span data-lang="en">based on ${row.v}</span></span>`;
+    } else {
+      primary = row.v;
+      formulaHtml = '';
+    }
+  } else {
+    const calc = applyBW(row.v);
+    primary = calc ? calc : row.v;
+    formulaHtml = calc
+      ? `<span class="abx-card__matched-formula"><span data-lang="ko">${row.v} 기준</span><span data-lang="en">based on ${row.v}</span></span>`
+      : '';
+  }
+  let lblKo, lblEn;
+  if (kind === 'loading') { lblKo = '로딩 용량'; lblEn = 'Loading'; }
+  else if (hasBoth)        { lblKo = '유지 용량'; lblEn = 'Maintenance'; }
+  else                     { lblKo = '투약 용량'; lblEn = 'Dose'; }
+  const lblHtml = `<span class="abx-card__matched-lbl"><span data-lang="ko">${lblKo}</span><span data-lang="en">${lblEn}</span></span>`;
+  return `<span class="abx-card__matched-line">${lblHtml}<span class="abx-card__matched-primary">${primary}</span>${formulaHtml}</span>`;
+}
+
+// Update matched-dose display on every card based on current patient state
+function updateMatched(){
+  const hasInput = (patient.mode === 'hd' || patient.mode === 'crrt' || (patient.gfr != null && !isNaN(patient.gfr)));
+  document.querySelectorAll('.abx-card').forEach(card => {
+    const i = +card.dataset.idx;
+    const drug = ABX[i];
+    const matchedEl = card.querySelector('[data-matched]');
+    // Clear existing row highlight
+    card.querySelectorAll('.abx-dose__row').forEach(r => r.classList.remove('is-match'));
+    if (!hasInput || !drug.d) {
+      matchedEl.style.display = 'none';
+      matchedEl.innerHTML = '';
+      return;
+    }
+    const mIdx = matchIdx(drug);
+    const lIdx = loadingIdx(drug);
+    if (mIdx < 0 && lIdx < 0) {
+      matchedEl.style.display = 'none';
+      matchedEl.innerHTML = '';
+      return;
+    }
+    const hasBoth = (mIdx >= 0 && lIdx >= 0);
+    let html = '';
+    if (lIdx >= 0) {
+      html += renderMatchedLine(drug, drug.d[lIdx], 'loading', hasBoth);
+      const lr = card.querySelector(`.abx-dose__row[data-idx="${lIdx}"]`);
+      if (lr) lr.classList.add('is-match');
+    }
+    if (mIdx >= 0) {
+      html += renderMatchedLine(drug, drug.d[mIdx], 'maint', hasBoth);
+      const mr = card.querySelector(`.abx-dose__row[data-idx="${mIdx}"]`);
+      if (mr) mr.classList.add('is-match');
+    }
+    matchedEl.innerHTML = html;
+    matchedEl.style.display = '';
+  });
+}
+
+// =================== Filter / search ===================
+let currentCls = 'all';
+let currentQuery = '';
+
+function applyFilter(){
+  const q = currentQuery.trim().toLowerCase();
+  const cards = document.querySelectorAll('.abx-card');
+  let visibleCount = 0;
+  cards.forEach(c => {
+    const matchCls = (currentCls === 'all') || c.dataset.cls === currentCls;
+    const matchName = !q || c.dataset.name.includes(q);
+    const visible = matchCls && matchName;
+    c.style.display = visible ? '' : 'none';
+    if (visible) visibleCount++;
+  });
+  document.getElementById('abxEmpty').style.display = visibleCount === 0 ? 'block' : 'none';
+}
+
+function updateCounts(){
+  const counts = { all: ABX.length, bact: 0, fung: 0, viral: 0 };
+  ABX.forEach(d => { counts[d.c]++; });
+  document.querySelectorAll('.abx-chip').forEach(chip => {
+    const k = chip.dataset.cls;
+    const span = chip.querySelector('[data-count]');
+    if (span) span.textContent = counts[k];
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderList();
+  updateCounts();
+  document.getElementById('abxSearch').addEventListener('input', e => {
+    currentQuery = e.target.value;
+    applyFilter();
+  });
+  document.querySelectorAll('.abx-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.abx-chip').forEach(c => c.classList.toggle('is-active', c === chip));
+      currentCls = chip.dataset.cls;
+      applyFilter();
+    });
+  });
+
+  // Patient parameter inputs
+  const bw = document.getElementById('ptBW');
+  const gfr = document.getElementById('ptGFR');
+  bw.addEventListener('input', () => { patient.bw = bw.value === '' ? null : +bw.value; updateMatched(); });
+  gfr.addEventListener('input', () => { patient.gfr = gfr.value === '' ? null : +gfr.value; updateMatched(); });
+  document.querySelectorAll('.abx-pt__mode').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.abx-pt__mode').forEach(b => b.classList.toggle('is-active', b === btn));
+      patient.mode = btn.dataset.mode;
+      updateMatched();
+    });
+  });
+  document.getElementById('ptClear').addEventListener('click', () => {
+    bw.value = ''; gfr.value = '';
+    patient.bw = null; patient.gfr = null; patient.mode = 'gfr';
+    document.querySelectorAll('.abx-pt__mode').forEach(b => b.classList.toggle('is-active', b.dataset.mode === 'gfr'));
+    updateMatched();
+  });
+});
+</script>
+<script src="recent.js?v=1776350000"></script>
+</body>
+</html>
